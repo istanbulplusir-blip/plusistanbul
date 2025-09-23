@@ -1,0 +1,85 @@
+{% extends "admin/base_site.html" %} {% load i18n %} {% block title %}{{ title
+}} | {{ site_title|default:_('Django site admin') }}{% endblock %} {% block
+breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+  &rsaquo;
+  <a href="{% url 'admin:app_list' app_label='tours' %}">{% trans 'Tours' %}</a>
+  &rsaquo;
+  <a href="{% url 'admin:tours_tourschedule_changelist' %}"
+    >{% trans 'Tour schedules' %}</a
+  >
+  &rsaquo; {{ title }}
+</div>
+{% endblock %} {% block content %}
+<h1>{{ title }}</h1>
+
+<p>
+  {% trans 'You have selected' %} {{ queryset.count }} {% trans 'schedule(s).'
+  %}
+</p>
+
+<form method="post">
+  {% csrf_token %}
+
+  <fieldset class="module aligned">
+    <h2>{% trans 'Set Day of Week' %}</h2>
+
+    <div class="form-row">
+      <div>
+        <label for="id_day_of_week">{% trans 'Day of Week:' %}</label>
+        <select name="day_of_week" id="id_day_of_week" required>
+          <option value="">{% trans 'Select a day...' %}</option>
+          {% for value, label in day_choices %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+        <p class="help">
+          {% trans 'Select the day of the week for the selected schedules.' %}
+        </p>
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="submit-row">
+    <input
+      type="submit"
+      value="{% trans 'Update Schedules' %}"
+      class="default"
+      name="post"
+    />
+    <a
+      href="{% url 'admin:tours_tourschedule_changelist' %}"
+      class="button cancel-link"
+      >{% trans 'Cancel' %}</a
+    >
+  </div>
+</form>
+
+<div class="results">
+  <h2>{% trans 'Selected Schedules' %}</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>{% trans 'Tour' %}</th>
+        <th>{% trans 'Start Date' %}</th>
+        <th>{% trans 'Current Day' %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for schedule in queryset %}
+      <tr>
+        <td>{{ schedule.tour.title }}</td>
+        <td>{{ schedule.start_date }}</td>
+        <td>
+          {% if schedule.day_of_week is not None %} {% for value, label in
+          day_choices %} {% if value == schedule.day_of_week %}{{ label }}{%
+          endif %} {% endfor %} {% else %} {% trans 'Not set' %} {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,40 @@
+Welcome to {{ site_name }}!
+
+Dear {{ customer.first_name }},
+
+Your travel agent {{ agent_company }} has created an account for you on our platform. You can now access your account and manage your travel bookings independently.
+
+Your Login Credentials:
+Email: {{ customer.email }}
+Password: {{ password }}
+
+Log in to your account: {{ login_url }}
+
+Once you log in, you'll be able to:
+- View your bookings and reservations
+- Update your profile information
+- Access exclusive travel offers
+- Manage your travel preferences
+- Track your travel history
+- Receive personalized recommendations
+
+IMPORTANT SECURITY NOTICE:
+- Please change your password after your first login
+- Keep your login credentials secure and don't share them
+- Log out from shared or public computers
+
+EMAIL VERIFICATION REQUIRED:
+To access all features and ensure account security, please verify your email address by clicking the link below:
+
+{{ verification_url }}
+
+NEED HELP?
+If you have any questions or need assistance, please contact:
+- Your travel agent: {{ agent_company }}
+- Our support team: {{ support_email }}
+
+Best regards,
+The {{ site_name }} Team
+
+---
+This email was sent because your travel agent created an account for you. If you didn't expect this email, please contact our support team.

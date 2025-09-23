@@ -1,0 +1,132 @@
+{
+  "tours": [
+    {
+      "tour_id": "15b12356-8706-41b1-a1a6-2f44549228e7",
+      "tour_title": "تور باغ‌های ایرانی",
+      "variant_name": "استاندارد",
+      "participants": {
+        "adult": 2,
+        "child": 0,
+        "infant": 0
+      },
+      "base_price": 95.0,
+      "total_price": 190.0,
+      "breakdown": {
+        "adult": 190.0,
+        "child": 0.0,
+        "infant": 0.0,
+        "options": 0.0
+      },
+      "currency": "USD"
+    },
+    {
+      "tour_id": "15b12356-8706-41b1-a1a6-2f44549228e7",
+      "tour_title": "تور باغ‌های ایرانی",
+      "variant_name": "استاندارد",
+      "participants": {
+        "adult": 1,
+        "child": 1,
+        "infant": 0
+      },
+      "base_price": 95.0,
+      "total_price": 161.5,
+      "breakdown": {
+        "adult": 95.0,
+        "child": 66.5,
+        "infant": 0.0,
+        "options": 0.0
+      },
+      "currency": "USD"
+    },
+    {
+      "tour_id": "15b12356-8706-41b1-a1a6-2f44549228e7",
+      "tour_title": "تور باغ‌های ایرانی",
+      "variant_name": "استاندارد",
+      "participants": {
+        "adult": 2,
+        "child": 1,
+        "infant": 1
+      },
+      "base_price": 95.0,
+      "total_price": 256.5,
+      "breakdown": {
+        "adult": 190.0,
+        "child": 66.5,
+        "infant": 0.0,
+        "options": 0.0
+      },
+      "currency": "USD"
+    },
+    {
+      "tour_id": "15b12356-8706-41b1-a1a6-2f44549228e7",
+      "tour_title": "تور باغ‌های ایرانی",
+      "variant_name": "استاندارد",
+      "participants": {
+        "adult": 0,
+        "child": 3,
+        "infant": 0
+      },
+      "base_price": 95.0,
+      "total_price": 199.5,
+      "breakdown": {
+        "adult": 0.0,
+        "child": 199.5,
+        "infant": 0.0,
+        "options": 0.0
+      },
+      "currency": "USD"
+    }
+  ],
+  "transfers": [],
+  "car_rentals": [
+    {
+      "car_id": "f654d0b8-e949-4821-8ba9-f904dc8299f1",
+      "car_name": "Peykan P-Class (2025)",
+      "rental_type": "daily",
+      "days": 1,
+      "hours": 0,
+      "include_insurance": false,
+      "daily_rate": 150.0,
+      "hourly_rate": 25.0,
+      "total_price": 150.0,
+      "currency": "USD"
+    },
+    {
+      "car_id": "f654d0b8-e949-4821-8ba9-f904dc8299f1",
+      "car_name": "Peykan P-Class (2025)",
+      "rental_type": "daily",
+      "days": 3,
+      "hours": 0,
+      "include_insurance": true,
+      "daily_rate": 150.0,
+      "hourly_rate": 25.0,
+      "total_price": 510.0,
+      "currency": "USD"
+    },
+    {
+      "car_id": "f654d0b8-e949-4821-8ba9-f904dc8299f1",
+      "car_name": "Peykan P-Class (2025)",
+      "rental_type": "daily",
+      "days": 7,
+      "hours": 0,
+      "include_insurance": false,
+      "daily_rate": 150.0,
+      "hourly_rate": 25.0,
+      "total_price": 892.5,
+      "currency": "USD"
+    },
+    {
+      "car_id": "f654d0b8-e949-4821-8ba9-f904dc8299f1",
+      "car_name": "Peykan P-Class (2025)",
+      "rental_type": "hourly",
+      "days": 0,
+      "hours": 8,
+      "include_insurance": false,
+      "daily_rate": 150.0,
+      "hourly_rate": 25.0,
+      "total_price": 200.0,
+      "currency": "USD"
+    }
+  ],
+  "events": []
+}

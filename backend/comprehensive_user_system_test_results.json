@@ -1,0 +1,152 @@
+[
+  {
+    "test_id": "1",
+    "description": "User Model Creation",
+    "expected": "Users created with correct roles and defaults",
+    "actual": "Customer: customer, Agent: agent, Admin: admin",
+    "status": "PASS",
+    "error": null,
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:58.428490"
+  },
+  {
+    "test_id": "2",
+    "description": "UserProfile Creation",
+    "expected": "Profile created automatically with User",
+    "actual": "'UserProfile' object has no attribute 'preferred_language'",
+    "status": "FAIL",
+    "error": "'UserProfile' object has no attribute 'preferred_language'",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:58.429337"
+  },
+  {
+    "test_id": "3",
+    "description": "AgentProfile Creation",
+    "expected": "AgentProfile linked to User with correct defaults",
+    "actual": "Profile created: Test Travel Agency",
+    "status": "PASS",
+    "error": null,
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:58.430800"
+  },
+  {
+    "test_id": "4",
+    "description": "Direct Registration",
+    "expected": "User created with email verification required",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:58.868286"
+  },
+  {
+    "test_id": "5",
+    "description": "Login with Username",
+    "expected": "JWT tokens returned with user data",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:58.904377"
+  },
+  {
+    "test_id": "6",
+    "description": "Login with Email",
+    "expected": "JWT tokens returned with user data",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:58.941372"
+  },
+  {
+    "test_id": "7",
+    "description": "Agent Create Customer",
+    "expected": "Customer created with AgentCustomer relationship",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:58.988528"
+  },
+  {
+    "test_id": "8",
+    "description": "Agent List Customers",
+    "expected": "List of agent customers returned",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:59.030531"
+  },
+  {
+    "test_id": "9",
+    "description": "Role-Based Access Control",
+    "expected": "Users can only access resources appropriate to their role",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:59.069499"
+  },
+  {
+    "test_id": "10",
+    "description": "Activity Logging",
+    "expected": "User activities are logged",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:59.071359"
+  },
+  {
+    "test_id": "11",
+    "description": "Duplicate Email Registration",
+    "expected": "Error message for duplicate email",
+    "actual": "Content-Type header is \"text/html; charset=utf-8\", not \"application/json\"",
+    "status": "FAIL",
+    "error": "Content-Type header is \"text/html; charset=utf-8\", not \"application/json\"",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:59.115727"
+  },
+  {
+    "test_id": "12",
+    "description": "Invalid Login Credentials",
+    "expected": "Error message and failed attempt logged",
+    "actual": "Content-Type header is \"text/html; charset=utf-8\", not \"application/json\"",
+    "status": "FAIL",
+    "error": "Content-Type header is \"text/html; charset=utf-8\", not \"application/json\"",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:59.155603"
+  },
+  {
+    "test_id": "13",
+    "description": "Password Change",
+    "expected": "Password changed with session invalidation and logging",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:59.199728"
+  },
+  {
+    "test_id": "14",
+    "description": "Rate Limiting",
+    "expected": "Rate limiting blocks excessive requests",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:59.451646"
+  },
+  {
+    "test_id": "15",
+    "description": "Admin User Management",
+    "expected": "Admin can access user management endpoints",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "fix_applied": null,
+    "timestamp": "2025-09-14T22:30:59.491587"
+  }
+]

@@ -1,0 +1,110 @@
+[
+  {
+    "test_id": "1",
+    "description": "User Model Creation",
+    "expected": "Users created with correct roles and defaults",
+    "actual": "Customer: customer, Agent: agent, Admin: admin",
+    "status": "PASS",
+    "error": null,
+    "timestamp": "2025-09-14T22:23:04.376978"
+  },
+  {
+    "test_id": "2",
+    "description": "UserProfile Creation",
+    "expected": "Profile created automatically with User",
+    "actual": "'UserProfile' object has no attribute 'preferred_language'",
+    "status": "FAIL",
+    "error": "'UserProfile' object has no attribute 'preferred_language'",
+    "timestamp": "2025-09-14T22:23:04.377526"
+  },
+  {
+    "test_id": "3",
+    "description": "AgentProfile Creation",
+    "expected": "AgentProfile linked to User with correct defaults",
+    "actual": "Profile created: Test Travel Agency",
+    "status": "PASS",
+    "error": null,
+    "timestamp": "2025-09-14T22:23:04.378551"
+  },
+  {
+    "test_id": "4",
+    "description": "Direct Registration",
+    "expected": "User created with email verification required",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "timestamp": "2025-09-14T22:23:05.162555"
+  },
+  {
+    "test_id": "5",
+    "description": "Login with Username",
+    "expected": "JWT tokens returned with user data",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "timestamp": "2025-09-14T22:23:05.197046"
+  },
+  {
+    "test_id": "6",
+    "description": "Login with Email",
+    "expected": "JWT tokens returned with user data",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "timestamp": "2025-09-14T22:23:05.230644"
+  },
+  {
+    "test_id": "7",
+    "description": "Agent Create Customer",
+    "expected": "Customer created with AgentCustomer relationship",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "timestamp": "2025-09-14T22:23:05.273322"
+  },
+  {
+    "test_id": "8",
+    "description": "Agent List Customers",
+    "expected": "List of agent customers returned",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "timestamp": "2025-09-14T22:23:05.307322"
+  },
+  {
+    "test_id": "9",
+    "description": "Role-Based Access Control",
+    "expected": "Users can only access resources appropriate to their role",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "timestamp": "2025-09-14T22:23:05.342975"
+  },
+  {
+    "test_id": "10",
+    "description": "Activity Logging",
+    "expected": "User activities are logged",
+    "actual": "",
+    "status": "FAIL",
+    "error": "",
+    "timestamp": "2025-09-14T22:23:05.344401"
+  },
+  {
+    "test_id": "11",
+    "description": "Duplicate Email Registration",
+    "expected": "Error message for duplicate email",
+    "actual": "Content-Type header is \"text/html; charset=utf-8\", not \"application/json\"",
+    "status": "FAIL",
+    "error": "Content-Type header is \"text/html; charset=utf-8\", not \"application/json\"",
+    "timestamp": "2025-09-14T22:23:05.379186"
+  },
+  {
+    "test_id": "12",
+    "description": "Invalid Login Credentials",
+    "expected": "Error message and failed attempt logged",
+    "actual": "Content-Type header is \"text/html; charset=utf-8\", not \"application/json\"",
+    "status": "FAIL",
+    "error": "Content-Type header is \"text/html; charset=utf-8\", not \"application/json\"",
+    "timestamp": "2025-09-14T22:23:05.413625"
+  }
+]

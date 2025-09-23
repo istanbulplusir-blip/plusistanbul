@@ -1,0 +1,127 @@
+{% extends "admin/change_form.html" %} {% load i18n %} {% block extrahead %} {{
+block.super }}
+<style>
+  .inline-group[id*="tourschedule"] select[name$="-day_of_week"] {
+    min-width: 100px;
+  }
+  .auto-populate-btn {
+    margin: 10px 0;
+    background: #417690;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .auto-populate-btn:hover {
+    background: #205067;
+  }
+  .day-of-week-updated {
+    background-color: #d4edda !important;
+    border-color: #c3e6cb !important;
+    transition: background-color 0.3s ease;
+  }
+</style>
+{% endblock %} {% block admin_change_form_document_ready %} {{ block.super }}
+<script type="text/javascript">
+  (function ($) {
+    // Auto-populate day of week from start date
+    function updateDayOfWeek(startDateInput, dayOfWeekSelect) {
+      if (startDateInput.val()) {
+        const date = new Date(startDateInput.val());
+        if (!isNaN(date.getTime())) {
+          // JavaScript getDay() returns 0=Sunday, 1=Monday, etc.
+          // But our model uses 0=Monday, 1=Tuesday, etc.
+          let dayOfWeek = date.getDay();
+          dayOfWeek = (dayOfWeek + 6) % 7; // Convert to our format
+
+          // Only update if not already set or if it's different
+          if (!dayOfWeekSelect.val() || dayOfWeekSelect.val() != dayOfWeek) {
+            dayOfWeekSelect.val(dayOfWeek);
+            dayOfWeekSelect.trigger("change");
+
+            // Add visual feedback
+            dayOfWeekSelect.addClass("day-of-week-updated");
+            setTimeout(function () {
+              dayOfWeekSelect.removeClass("day-of-week-updated");
+            }, 2000);
+          }
+        }
+      }
+    }
+
+    // Function to bind events to inline forms
+    function bindInlineEvents() {
+      // Find all schedule inline forms
+      $('.inline-group[id*="tourschedule"] .form-row').each(function () {
+        const $row = $(this);
+        const $startDate = $row.find('input[name$="-start_date"]');
+        const $dayOfWeek = $row.find('select[name$="-day_of_week"]');
+
+        if ($startDate.length && $dayOfWeek.length) {
+          // Bind change event to start date
+          $startDate
+            .off("change.dayofweek")
+            .on("change.dayofweek", function () {
+              updateDayOfWeek($startDate, $dayOfWeek);
+            });
+
+          // Auto-populate on page load if start date is set but day of week is not
+          if ($startDate.val() && !$dayOfWeek.val()) {
+            updateDayOfWeek($startDate, $dayOfWeek);
+          }
+        }
+      });
+    }
+
+    // Initial binding
+    bindInlineEvents();
+
+    // Re-bind when new inline forms are added
+    $(document).on("formset:added", function (event, $row) {
+      if ($row.closest('.inline-group[id*="tourschedule"]').length) {
+        bindInlineEvents();
+      }
+    });
+
+    // Add a button to auto-populate all day of week fields
+    const $autoPopulateBtn = $(
+      '<button type="button" class="button auto-populate-btn">📅 {% trans "Auto-populate Day of Week" %}</button>'
+    );
+    $autoPopulateBtn.on("click", function (e) {
+      e.preventDefault();
+      $('.inline-group[id*="tourschedule"] .form-row').each(function () {
+        const $row = $(this);
+        const $startDate = $row.find('input[name$="-start_date"]');
+        const $dayOfWeek = $row.find('select[name$="-day_of_week"]');
+
+        if ($startDate.length && $dayOfWeek.length && $startDate.val()) {
+          updateDayOfWeek($startDate, $dayOfWeek);
+        }
+      });
+
+      // Show success message
+      const $message = $(
+        '<div class="messagelist"><div class="success">{% trans "Day of week fields have been auto-populated based on start dates." %}</div></div>'
+      );
+      $(".breadcrumbs").after($message);
+      setTimeout(function () {
+        $message.fadeOut();
+      }, 3000);
+    });
+
+    // Add the button after the schedule inline group header
+    $('.inline-group[id*="tourschedule"] h2').after($autoPopulateBtn);
+
+    // Add tooltips to day of week fields
+    $('.inline-group[id*="tourschedule"] select[name$="-day_of_week"]').each(
+      function () {
+        $(this).attr(
+          "title",
+          '{% trans "Day of week - automatically calculated from start date" %}'
+        );
+      }
+    );
+  })(django.jQuery);
+</script>
+{% endblock %}
