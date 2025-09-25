@@ -460,7 +460,7 @@ function TransferBookingContent() {
               className="w-full h-64 object-cover rounded-t-2xl"
               style={{ width: 'auto', height: 'auto' }}
               priority
-              fallbackSrc="/images/car-placeholder.svg"
+              fallbackSrc="/images/placeholder-car.jpg"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-t-2xl" />
             <motion.div 

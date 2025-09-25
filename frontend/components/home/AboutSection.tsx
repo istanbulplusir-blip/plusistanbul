@@ -194,7 +194,7 @@ export default function AboutSection() {
                 width={600}
                 height={500}
                 className="w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover"
-                fallbackSrc="/images/about-placeholder.svg"
+                fallbackSrc="/images/about-image.jpg"
                 quality={85}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
                 placeholder="blur"

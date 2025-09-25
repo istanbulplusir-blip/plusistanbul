@@ -1110,7 +1110,7 @@ export default function EventDetailPage() {
         >
           <div className="relative">
             <OptimizedImage
-              src={event.image || '/images/event-hero.svg'}
+              src={event.image || '/images/event-hero.jpg'}
               alt={event.title || 'Event Image'}
               width={800}
               height={256}

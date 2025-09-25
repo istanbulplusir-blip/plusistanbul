@@ -142,25 +142,19 @@ export default function ProductCard({
     const imageSource = product.image_url || product.image;
     
     if (imageSource) {
-      if (imageSource.includes('/media/defaults/')) {
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
-        return `${backendUrl}${imageSource}`;
-      }
+      // Use the validated image URL function which handles all cases
       return getImageUrl(imageSource);
     }
     
+    // Return appropriate fallback based on product type
     if (product.type === 'tour') {
-      // Use backend default tour image as fallback
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
-      return `${backendUrl}/media/defaults/tour-default.png`;
+      return '/images/tour-image.jpg';
     } else if (product.type === 'event') {
-      // Use backend default event image as fallback
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
-      return `${backendUrl}/media/defaults/event-default.png`;
+      return '/images/event-image.jpg';
     }
 
     // Default fallback
-    return '/images/event-image.jpg';
+    return '/images/placeholder-car.jpg';
   };
 
   // Get product title
@@ -549,12 +543,10 @@ export default function ProductCard({
             alt={getProductTitle()}
             fill
             className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
-            fallbackSrc={(() => {
-              const backendUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
-              return product.type === 'tour'
-                ? `${backendUrl}/media/defaults/tour-default.png`
-                : `${backendUrl}/media/defaults/event-default.png`;
-            })()}
+            fallbackSrc={product.type === 'tour' 
+              ? '/images/tour-image.jpg' 
+              : '/images/event-image.jpg'
+            }
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             priority={false}
           />

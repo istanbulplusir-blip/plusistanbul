@@ -398,7 +398,7 @@ export default function CartPage() {
                     >
                       <div className="relative overflow-hidden rounded-lg shadow-md">
                         <OptimizedImage
-                          src={getImageUrl(item.image) || '/images/placeholder.svg'}
+                          src={getImageUrl(item.image) || '/images/placeholder-car.jpg'}
                           alt={item.title || item.product_title || 'Product'}
                           width={80}
                           height={80}
@@ -472,7 +472,7 @@ export default function CartPage() {
                     >
                       <div className="relative overflow-hidden rounded-xl shadow-md">
                         <OptimizedImage
-                          src={getImageUrl(item.image) || '/images/placeholder.svg'}
+                          src={getImageUrl(item.image) || '/images/placeholder-car.jpg'}
                           alt={item.title || item.product_title || 'Product'}
                           width={120}
                           height={120}

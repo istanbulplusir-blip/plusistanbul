@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { processImageUrl, getSafeFallbackImage } from '@/lib/imageValidation';
 
 interface OptimizedImageProps {
   src: string | null | undefined;
@@ -39,23 +40,26 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   onError,
   onLoad,
 }) => {
-  const [imageSrc, setImageSrc] = useState<string>(src || fallbackSrc || '/images/event-image.jpg');
+  const [imageSrc, setImageSrc] = useState<string>(processImageUrl(src, fallbackSrc));
   const [hasError, setHasError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Update imageSrc when src prop changes
   useEffect(() => {
-    if (src && src !== imageSrc) {
-      setImageSrc(src);
+    const newImageSrc = processImageUrl(src, fallbackSrc);
+    if (newImageSrc !== imageSrc) {
+      setImageSrc(newImageSrc);
       setHasError(false);
       setIsLoading(true);
     }
-  }, [src, imageSrc]);
+  }, [src, fallbackSrc, imageSrc]);
 
   // Handle image error
   const handleError = () => {
-    if (!hasError && imageSrc !== (fallbackSrc || '/images/event-image.jpg')) {
-      setImageSrc(fallbackSrc || '/images/event-image.jpg');
+    const safeFallback = getSafeFallbackImage(fallbackSrc);
+    if (!hasError && imageSrc !== safeFallback) {
+      console.warn(`Image failed to load: ${imageSrc}. Using fallback: ${safeFallback}`);
+      setImageSrc(safeFallback);
       setHasError(true);
       onError?.();
     }
@@ -67,41 +71,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onLoad?.();
   };
 
-  // Get optimized image URL with better fallback logic
-  const getOptimizedImageUrl = (imageUrl: string): string => {
-    if (!imageUrl) {
-      return fallbackSrc || '/images/event-image.jpg';
-    }
-
-    if (imageUrl === fallbackSrc) {
-      return imageUrl;
-    }
-
-    // Handle malformed URLs and placeholders
-    if (imageUrl === 'null' || imageUrl === 'undefined' || imageUrl.includes('via.placeholder.com')) {
-      return fallbackSrc || '/images/event-image.jpg';
-    }
-
-    // If it's already a placeholder or external URL, return as is
-    if (imageUrl.startsWith('/images/') || imageUrl.startsWith('http')) {
-      return imageUrl;
-    }
-
-    // For media files from backend, use direct URL
-    if (imageUrl.startsWith('media/')) {
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
-      return `${backendUrl}/${imageUrl}`;
-    }
-
-    // If it's already a full backend URL, return as is
-    if (imageUrl.startsWith('http://localhost:8000/') || imageUrl.startsWith('http://127.0.0.1:8000/')) {
-      return imageUrl;
-    }
-
-    return imageUrl;
-  };
-
-  const finalSrc = getOptimizedImageUrl(imageSrc || fallbackSrc || '/images/event-image.jpg');
+  const finalSrc = processImageUrl(imageSrc, fallbackSrc);
 
   // Ensure alt is always a valid string
   const safeAlt = alt || 'Image';
