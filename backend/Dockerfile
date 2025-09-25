@@ -1,5 +1,5 @@
 # Multi-stage build for Django backend
-FROM python:3.11-slim as builder
+FROM python:3.11-alpine as builder
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -8,12 +8,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        build-essential \
-        libpq-dev \
-        gcc \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+    build-base \
+    postgresql-dev \
+    gcc \
+    musl-dev \
+    libffi-dev \
+    openssl-dev
 
 # Create virtual environment
 RUN rm -rf /opt/venv && python -m venv /opt/venv
@@ -24,7 +25,7 @@ COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements.txt
 
 # Production stage
-FROM python:3.11-slim as production
+FROM python:3.11-alpine as production
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -32,14 +33,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PATH="/opt/venv/bin:$PATH"
 
 # Create non-root user
-RUN groupadd -r django && useradd -r -g django django
+RUN addgroup -g 1001 -S django && \
+    adduser -S django -u 1001 -G django
 
 # Install runtime dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        libpq5 \
-        curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+    postgresql-libs \
+    curl \
+    libpq
 
 # Copy virtual environment from builder
 COPY --from=builder /opt/venv /opt/venv
@@ -48,14 +49,14 @@ COPY --from=builder /opt/venv /opt/venv
 WORKDIR /app
 
 # Copy application code
-COPY . .
+COPY --chown=django:django . .
 
 # Create necessary directories
 RUN mkdir -p /app/staticfiles /app/media /app/logs \
     && chown -R django:django /app
 
 # Copy startup script
-COPY start.sh /app/start.sh
+COPY --chown=django:django start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 # Switch to non-root user

@@ -7,13 +7,13 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies with clean cache
+RUN npm ci --only=production --no-audit --no-fund
 
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application with optimization
 RUN npm run build
 
 # Production stage
@@ -38,7 +38,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./
 COPY --from=builder --chown=nextjs:nodejs /app/i18n.ts ./
 
 # Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --only=production --no-audit --no-fund && npm cache clean --force
 
 # Switch to non-root user
 USER nextjs
