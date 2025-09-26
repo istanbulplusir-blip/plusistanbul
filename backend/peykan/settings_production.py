@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 from decouple import config
 import dj_database_url
+from datetime import timedelta
 from .settings import *
 
 # SECURITY WARNING: don't run with debug turned on in production!

@@ -193,7 +193,8 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
     }
   };
 
-  const formatPhoneNumber = (phone: string) => {
+  const formatPhoneNumber = (phone: string | undefined) => {
+    if (!phone) return '';
     return phone.replace(/\D/g, '');
   };
 

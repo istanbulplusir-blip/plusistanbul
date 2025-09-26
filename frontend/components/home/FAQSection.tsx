@@ -25,23 +25,24 @@ export default function FAQSection() {
   // Fetch FAQ settings from API
   useEffect(() => {
     const fetchFAQSettings = async () => {
-      try {
-        setSettingsLoading(true)
-        const settings = await getFAQSettings()
-        setFaqSettings(settings)
-      } catch (err) {
-        console.error('Error fetching FAQ settings:', err)
-      } finally {
-        setSettingsLoading(false)
-      }
+      setSettingsLoading(true)
+      const settings = await getFAQSettings()
+      setFaqSettings(settings)
+      setSettingsLoading(false)
     }
 
     fetchFAQSettings()
   }, [])
+
   const [activeAccordion, setActiveAccordion] = useState<string>('')
   const [showMoreFAQs, setShowMoreFAQs] = useState<Record<string, boolean>>({})
   const [showAllCategories, setShowAllCategories] = useState(false)
   const [showCategoriesSection, setShowCategoriesSection] = useState(false)
+
+  // Don't render if no FAQs and no settings
+  if (!loading && !error && faqs.length === 0 && !faqSettings) {
+    return null
+  }
 
   
   const initialCount = 5

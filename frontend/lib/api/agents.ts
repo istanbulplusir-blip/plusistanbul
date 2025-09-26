@@ -170,6 +170,10 @@ export interface TransferPricing {
   final_price: number;
   agent_commission: number;
   customer_price: number;
+  fees_total?: number;
+  tax_total?: number;
+  grand_total?: number;
+  subtotal?: number;
   price_breakdown?: {
     outbound_surcharge: number;
     return_surcharge: number;

@@ -363,6 +363,7 @@ export const searchTransfers = async (params: {
 // Cart operations
 export interface CartTransferItem {
   id: string;
+  product_type: string;
   route_id: string;
   vehicle_type: string;
   trip_type: 'one_way' | 'round_trip';
@@ -395,6 +396,8 @@ export const addTransferToCart = async (data: {
   contact_phone?: string;
   special_requirements?: string;
   selected_options?: Array<{ id: string }>;
+  pricing_breakdown?: TransferPriceCalculationResponse;
+  final_price?: number;
 }): Promise<CartTransferItem> => {
   // Transform data to match backend cart format
   const cartData = {

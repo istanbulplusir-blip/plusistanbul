@@ -18,21 +18,15 @@ export default function Banner({ position = 'top', page = 'home', className = ''
 
   useEffect(() => {
     const fetchBanners = async () => {
-      try {
-        setLoading(true)
-        const bannerData = await getBanners(page)
-        console.log('Fetched banners:', bannerData)
+      setLoading(true)
+      const bannerData = await getBanners(page)
+      console.log('Fetched banners:', bannerData)
 
-        // Filter banners by position
-        const filteredBanners = bannerData.filter(banner => banner.position === position)
-        setBanners(filteredBanners)
-        console.log('Filtered banners for position', position, ':', filteredBanners.length)
-      } catch (err) {
-        console.error('Error fetching banners:', err)
-        setError('Failed to load banners')
-      } finally {
-        setLoading(false)
-      }
+      // Filter banners by position
+      const filteredBanners = bannerData.filter(banner => banner.position === position)
+      setBanners(filteredBanners)
+      console.log('Filtered banners for position', position, ':', filteredBanners.length)
+      setLoading(false)
     }
 
     fetchBanners()

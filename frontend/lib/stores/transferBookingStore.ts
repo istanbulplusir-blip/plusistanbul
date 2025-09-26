@@ -445,8 +445,8 @@ export const useTransferBookingStore = create<TransferBookingState & TransferBoo
               special_requirements: state.special_requirements || undefined,
               pickup_address: state.route_data?.origin || '',
               dropoff_address: state.route_data?.destination || '',
-              pricing_breakdown: state.pricing_breakdown,
-              final_price: state.final_price,
+              pricing_breakdown: state.pricing_breakdown || undefined,
+              final_price: state.final_price || undefined,
             };
             
             await transfersApi.addTransferToCart(bookingData);

@@ -1478,27 +1478,27 @@ export default function AgentTransferBookingPage() {
                   <div className="flex justify-between items-center py-2">
                     <span className="text-gray-700 dark:text-gray-300 font-medium">Subtotal</span>
                     <span className="font-semibold text-gray-900 dark:text-white">
-                      {formatCurrency(pricing.subtotal || pricing.final_price)}
+                      {formatCurrency(pricing.final_price)}
                     </span>
                   </div>
                 </div>
                 
                 {/* Fees */}
-                {pricing.fees_total > 0 && (
+                {(pricing.fees_total || 0 || 0) > 0 && (
                   <div className="flex justify-between items-center py-2 bg-blue-50 dark:bg-blue-900/20 px-3 rounded">
                     <span className="text-blue-700 dark:text-blue-300">Service Fee (3%)</span>
                     <span className="font-semibold text-blue-600 dark:text-blue-400">
-                      +{formatCurrency(pricing.fees_total)}
+                      +{formatCurrency(pricing.fees_total || 0)}
                     </span>
                   </div>
                 )}
                 
                 {/* Tax */}
-                {pricing.tax_total > 0 && (
+                {pricing.tax_total || 0 > 0 && (
                   <div className="flex justify-between items-center py-2 bg-purple-50 dark:bg-purple-900/20 px-3 rounded">
                     <span className="text-purple-700 dark:text-purple-300">VAT (9%)</span>
                     <span className="font-semibold text-purple-600 dark:text-purple-400">
-                      +{formatCurrency(pricing.tax_total)}
+                      +{formatCurrency(pricing.tax_total || 0)}
                     </span>
                   </div>
                 )}
@@ -2324,8 +2324,8 @@ export default function AgentTransferBookingPage() {
     const selectedRoute = routes.find(route => route.id === bookingData.route_id);
     const selectedVehicleFromRoute = selectedRoute?.vehicle_types?.find(vt => vt.type === bookingData.vehicle_type);
     const vehicleCapacity = selectedVehicleFromRoute ? {
-      max_passengers: selectedVehicleFromRoute.max_passengers,
-      max_luggage: selectedVehicleFromRoute.max_luggage,
+      max_passengers: selectedVehicleFromRoute.capacity,
+      max_luggage: 4, // Default luggage capacity
       vehicle_type: selectedVehicleFromRoute.type
     } : vehicleCapacities.sedan;
     
@@ -2963,26 +2963,26 @@ Pricing Details:
                         <div className="border-t border-gray-200 dark:border-gray-700 pt-2">
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
-                            <span className="font-medium">{formatCurrency(pricing.subtotal || pricing.final_price)}</span>
+                            <span className="font-medium">{formatCurrency(pricing.final_price)}</span>
                           </div>
                         </div>
                         
                         {/* Fees */}
-                        {pricing.fees_total > 0 && (
+                        {pricing.fees_total || 0 > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600 dark:text-gray-400">Service Fee (3%)</span>
                             <span className="font-medium text-blue-600 dark:text-blue-400">
-                              +{formatCurrency(pricing.fees_total)}
+                              +{formatCurrency(pricing.fees_total || 0)}
                             </span>
                           </div>
                         )}
                         
                         {/* Tax */}
-                        {pricing.tax_total > 0 && (
+                        {pricing.tax_total || 0 > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600 dark:text-gray-400">VAT (9%)</span>
                             <span className="font-medium text-purple-600 dark:text-purple-400">
-                              +{formatCurrency(pricing.tax_total)}
+                              +{formatCurrency(pricing.tax_total || 0)}
                             </span>
                           </div>
                         )}

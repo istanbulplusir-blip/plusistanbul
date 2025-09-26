@@ -59,6 +59,8 @@
     "faqShowMoreQuestions": "Show more questions",
     "faqDisplaying": "Displaying",
     "faqLoading": "Loading frequently asked questions...",
+    "faqNoQuestions": "No questions available at the moment.",
+    "faqNoQuestionsInCategory": "No questions available in the {category} category.",
     "hero": {
       "slide1": {
         "topText": "Welcome",
@@ -521,7 +523,26 @@
     "saturday": "Saturday",
     "sunday": "Sunday",
     "closed": "Closed",
-    "buttonTooltip": "Need help? Contact our support team"
+    "buttonTooltip": "Need help? Contact our support team",
+    "quickQuestions": "Quick Questions",
+    "quickQuestionsDesc": "Select common questions to prepare your message",
+    "noFAQs": "No frequently asked questions found",
+    "call": "Call",
+    "workingHours": "Working Hours",
+    "quickMessage": "Quick Message",
+    "messagePlaceholder": "Enter your message",
+    "openWhatsApp": "Open WhatsApp",
+    "loadingFAQs": "Loading questions...",
+    "usingFallbackData": "Using fallback data",
+    "errorLoadingContactInfo": "Error loading contact information",
+    "customizeMessage": "Customize Message",
+    "defaultMessage": "Hello, I need help",
+    "categories": {
+      "booking": "Booking",
+      "cancellation": "Cancellation",
+      "transfer": "Transfer",
+      "general": "General"
+    }
   },
   "CarRentals": {
     "title": "Car Rentals",

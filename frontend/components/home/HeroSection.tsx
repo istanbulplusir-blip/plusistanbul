@@ -400,62 +400,56 @@ export default function HeroSection() {
   // Fetch hero slides from API
   useEffect(() => {
     const fetchHeroSlides = async () => {
-      try {
-        setLoadingSlides(true)
-        const fetchedSlides = await getHeroSlides()
-        console.log('Fetched hero slides:', fetchedSlides)
-        if (fetchedSlides && fetchedSlides.length > 0) {
-          setHeroSlides(fetchedSlides)
-        } else {
-          setHeroSlides([{
-            id: 'fallback',
-            title: 'Welcome to Peykan Tourism',
-            subtitle: 'Discover amazing places',
-            description: 'Your gateway to amazing travel experiences',
-            button_text: 'Explore Tours',
-            button_url: '/tours',
-            button_type: 'primary' as const,
-            desktop_image: 'http://localhost:8000/media/hero/hero-main.jpg',
-            tablet_image: 'http://localhost:8000/media/hero/hero-main.jpg',
-            mobile_image: 'http://localhost:8000/media/hero/hero-main.jpg',
-            desktop_image_url: 'http://localhost:8000/media/hero/hero-main.jpg',
-            tablet_image_url: 'http://localhost:8000/media/hero/hero-main.jpg',
-            mobile_image_url: 'http://localhost:8000/media/hero/hero-main.jpg',
-            order: 0,
-            display_duration: 5000,
-            show_for_authenticated: true,
-            show_for_anonymous: true,
-            start_date: undefined,
-            end_date: undefined,
-            is_active: true,
-            is_active_now: true,
-            view_count: 0,
-            click_count: 0,
-            click_rate: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            // Video fields for fallback
-            video_type: 'none' as const,
-            video_file: undefined,
-            video_url: undefined,
-            video_thumbnail: undefined,
-            video_file_url: undefined,
-            video_thumbnail_url: undefined,
-            has_video: false,
-            video_display_name: 'No Video',
-            autoplay_video: false,
-            video_muted: true,
-            show_video_controls: false,
-            video_loop: true,
-            is_video_autoplay_allowed: false
-          }])
-        }
-      } catch (error) {
-        console.error('Error fetching hero slides:', error)
-        console.log('Using fallback slides due to error')
-      } finally {
-        setLoadingSlides(false)
+      setLoadingSlides(true)
+      const fetchedSlides = await getHeroSlides()
+      console.log('Fetched hero slides:', fetchedSlides)
+      if (fetchedSlides && fetchedSlides.length > 0) {
+        setHeroSlides(fetchedSlides)
+      } else {
+        setHeroSlides([{
+          id: 'fallback',
+          title: 'Welcome to Peykan Tourism',
+          subtitle: 'Discover amazing places',
+          description: 'Your gateway to amazing travel experiences',
+          button_text: 'Explore Tours',
+          button_url: '/tours',
+          button_type: 'primary' as const,
+          desktop_image: 'http://localhost:8000/media/hero/hero-main.jpg',
+          tablet_image: 'http://localhost:8000/media/hero/hero-main.jpg',
+          mobile_image: 'http://localhost:8000/media/hero/hero-main.jpg',
+          desktop_image_url: 'http://localhost:8000/media/hero/hero-main.jpg',
+          tablet_image_url: 'http://localhost:8000/media/hero/hero-main.jpg',
+          mobile_image_url: 'http://localhost:8000/media/hero/hero-main.jpg',
+          order: 0,
+          display_duration: 5000,
+          show_for_authenticated: true,
+          show_for_anonymous: true,
+          start_date: undefined,
+          end_date: undefined,
+          is_active: true,
+          is_active_now: true,
+          view_count: 0,
+          click_count: 0,
+          click_rate: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          // Video fields for fallback
+          video_type: 'none' as const,
+          video_file: undefined,
+          video_url: undefined,
+          video_thumbnail: undefined,
+          video_file_url: undefined,
+          video_thumbnail_url: undefined,
+          has_video: false,
+          video_display_name: 'No Video',
+          autoplay_video: false,
+          video_muted: true,
+          show_video_controls: false,
+          video_loop: true,
+          is_video_autoplay_allowed: false
+        }])
       }
+      setLoadingSlides(false)
     }
 
     fetchHeroSlides()
@@ -464,14 +458,10 @@ export default function HeroSection() {
   // Fetch about statistics from API
   useEffect(() => {
     const fetchAboutStatistics = async () => {
-      try {
-        const fetchedStats = await getAboutStatistics()
-        console.log('Fetched about statistics:', fetchedStats)
-        if (fetchedStats && fetchedStats.length > 0) {
-          setAboutStatistics(fetchedStats)
-        }
-      } catch (error) {
-        console.error('Error fetching about statistics:', error)
+      const fetchedStats = await getAboutStatistics()
+      console.log('Fetched about statistics:', fetchedStats)
+      if (fetchedStats && fetchedStats.length > 0) {
+        setAboutStatistics(fetchedStats)
       }
     }
 

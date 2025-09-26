@@ -232,37 +232,30 @@ export interface FAQSettings {
 
 // API functions
 export const getHeroSlides = async (): Promise<HeroSlide[]> => {
-  try {
+  const result = await safeApiCall(async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.get('/shared/hero-slides/active/') as any
     return response.data
-  } catch (error) {
-    console.error('Error fetching hero slides:', error)
-    return []
-  }
+  })
+  return result || []
 }
 
 export const getBanners = async (page?: string): Promise<Banner[]> => {
-  try {
+  const result = await safeApiCall(async () => {
     const params = page ? { page } : {}
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.get('/shared/banners/active/', { params }) as any
     return response.data
-  } catch (error) {
-    console.error('Error fetching banners:', error)
-    return []
-  }
+  })
+  return result || []
 }
 
 export const getSiteSettings = async (): Promise<SiteSettings | null> => {
-  try {
+  return safeApiCall(async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.get('/shared/site-settings/') as any
     return response.data
-  } catch (error) {
-    console.error('Error fetching site settings:', error)
-    return null
-  }
+  })
 }
 
 export const trackHeroSlideClick = async (slideId: string): Promise<boolean> => {
@@ -309,93 +302,84 @@ export const trackBannerView = async (bannerId: string): Promise<boolean> => {
   }
 }
 
+// Helper function to safely make API calls without throwing errors
+const safeApiCall = async <T>(apiCall: () => Promise<T>): Promise<T | null> => {
+  try {
+    return await apiCall()
+  } catch (error) {
+    // Don't log 404 errors for missing data - this is expected
+    if (error instanceof Error && !error.message.includes('404')) {
+      console.error('API call error:', error)
+    }
+    return null
+  }
+}
+
 // New homepage section API functions
 export const getAboutSection = async (): Promise<AboutSection | null> => {
-  try {
+  return safeApiCall(async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.get('/shared/about-section/active/') as any
     return response.data
-  } catch (error) {
-    console.error('Error fetching about section:', error)
-    return null
-  }
+  })
 }
 
 export const getAboutStatistics = async (): Promise<AboutStatistic[]> => {
-  try {
+  const result = await safeApiCall(async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.get('/shared/about-statistics/') as any
     return response.data.results || response.data || []
-  } catch (error) {
-    console.error('Error fetching about statistics:', error)
-    return []
-  }
+  })
+  return result || []
 }
 
 export const getAboutFeatures = async (): Promise<AboutFeature[]> => {
-  try {
+  const result = await safeApiCall(async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.get('/shared/about-features/') as any
     return response.data.results || response.data || []
-  } catch (error) {
-    console.error('Error fetching about features:', error)
-    return []
-  }
+  })
+  return result || []
 }
 
 export const getCTASection = async (): Promise<CTASection | null> => {
-  try {
+  return safeApiCall(async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.get('/shared/cta-section/active/') as any
     return response.data
-  } catch (error) {
-    console.error('Error fetching CTA section:', error)
-    return null
-  }
+  })
 }
 
 export const getFooter = async (): Promise<Footer | null> => {
-  try {
+  return safeApiCall(async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.get('/shared/footer/active/') as any
     return response.data
-  } catch (error) {
-    console.error('Error fetching footer:', error)
-    return null
-  }
+  })
 }
 
 export const getTransferBookingSection = async (): Promise<TransferBookingSection | null> => {
-  try {
+  return safeApiCall(async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.get('/shared/transfer-booking-section/active/') as any
     return response.data
-  } catch (error) {
-    console.error('Error fetching transfer booking section:', error)
-    return null
-  }
+  })
 }
 
 export const getWhatsAppInfo = async (): Promise<WhatsAppInfo | null> => {
-  try {
+  return safeApiCall(async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.get('/shared/whatsapp-info/') as any
     return response.data
-  } catch (error) {
-    console.error('Error fetching WhatsApp info:', error)
-    return null
-  }
+  })
 }
 
 export const getFAQSettings = async (): Promise<FAQSettings | null> => {
-  try {
+  return safeApiCall(async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.get('/shared/faq-settings/') as any
     // Return the first active FAQ settings
     const activeSettings = response.data?.results?.find((setting: { is_active: boolean }) => setting.is_active) || response.data?.results?.[0]
     return activeSettings || null
-  } catch (error) {
-    console.error('Error fetching FAQ settings:', error)
-    return null
-  }
+  })
 }

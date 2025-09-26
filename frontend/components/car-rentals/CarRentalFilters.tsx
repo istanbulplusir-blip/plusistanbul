@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Filter, 
   ChevronDown, 
   ChevronUp,
   Search,
@@ -15,6 +14,7 @@ import {
   RotateCcw,
   Settings
 } from 'lucide-react';
+import { FunnelIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -81,7 +81,7 @@ export default function CarRentalFilters({
             className={`w-full flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
             disabled
           >
-            <Filter className="w-4 h-4" />
+            <FunnelIcon className="w-4 h-4" />
             {t('filters')}
             <ChevronDown className="w-4 h-4" />
           </Button>
@@ -107,14 +107,14 @@ export default function CarRentalFilters({
 
   return (
     <div className="w-full">
-      {/* Mobile Filter Toggle - Only show on mobile */}
+      {/* Mobile FunnelIcon Toggle - Only show on mobile */}
       <div className="lg:hidden mb-4">
         <Button
           onClick={() => setIsExpanded(!isExpanded)}
           variant="outline"
           className={`w-full flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
         >
-          <Filter className="w-4 h-4" />
+          <FunnelIcon className="w-4 h-4" />
           {t('filters')}
           {hasActiveFilters && (
             <span className={`px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full ${isRTL ? 'mr-2' : 'ml-2'}`}>
@@ -125,7 +125,7 @@ export default function CarRentalFilters({
         </Button>
       </div>
 
-      {/* Filter Content - Always visible on desktop, toggleable on mobile */}
+      {/* FunnelIcon Content - Always visible on desktop, toggleable on mobile */}
       <div className="xl:block">
         <AnimatePresence>
           {(isExpanded || typeof window === 'undefined') && (
@@ -179,9 +179,9 @@ export default function CarRentalFilters({
                     </div>
                   </div>
 
-                  {/* Filter Grid - Responsive */}
+                  {/* FunnelIcon Grid - Responsive */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                    {/* Location Filters */}
+                    {/* Location FunnelIcons */}
                     <div className="space-y-4">
                       <div className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                         <MapPin className="w-4 h-4" />
@@ -227,7 +227,7 @@ export default function CarRentalFilters({
                       </div>
                     </div>
 
-                    {/* Vehicle Filters */}
+                    {/* Vehicle FunnelIcons */}
                     <div className="space-y-4">
                       <div className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                         <Car className="w-4 h-4" />

@@ -1,4 +1,4 @@
-# راهنمای Deploy Production - Peykan Tourism Platform
+# راهنمای Deploy Production - Peykan Tourism Platform (نسخه به‌روزرسانی شده)
 
 ## 📋 پیش‌نیازها
 
@@ -22,7 +22,7 @@ sudo systemctl enable docker
 فایل `backend/.env.production` را کپی کنید و مقادیر را تغییر دهید:
 
 ```bash
-cp backend/env.production backend/.env.production
+cp backend/env.production.template backend/.env.production
 ```
 
 **مقادیر مهم که باید تغییر دهید:**

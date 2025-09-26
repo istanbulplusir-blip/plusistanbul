@@ -7,10 +7,10 @@ RUN apk add --no-cache openssl
 RUN mkdir -p /etc/nginx/ssl
 
 # Generate self-signed certificate for development
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:4096 \
     -keyout /etc/nginx/ssl/key.pem \
     -out /etc/nginx/ssl/cert.pem \
-    -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+    -subj "/C=IR/ST=Tehran/L=Tehran/O=Peykan Tourism/CN=yourdomain.com"
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf

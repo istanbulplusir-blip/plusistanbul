@@ -1,15 +1,16 @@
 #!/bin/bash
 set -e
 
-# Production Deployment Script for Peykan Tourism Platform
+# Modern Production Deployment Script for Peykan Tourism Platform
 # Usage: ./deploy-production.sh
 
-echo "🚀 Starting Production Deployment..."
+echo "🚀 Starting Modern Production Deployment..."
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Function to print colored output
@@ -25,10 +26,15 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+print_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
 # Check if .env.production exists
 if [ ! -f "backend/.env.production" ]; then
     print_error ".env.production file not found!"
-    print_warning "Please copy env.production to .env.production and update the values"
+    print_warning "Please copy env.production.template to .env.production and update the values"
+    print_info "Run: cp backend/env.production.template backend/.env.production"
     exit 1
 fi
 
@@ -61,12 +67,13 @@ mkdir -p postgres redis nginx/ssl backend/logs
 # Generate SSL certificates if they don't exist
 if [ ! -f "nginx/ssl/cert.pem" ] || [ ! -f "nginx/ssl/key.pem" ]; then
     print_warning "SSL certificates not found. Generating self-signed certificates..."
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    openssl req -x509 -nodes -days 365 -newkey rsa:4096 \
         -keyout nginx/ssl/key.pem \
         -out nginx/ssl/cert.pem \
-        -subj "/C=IR/ST=Tehran/L=Tehran/O=Peykan Tourism/CN=peykantravelistanbul.com"
+        -subj "/C=IR/ST=Tehran/L=Tehran/O=Peykan Tourism/CN=yourdomain.com"
     print_status "Self-signed SSL certificates generated!"
-    print_warning "For production, replace with real SSL certificates from Let's Encrypt"
+    print_warning "⚠️  IMPORTANT: For production, replace with real SSL certificates from Let's Encrypt"
+    print_info "Run: sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com"
 fi
 
 # Stop existing containers
@@ -118,9 +125,17 @@ else
     docker-compose -f docker-compose.production-secure.yml logs
 fi
 
-print_status "🎉 Deployment completed!"
-print_warning "Next steps:"
+print_status "🎉 Modern Production Deployment completed!"
+print_info "Next steps:"
 echo "1. Create a superuser: docker-compose -f docker-compose.production-secure.yml exec backend python manage.py createsuperuser"
-echo "2. Replace self-signed SSL certificates with real ones"
+echo "2. Replace self-signed SSL certificates with Let's Encrypt certificates"
 echo "3. Configure your domain DNS to point to this server"
-echo "4. Set up monitoring and backups"
+echo "4. Set up monitoring and automated backups"
+echo "5. Configure log rotation and monitoring alerts"
+echo "6. Test all functionality in production environment"
+echo ""
+print_warning "Security reminders:"
+echo "• Ensure all passwords are strong and unique"
+echo "• Regularly update dependencies and security patches"
+echo "• Monitor logs for suspicious activity"
+echo "• Set up automated backups"

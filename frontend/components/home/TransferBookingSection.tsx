@@ -10,6 +10,7 @@ export default function TransferBookingSection() {
   const router = useRouter();
   const [carIn, setCarIn] = useState(false);
   const [isRTL, setIsRTL] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // API state
   const [transferData, setTransferData] = useState<TransferBookingSectionType | null>(null);
@@ -18,16 +19,19 @@ export default function TransferBookingSection() {
   const carRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isScrollingRef = useRef(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
   
   // Optimized scroll handling with throttling and CSS variables
   const handleScroll = useCallback(() => {
-    if (!sectionRef.current || !carRef.current || isScrollingRef.current) return;
+    if (!sectionRef.current || !carRef.current || isScrollingRef.current || !isMounted) return;
     
     isScrollingRef.current = true;
     
     // Use requestAnimationFrame for smooth performance
     requestAnimationFrame(() => {
-      const rect = sectionRef.current!.getBoundingClientRect();
+      if (!sectionRef.current || !carRef.current) return;
+      
+      const rect = sectionRef.current.getBoundingClientRect();
       const sectionTop = rect.top;
       const sectionHeight = rect.height;
       const windowHeight = window.innerHeight;
@@ -36,31 +40,29 @@ export default function TransferBookingSection() {
       const scrollProgress = Math.max(0, Math.min(1, (windowHeight - sectionTop) / (windowHeight + sectionHeight)));
       
       // Move car horizontally based on scroll (left-right for LTR, right-left for RTL)
-      if (scrollProgress > 0) {
+      if (scrollProgress > 0 && carIn) {
         // Calculate available space for movement based on screen size
         const isMobile = window.innerWidth < 768;
         const isTablet = window.innerWidth < 1024;
         
         let maxMoveDistance;
         if (isMobile) {
-          maxMoveDistance = window.innerWidth * 0.4;
+          maxMoveDistance = window.innerWidth * 0.2;
         } else if (isTablet) {
-          maxMoveDistance = window.innerWidth * 0.3;
+          maxMoveDistance = window.innerWidth * 0.15;
         } else {
-          maxMoveDistance = 200;
+          maxMoveDistance = 100;
         }
         
         const moveDistance = scrollProgress * maxMoveDistance;
         
         // Use CSS custom properties for better performance
         if (isRTL) {
-          carRef.current!.style.setProperty('--car-move-x', `-${moveDistance}px`);
+          carRef.current.style.setProperty('--car-move-x', `-${moveDistance}px`);
         } else {
-          carRef.current!.style.setProperty('--car-move-x', `${moveDistance}px`);
+          carRef.current.style.setProperty('--car-move-x', `${moveDistance}px`);
         }
       }
-      
-
       
       // Throttle scroll events
       if (scrollTimeoutRef.current) {
@@ -71,17 +73,17 @@ export default function TransferBookingSection() {
         isScrollingRef.current = false;
       }, 16); // ~60fps throttling
     });
-  }, [isRTL]);
+  }, [isRTL, isMounted, carIn]);
 
   // Handle intersection observer for car entrance animation
   const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
     entries.forEach((entry) => {
-      if (entry.isIntersecting) {
+      if (entry.isIntersecting && !carIn) {
         // Delay car entrance for better effect
         setTimeout(() => setCarIn(true), 300);
       }
     });
-  }, []);
+  }, [carIn]);
 
   // Fetch transfer data from API
   useEffect(() => {
@@ -140,33 +142,52 @@ export default function TransferBookingSection() {
     fetchTransferData();
   }, []);
 
+  // Handle mounting and setup
   useEffect(() => {
+    setIsMounted(true);
+    
     if (typeof document !== 'undefined') {
       setIsRTL(document.dir === 'rtl');
     }
+  }, []);
+
+  // Setup observers and event listeners after mounting
+  useEffect(() => {
+    if (!isMounted) return;
+
+    // Clean up previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
 
     // Intersection Observer for car entrance
-    const observer = new IntersectionObserver(handleIntersection, {
+    observerRef.current = new IntersectionObserver(handleIntersection, {
       threshold: 0.3,
       rootMargin: '0px 0px -100px 0px'
     });
 
     if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+      observerRef.current.observe(sectionRef.current);
     }
 
     // Scroll event listener
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      observer.disconnect();
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
       window.removeEventListener('scroll', handleScroll);
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
     };
-  }, [handleScroll, handleIntersection]);
-  
+  }, [isMounted, handleScroll, handleIntersection]);
+
+  // Don't render until mounted
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <section ref={sectionRef} className="relative py-12 sm:py-16 lg:py-20 overflow-hidden">
@@ -253,44 +274,66 @@ export default function TransferBookingSection() {
           </div>
         </div>
 
-        {/* Enhanced Car Animation - Larger and Better Positioned */}
-        <div className={`w-full relative mt-8 lg:mt-0 lg:absolute lg:inset-y-0 ${isRTL ? 'lg:left-0' : 'lg:right-0'} lg:w-3/5 flex items-center z-0`} style={{pointerEvents: 'none', overflow: 'visible'}}>
+        {/* Enhanced Car Animation - Better Image Handling */}
+        <div 
+          className={`w-full relative mt-8 lg:mt-0 lg:absolute lg:inset-y-0 ${isRTL ? 'lg:left-0' : 'lg:right-0'} lg:w-3/5 flex items-center z-0`} 
+          style={{
+            pointerEvents: 'none', 
+            overflow: 'visible',
+            minHeight: '300px'
+          }}
+        >
           <div
             ref={carRef}
-            className={`relative w-full h-[220px] sm:h-[280px] md:h-[400px] lg:h-[600px] xl:h-[1200px] transition-all duration-1000 ease-out transform-gpu`
-              + (carIn
-                ? ' translate-x-0 opacity-100 scale-100'
-                : (isRTL ? ' -translate-x-full opacity-0 scale-75' : ' translate-x-full opacity-0 scale-75'))}
+            className={`relative w-full h-[220px] sm:h-[280px] md:h-[400px] lg:h-[600px] xl:h-[800px] transition-all duration-1000 ease-out transform-gpu ${
+              carIn 
+                ? 'translate-x-0 opacity-100 scale-100' 
+                : (isRTL ? '-translate-x-full opacity-0 scale-75' : 'translate-x-full opacity-0 scale-75')
+            }`}
             style={{
-              maxWidth: '120vw', // Allow car to extend beyond container
-              left: 0,
-              right: 0,
+              maxWidth: '120vw',
               position: 'relative',
               '--car-move-x': '0px',
-              transform: carIn ? `translateX(var(--car-move-x, 0px))` : undefined,
+              transform: carIn ? `translateX(var(--car-move-x, 0px)) scale(1)` : undefined,
             } as React.CSSProperties & { '--car-move-x': string }}
           >
             {/* Car shadow for depth */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent transform scale-110 blur-sm" />
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-3/4 h-8 bg-black/10 rounded-full blur-md" />
             
-            <OptimizedImage
-              src={transferData?.background_image_url || "/images/black-van-top.jpg"}
-              alt="Taxi Top View"
-              fill
-              style={{
-                objectFit: 'contain',
-                objectPosition: isRTL ? 'left' : 'right',
-                maxWidth: '120%',
-                maxHeight: '120%',
-                transform: isRTL ? 'scaleX(-1)' : 'scaleX(1)', // Mirror image for RTL
-              }}
-              className={`select-none pointer-events-none scale-125 lg:scale-110 xl:scale-100 transition-transform duration-500 hover:scale-110`}
-            />
-
-            {/* Car shadow for depth - no floating particles */}
+            {/* Car Image Container */}
+            <div className="relative w-full h-full">
+              <OptimizedImage
+                src={transferData?.background_image_url || "/images/black-van-top.jpg"}
+                alt={transferData?.title || "Transfer Service Vehicle"}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 60vw, 50vw"
+                style={{
+                  objectFit: 'contain',
+                  objectPosition: 'center',
+                }}
+                className={`select-none pointer-events-none transition-transform duration-300 hover:scale-105 ${
+                  isRTL ? 'scale-x-[-1]' : ''
+                }`}
+                priority={false}
+                onLoad={() => {
+                  console.log('Car image loaded successfully');
+                }}
+                onError={() => {
+                  console.error('Car image failed to load:', transferData?.background_image_url || "/images/black-van-top.jpg");
+                }}
+              />
+              
+              {/* Fallback content if image fails */}
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg opacity-0 transition-opacity duration-300">
+                <div className="text-center">
+                  <span className="text-6xl mb-4 block">🚗</span>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">Transfer Vehicle</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
   );
-} 
+}

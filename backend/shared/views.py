@@ -636,7 +636,7 @@ class AboutSectionViewSet(viewsets.ModelViewSet):
         try:
             section = AboutSection.objects.filter(is_active=True).first()
             if section:
-                serializer = self.get_serializer(section)
+                serializer = self.get_serializer(section, context={'request': request})
                 return Response(serializer.data)
             return Response({'message': 'No active about section found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
@@ -678,7 +678,7 @@ class CTASectionViewSet(viewsets.ModelViewSet):
         try:
             section = CTASection.objects.filter(is_active=True).first()
             if section:
-                serializer = self.get_serializer(section)
+                serializer = self.get_serializer(section, context={'request': request})
                 return Response(serializer.data)
             return Response({'message': 'No active CTA section found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
@@ -720,7 +720,7 @@ class FooterViewSet(viewsets.ModelViewSet):
         try:
             footer = Footer.objects.filter(is_active=True).first()
             if footer:
-                serializer = self.get_serializer(footer)
+                serializer = self.get_serializer(footer, context={'request': request})
                 return Response(serializer.data)
             return Response({'message': 'No active footer found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
@@ -752,7 +752,7 @@ class TransferBookingSectionViewSet(viewsets.ModelViewSet):
         try:
             section = TransferBookingSection.objects.filter(is_active=True).first()
             if section:
-                serializer = self.get_serializer(section)
+                serializer = self.get_serializer(section, context={'request': request})
                 return Response(serializer.data)
             return Response({'message': 'No active transfer booking section found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
@@ -790,7 +790,7 @@ class WhatsAppInfoViewSet(viewsets.ViewSet):
         try:
             settings = FAQSettings.objects.filter(is_active=True).first()
             if settings:
-                serializer = self.get_serializer(settings)
+                serializer = self.get_serializer(settings, context={'request': request})
                 return Response(serializer.data)
             return Response({'message': 'No active FAQ settings found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:

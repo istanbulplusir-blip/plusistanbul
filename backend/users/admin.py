@@ -103,7 +103,9 @@ class UserAdmin(BaseUserAdmin):
     def get_readonly_fields(self, request, obj=None):
         """Make certain fields readonly for existing users."""
         if obj:  # Editing existing user
-            return self.readonly_fields + ('id',)
+            # Add additional readonly fields for existing users
+            additional_readonly = ['username', 'email']  # Prevent changing username/email for existing users
+            return self.readonly_fields + additional_readonly
         return self.readonly_fields
 
 

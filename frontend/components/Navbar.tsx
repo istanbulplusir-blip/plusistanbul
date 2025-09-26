@@ -10,7 +10,6 @@ import {
   User, 
   ShoppingCart, 
   LogOut, 
-  Heart, 
   Package, 
   Menu, 
   X, 
@@ -317,15 +316,6 @@ export default function Navbar() {
                           >
                             <Package className="w-4 h-4" />
                             {t('orders')}
-                          </Link>
-                          
-                          <Link
-                            href={`${prefix}/wishlist`}
-                            className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-200 rounded-lg mx-2"
-                            onClick={() => setShowUserMenu(false)}
-                          >
-                            <Heart className="w-4 h-4" />
-                            {t('wishlist')}
                           </Link>
                         </div>
                         

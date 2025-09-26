@@ -15,7 +15,6 @@ import {
   X,
   Key,
   LogOut,
-  Heart,
   Package
 } from 'lucide-react';
 import { profileService, SensitiveFieldRequest, SensitiveFieldVerify } from '../../../lib/services/profileService';
@@ -336,13 +335,6 @@ export default function ProfilePage() {
                     >
                       <Package className="w-4 h-4 lg:w-4 lg:h-4 flex-shrink-0" />
                       <span className="min-w-0">{t('ordersTab')}</span>
-                    </button>
-                    <button 
-                      onClick={() => router.push('/wishlist')}
-                      className="w-full flex items-center gap-2 lg:gap-3 px-2 lg:px-3 py-2 lg:py-2 text-left text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors text-sm lg:text-base"
-                    >
-                      <Heart className="w-4 h-4 lg:w-4 lg:h-4 flex-shrink-0" />
-                      <span className="min-w-0">{t('wishlistTab')}</span>
                     </button>
                     <Button 
                       variant="ghost"

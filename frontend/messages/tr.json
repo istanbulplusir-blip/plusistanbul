@@ -876,6 +876,10 @@
           "title": "Fiyat Özeti",
           "description": "Fiyat dağılımını ve toplam maliyeti gözden geçirin"
         },
+        "payment": {
+          "title": "Ödeme Yöntemi",
+          "description": "Rezervasyon için ödeme yöntemini seçin"
+        },
         "confirm": {
           "title": "Onay",
           "description": "Rezervasyonu onaylayın ve tamamlayın"
@@ -1301,7 +1305,17 @@
         "inactive": "Pasif",
         "suspended": "Askıya Alınmış",
         "vip": "VIP"
-      }
+      },
+      "basicInformation": "Temel Bilgiler",
+      "authenticationOptions": "Kimlik Doğrulama Seçenekleri",
+      "sendCredentials": "Kimlik Bilgilerini Gönder",
+      "verificationMethod": "Doğrulama Yöntemi",
+      "both": "Her İkisi",
+      "welcomeMessage": "Hoş Geldin Mesajı",
+      "welcomeMessagePlaceholder": "Bu müşteri için hoş geldin mesajı girin...",
+      "customInstructions": "Özel Talimatlar",
+      "customInstructionsPlaceholder": "Bu müşteri için özel talimatlar ekleyin...",
+      "customerSettings": "Müşteri Ayarları"
     },
     "analytics": {
       "title": "Analiz Paneli",
