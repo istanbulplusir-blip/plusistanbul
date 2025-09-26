@@ -71,8 +71,8 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    # 'django.middleware.security.SecurityMiddleware',  # Temporarily disabled
-    # 'whitenoise.middleware.WhiteNoiseMiddleware',  # Temporarily disabled
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'peykan.middleware.LanguageMiddleware',  # Custom language middleware
@@ -80,7 +80,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',  # Re-enabled for production
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',  # Temporarily disabled
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Custom user security middleware
     'users.middleware.UserActivityMiddleware',
     'users.middleware.SecurityMiddleware',
