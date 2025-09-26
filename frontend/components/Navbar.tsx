@@ -14,7 +14,8 @@ import {
   Menu, 
   X, 
   Sun, 
-  Moon
+  Moon,
+  Heart
 } from 'lucide-react';
 import Image from 'next/image';
 import { useAuth } from '../lib/contexts/AuthContext';
