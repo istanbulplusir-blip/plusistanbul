@@ -12,6 +12,7 @@ interface CommissionData {
   name: string;
   value: number;
   color: string;
+  [key: string]: any;
 }
 
 export function AgentCommissionChart() {

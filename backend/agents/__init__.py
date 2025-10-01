@@ -1,1 +1,2 @@
-# Agents app for Peykan Tourism Platform 
+# Agents app for Peykan Tourism Platform
+# No imports here to avoid circular import issues 

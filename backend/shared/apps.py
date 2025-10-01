@@ -8,7 +8,5 @@ class SharedConfig(AppConfig):
     
     def ready(self):
         """Import models when app is ready."""
-        try:
-            import shared.models  # noqa
-        except ImportError:
-            pass 
+        # Remove problematic model import that causes circular imports
+        pass 

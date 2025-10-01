@@ -4,19 +4,18 @@ services:
   # Database - PostgreSQL with SSL
   postgres:
     image: postgres:16.3-alpine
-    container_name: peykan_postgres
+    container_name: peykan_postgres_dev
     environment:
       POSTGRES_DB: peykan
       POSTGRES_USER: peykan_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password_123}
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
       - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
       - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
-    # حذف پورت عمومی - فقط دسترسی داخلی
-    # ports:
-    #   - "5432:5432"
+    ports:
+      - "5432:5432"  # Expose for development access
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U peykan_user -d peykan"]
       interval: 10s
@@ -35,17 +34,16 @@ services:
   # Redis - امن و بدون دسترسی بیرونی
   redis:
     image: redis:7.4-alpine
-    container_name: peykan_redis
+    container_name: peykan_redis_dev
     volumes:
-      - redis_data:/data
+      - redis_data_dev:/data
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-      - redis_logs:/var/log/redis
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--requirepass", "${REDIS_PASSWORD}"]
-    # حذف پورت عمومی - فقط دسترسی داخلی
-    # ports:
-    #   - "6379:6379"
+      - redis_logs_dev:/var/log/redis
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--requirepass", "${REDIS_PASSWORD:-dev_redis_123}"]
+    ports:
+      - "6379:6379"  # Expose for development access
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-dev_redis_123}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -64,21 +62,20 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: peykan_backend
+    container_name: peykan_backend_dev
     env_file:
-      - ./backend/env.production
+      - ./backend/env.production.dev
     environment:
       - DEBUG=False
-      - DATABASE_URL=postgresql://peykan_user:${POSTGRES_PASSWORD}@postgres:5432/peykan
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - DATABASE_URL=postgresql://peykan_user:${POSTGRES_PASSWORD:-dev_password_123}@postgres:5432/peykan
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-dev_redis_123}@redis:6379/1
       - DJANGO_SETTINGS_MODULE=peykan.settings_production
     volumes:
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
+      - static_volume_dev:/app/staticfiles
+      - media_volume_dev:/app/media
       - ./backend/logs:/app/logs
-    # حذف پورت عمومی - فقط از طریق nginx
-    # ports:
-    #   - "8000:8000"
+    ports:
+      - "8000:8000"  # Expose for development access
     depends_on:
       postgres:
         condition: service_healthy
@@ -102,14 +99,13 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: peykan_frontend
+    container_name: peykan_frontend_dev
     environment:
-      - NEXT_PUBLIC_API_URL=https://peykantravelistanbul.com/api/v1
-      - NEXT_PUBLIC_SITE_URL=https://peykantravelistanbul.com
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NEXT_PUBLIC_SITE_URL=http://localhost:3000
       - NODE_ENV=production
-    # حذف پورت عمومی - فقط از طریق nginx
-    # ports:
-    #   - "3000:3000"
+    ports:
+      - "3000:3000"  # Expose for development access
     depends_on:
       - backend
     restart: unless-stopped
@@ -129,15 +125,12 @@ services:
   nginx:
     build:
       context: ./nginx
-      dockerfile: Dockerfile
-    container_name: peykan_nginx
+      dockerfile: Dockerfile.dev
+    container_name: peykan_nginx_dev
     ports:
       - "80:80"
-      - "443:443"
     volumes:
-      - nginx_logs:/var/log/nginx
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs_dev:/var/log/nginx
     depends_on:
       - backend
       - frontend
@@ -146,22 +139,22 @@ services:
       - peykan_external
 
 volumes:
-  postgres_data:
+  postgres_data_dev:
     driver: local
-  redis_data:
+  redis_data_dev:
     driver: local
-  redis_logs:
+  redis_logs_dev:
     driver: local
-  static_volume:
+  static_volume_dev:
     driver: local
-  media_volume:
+  media_volume_dev:
     driver: local
-  nginx_logs:
+  nginx_logs_dev:
     driver: local
 
 networks:
   peykan_internal:
     driver: bridge
-    internal: true  # شبکه داخلی بدون دسترسی به اینترنت
+    internal: false  # Allow internet access for development
   peykan_external:
     driver: bridge

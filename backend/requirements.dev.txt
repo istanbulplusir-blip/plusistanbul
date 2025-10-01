@@ -1,12 +1,12 @@
 # Django and DRF
-Django==5.0.8
+Django==5.1.4
 djangorestframework==3.15.2
 drf-nested-routers==0.94.2
 django-cors-headers==4.6.0
 django-filter==24.2
 
 # Database - PostgreSQL for production
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
 dj-database-url==2.2.0
 
 # Caching and Sessions
@@ -33,16 +33,16 @@ Pillow==10.4.0
 drf-spectacular==0.27.0
 
 # Development
-django-debug-toolbar==4.3.0
+django-debug-toolbar==4.4.0
 
 # Production
-gunicorn==22.0.0
+gunicorn==23.0.0
 whitenoise==6.6.0
 
 # Utilities
 python-dateutil==2.9.0
 requests==2.32.3
-celery==5.3.6
+celery==5.4.0
 
 # Testing
 pytest==8.2.2

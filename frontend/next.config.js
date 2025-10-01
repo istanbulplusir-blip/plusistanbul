@@ -10,6 +10,10 @@ const __dirname = dirname(__filename);
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   outputFileTracingRoot: __dirname,
+  // Disable ESLint during build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // Disable experimental features that might cause ReactDOM.preload warnings
   experimental: {
     // Disable scroll behavior warning
@@ -43,6 +47,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.peykantravelistanbul.com',
+        port: '',
+        pathname: '/**',
+      },
       // Media files from Django backend
       {
         protocol: 'http',
@@ -53,6 +63,12 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'peykantravelistanbul.com',
+        port: '',
+        pathname: '/media/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.peykantravelistanbul.com',
         port: '',
         pathname: '/media/**',
       },

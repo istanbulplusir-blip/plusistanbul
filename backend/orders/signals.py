@@ -71,8 +71,11 @@ def update_capacity_on_status_change(sender, instance, created, **kwargs):
                 logger.info(f"Updating capacity for order {instance.order_number}: {old_status} -> {new_status}")
                 
                 # Import here to avoid circular imports
-                from .models import OrderService
-                OrderService._update_capacity_for_order_status_change(instance, old_status, new_status)
+                try:
+                    from .models import OrderService
+                    OrderService._update_capacity_for_order_status_change(instance, old_status, new_status)
+                except ImportError:
+                    logger.warning(f"Could not import OrderService for capacity update")
                 
     except Exception as e:
         logger.error(f"Error updating capacity for order {instance.order_number}: {str(e)}")

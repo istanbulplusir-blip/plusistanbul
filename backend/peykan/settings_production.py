@@ -36,6 +36,14 @@ CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = False
 
+# CSRF Settings for Production
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://peykantravelistanbul.com,https://www.peykantravelistanbul.com').split(',')
+CSRF_COOKIE_DOMAIN = config('CSRF_COOKIE_DOMAIN', default='.peykantravelistanbul.com')
+CSRF_COOKIE_PATH = '/'
+CSRF_COOKIE_AGE = 31449600  # 1 year
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+
 # Database - Use PostgreSQL in production
 DATABASES = {
     'default': dj_database_url.config(
@@ -153,7 +161,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',  # Re-enabled for production
+    'peykan.csrf_middleware.ProductionCsrfMiddleware',  # Custom CSRF middleware
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
