@@ -302,15 +302,14 @@ export default function CheckoutPage() {
                     {items.map((item: CartItem, index) => (
                       <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-600">
-                          {item.product_image && (
-                            <OptimizedImage
-                              src={getImageUrl(item.product_image)}
-                              alt={item.product_title || 'Product'}
-                              width={48}
-                              height={48}
-                              className="w-full h-full object-cover"
-                            />
-                          )}
+                          <OptimizedImage
+                            src={getImageUrl(item.image) || '/images/placeholder-car.jpg'}
+                            alt={item.title || item.product_title || 'Product'}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                            fallbackSrc="/images/tour-image.jpg"
+                          />
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">

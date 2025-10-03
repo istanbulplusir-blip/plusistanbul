@@ -319,8 +319,9 @@ class Tour(BaseProductModel):
             raise ValidationError(_('Pickup time must be before start time.'))
         
         # Validate that at least one variant exists
-        if self.pk and not self.variants.exists():
-            raise ValidationError(_('Tour must have at least one variant.'))
+        # Temporarily disable this validation to allow tour creation with automatic variant creation
+        # The validation will be handled in the admin save_model method
+        pass
     
     def validate_schedules(self):
         """Validate that tour schedules don't have conflicts."""

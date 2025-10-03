@@ -1582,12 +1582,14 @@ def merge_cart_view(request):
     if not user or not user.is_authenticated:
         return Response({'message': 'Authentication required to merge cart.'}, status=status.HTTP_401_UNAUTHORIZED)
     
-    # Get the base session key (without user prefix)
-    session_key = request.session.session_key
-
-    # If no session key in request.session, try to get from request.data
-    if not session_key and request.data and request.data.get('session_key'):
+    # Get the session key from request data (sent by frontend)
+    session_key = None
+    if request.data and request.data.get('session_key'):
         session_key = request.data.get('session_key')
+    
+    # Fallback to request session key if not provided in data
+    if not session_key:
+        session_key = request.session.session_key
 
     if not session_key:
         return Response({'message': 'No session cart found to merge.'})
@@ -1599,10 +1601,9 @@ def merge_cart_view(request):
     max_retries = 3
     for attempt in range(max_retries):
         try:
-            # Get user cart using CartService
-            session_id = CartService.get_session_id(request)
+            # Get user cart using CartService with the same session key as guest cart
             user_cart = CartService.get_or_create_cart(
-                session_id=session_id,
+                session_id=session_key,
                 user=user
             )
             # Lock user cart for update
@@ -1630,11 +1631,11 @@ def merge_cart_view(request):
             print(f"🔍 Found guest cart with {session_cart.items.count()} items")
             break  # Success, exit retry loop
         except Cart.DoesNotExist:
-            # If no guest cart found, check if there's already a user cart with this session_key
+            # If no guest cart found, check if there's already a user cart
             # This happens when CartService already migrated the cart
             try:
-                existing_user_cart = Cart.objects.get(session_id=session_key, user=user)
-                print(f"🔍 Session cart already migrated to user cart with {existing_user_cart.items.count()} items")
+                existing_user_cart = Cart.objects.get(user=user, is_active=True)
+                print(f"🔍 User cart already exists with {existing_user_cart.items.count()} items")
                 return Response({
                     'message': 'Cart already merged successfully.',
                     'items_count': existing_user_cart.items.count()

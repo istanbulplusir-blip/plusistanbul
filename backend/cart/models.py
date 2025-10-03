@@ -544,8 +544,9 @@ class CartService:
             
             if session_cart:
                 # Don't migrate automatically - let merge_cart_view handle it
-                # Just return the session cart for now
-                return session_cart
+                # But don't return the session cart - create a new user cart instead
+                # This ensures proper separation between guest and user carts
+                pass
             
             # Create new user cart with unique session_id
             # Check if session_id already exists for another user
