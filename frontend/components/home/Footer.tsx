@@ -13,8 +13,8 @@ export default function Footer() {
 
   // API state
   const [footerData, setFooterData] = useState<FooterType | null>(null)
-  const [, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null) // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Detect RTL language
   useEffect(() => {
@@ -39,6 +39,29 @@ export default function Footer() {
 
     fetchFooterData()
   }, [])
+
+  if (loading) {
+    return (
+      <footer className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-8 sm:py-10 lg:py-12 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
+  if (error) {
+    return (
+      <footer className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-8 sm:py-10 lg:py-12 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-red-400">{error}</p>
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-8 sm:py-10 lg:py-12 overflow-hidden">

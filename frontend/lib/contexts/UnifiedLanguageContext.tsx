@@ -71,7 +71,7 @@ export const UnifiedLanguageProvider: React.FC<UnifiedLanguageProviderProps> = (
     };
 
     loadInitialLanguage();
-  }, [pathname, isAgent]);
+  }, [pathname, isAgent, agentLanguage]);
 
   // Update language state when URL changes
   useEffect(() => {
@@ -123,7 +123,7 @@ export const UnifiedLanguageProvider: React.FC<UnifiedLanguageProviderProps> = (
     
     console.log('Navigating to:', newPath);
     router.push(newPath);
-  }, [pathname, language, router, isAgent]);
+  }, [pathname, router, isAgent]);
 
   // Set language function (without navigation)
   const setLanguage = useCallback((newLanguage: string) => {
@@ -149,7 +149,7 @@ export const UnifiedLanguageProvider: React.FC<UnifiedLanguageProviderProps> = (
       setLanguageState(agentLanguage);
       console.log('Updated language from agent settings:', agentLanguage);
     }
-  }, [isAgent, agentLanguage]);
+  }, [isAgent, agentLanguage, language]);
 
   const value: UnifiedLanguageContextType = {
     language,

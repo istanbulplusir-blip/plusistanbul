@@ -3,10 +3,10 @@ import { TourListResponse, TourDetailResponse, TourSearchParams } from '../types
 
 // Interface for home tours response
 export interface HomeToursResponse {
-  featured_tours: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
-  special_tours: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
-  seasonal_tours: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
-  popular_tours: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  featured_tours: TourDetailResponse[];
+  special_tours: TourDetailResponse[];
+  seasonal_tours: TourDetailResponse[];
+  popular_tours: TourDetailResponse[];
 }
 
 // Get all tours

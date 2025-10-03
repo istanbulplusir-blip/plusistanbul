@@ -1,7 +1,6 @@
 /**
  * Agent API endpoints for Peykan Tourism Platform
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { apiClient } from './client';
 

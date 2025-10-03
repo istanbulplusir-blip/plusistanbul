@@ -1918,7 +1918,7 @@ export default function AgentTransferBookingPage() {
 
         <div className="text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            By clicking "Confirm Booking" you agree to the terms and conditions.
+            By clicking &quot;Confirm Booking&quot; you agree to the terms and conditions.
           </p>
         </div>
       </div>
@@ -2015,13 +2015,13 @@ export default function AgentTransferBookingPage() {
     };
     
     loadData();
-  }, []);
+  }, [loadCustomers]);
 
   // Debug current step
   useEffect(() => {
     console.log('Current step changed to:', currentStep);
     console.log('Current step component:', steps[currentStep]?.title);
-  }, [currentStep]);
+  }, [currentStep, steps]);
 
   // Update filtered routes when search changes
   useEffect(() => {

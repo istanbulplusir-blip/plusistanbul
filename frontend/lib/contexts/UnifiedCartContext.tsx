@@ -135,7 +135,7 @@ export function UnifiedCartProvider({ children }: { children: ReactNode }) {
       
       return newState;
     });
-  }, []);
+  }, [unifiedCurrency]);
 
   // Update limits when authentication status changes
   useEffect(() => {

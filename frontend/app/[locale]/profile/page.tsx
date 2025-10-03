@@ -278,10 +278,6 @@ export default function ProfilePage() {
     // Toast notification removed - using setSuccess/setError instead
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleShowToast = (message: string, type: 'success' | 'error' | 'info') => {
-    // Toast notification removed - using setSuccess/setError instead
-  };
 
   // تابع جدید برای نمایش تاریخ عضویت بر اساس زبان
   const formatDate = (dateString: string) => {

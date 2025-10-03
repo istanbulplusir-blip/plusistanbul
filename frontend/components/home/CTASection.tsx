@@ -12,8 +12,8 @@ export default function CTASection() {
 
   // API state
   const [ctaData, setCtaData] = useState<CTASectionType | null>(null);
-  const [, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch CTA data from API
   useEffect(() => {
@@ -32,6 +32,33 @@ export default function CTASection() {
 
     fetchCTAData();
   }, []);
+
+  if (loading) {
+    return (
+      <section className="relative py-12 sm:py-16 lg:py-20 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-300 rounded w-1/3 mx-auto mb-4"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="relative py-12 sm:py-16 lg:py-20 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-red-600">{error}</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative py-12 sm:py-16 lg:py-20 overflow-hidden">
