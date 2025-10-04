@@ -105,14 +105,37 @@ class EventCartService:
             # Use the enriched options directly
             updated_options = existing_options + (selected_options or [])
 
-        # Recalculate total price
-        total_price = sum(Decimal(str(seat.get('price', 0))) for seat in all_seats)
+        # Recalculate subtotal (seats + options)
+        seats_total = sum(Decimal(str(seat.get('price', 0))) for seat in all_seats)
+        options_total = Decimal('0.00')
+        
+        # Calculate options total if selected_options provided
+        if updated_options:
+            from events.models import EventOption
+            for option_data in updated_options:
+                option_id = option_data.get('option_id')
+                quantity = int(option_data.get('quantity', 1))
+                try:
+                    option = EventOption.objects.get(
+                        id=option_id,
+                        event_id=existing_item.product_id,
+                        is_active=True
+                    )
+                    options_total += option.price * quantity
+                except EventOption.DoesNotExist:
+                    continue
+        
+        subtotal = seats_total + options_total
+        
+        # Store seats_total as unit_price and options_total separately
+        # This way CartItem.save() will calculate: (unit_price * quantity) + options_total = subtotal
+        unit_price = seats_total
 
         # Update item
         existing_item.booking_data = updated_booking_data
         existing_item.selected_options = updated_options  # Store enriched options
-        existing_item.unit_price = total_price
-        existing_item.total_price = total_price
+        existing_item.unit_price = unit_price
+        existing_item.total_price = subtotal
         existing_item.save()
         
         return existing_item
@@ -160,7 +183,12 @@ class EventCartService:
                         logger.warning(f"Option {option_id} not found for event {event_id}")
                         continue
             
-            total_price = seats_total + options_total
+            # Calculate subtotal (seats + options) - this should be stored as subtotal
+            subtotal = seats_total + options_total
+            
+            # Store seats_total as unit_price and options_total separately
+            # This way CartItem.save() will calculate: (unit_price * quantity) + options_total = subtotal
+            unit_price = seats_total
             
             # Get currency from event or default to USD
             currency = getattr(event, 'currency', 'USD') or 'USD'
@@ -175,8 +203,8 @@ class EventCartService:
                 variant_id=ticket_type_id,
                 variant_name=ticket_type.name,
                 quantity=1,
-                unit_price=total_price,
-                total_price=total_price,
+                unit_price=unit_price,
+                total_price=subtotal,
                 currency=currency,
                 selected_options=selected_options if selected_options else [],  # Store enriched options with names/prices here
                 booking_data={
