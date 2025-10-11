@@ -506,6 +506,10 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
 
 # Logging Configuration
+# Ensure logs directory exists
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -523,7 +527,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs/debug.log',
+            'filename': str(LOGS_DIR / 'debug.log'),
             'formatter': 'verbose',
         },
         'console': {
