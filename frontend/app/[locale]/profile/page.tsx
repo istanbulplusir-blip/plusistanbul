@@ -87,6 +87,19 @@ export default function ProfilePage() {
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
+  // Toast handler function
+  const handleShowToast = (message: string, type: 'success' | 'error' | 'info') => {
+    if (type === 'success') {
+      setSuccess(message);
+    } else if (type === 'error') {
+      setError(message);
+    }
+    // For 'info' type, we can use success for now
+    else {
+      setSuccess(message);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       setProfileData(prev => ({
