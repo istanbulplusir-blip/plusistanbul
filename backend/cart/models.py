@@ -17,7 +17,7 @@ class Cart(BaseModel):
     
     # Cart identification
     session_id = models.CharField(
-        max_length=40, 
+        max_length=255,  # Increased to support longer session IDs
         unique=True,
         verbose_name=_('Session ID')
     )
@@ -72,11 +72,26 @@ class Cart(BaseModel):
     def clear_expired_items(self):
         """Remove expired items from cart."""
         from django.utils import timezone
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        # Check if CartItem has expires_at field
+        if not hasattr(CartItem, 'expires_at'):
+            logger.debug(f"CartItem model doesn't have expires_at field, skipping clearing for cart {self.id}")
+            return
+        
         now = timezone.now()
+        expired_count = 0
         
         for item in self.items.all():
-            if item.expires_at and now > item.expires_at:
+            # Double-check instance has the attribute
+            if hasattr(item, 'expires_at') and item.expires_at and now > item.expires_at:
                 item.delete()
+                expired_count += 1
+        
+        if expired_count > 0:
+            logger.info(f"Cleared {expired_count} expired items from cart {self.id}")
 
 
 class CartItem(BaseModel):
@@ -529,86 +544,128 @@ class CartService:
         from django.utils import timezone
         from datetime import timedelta
         import time
+        import logging
         
-        # For authenticated users, prioritize user-based cart
-        if user and user.is_authenticated:
-            # First, try to get existing user cart
-            user_cart = Cart.objects.filter(user=user, is_active=True).first()
-            
-            if user_cart:
-                # User has an existing cart, return it
-                return user_cart
-            
-            # Check if there's a session cart that should be migrated
-            session_cart = Cart.objects.filter(session_id=session_id, user__isnull=True, is_active=True).first()
-            
-            if session_cart:
-                # Don't migrate automatically - let merge_cart_view handle it
-                # Just return the session cart for now
-                return session_cart
-            
-            # Create new user cart with unique session_id
-            # Check if session_id already exists for another user
-            max_retries = 3
-            for attempt in range(max_retries):
+        logger = logging.getLogger(__name__)
+        
+        try:
+            # For authenticated users, prioritize user-based cart
+            if user and user.is_authenticated:
+                logger.info(f"Getting cart for authenticated user: user_id={user.id}, session_id={session_id}")
+                
                 try:
-                    existing_cart = Cart.objects.filter(session_id=session_id).first()
-                    if existing_cart:
-                        # Generate unique session_id
-                        unique_session_id = f"{session_id}_{uuid.uuid4().hex[:8]}"
-                    else:
-                        unique_session_id = session_id
+                    # First, try to get existing user cart
+                    user_cart = Cart.objects.filter(user=user, is_active=True).first()
                     
-                    cart = Cart.objects.create(
-                        session_id=unique_session_id,
-                        user=user,
-                        expires_at=timezone.now() + timedelta(hours=24),
-                    )
-                    return cart
+                    if user_cart:
+                        # User has an existing cart, return it
+                        logger.info(f"Found existing cart for user {user.id}: cart_id={user_cart.id}")
+                        return user_cart
+                    
+                    # Check if there's a session cart that should be migrated
+                    session_cart = Cart.objects.filter(session_id=session_id, user__isnull=True, is_active=True).first()
+                    
+                    if session_cart:
+                        # Don't migrate automatically - let merge_cart_view handle it
+                        # But don't return the session cart - create a new user cart instead
+                        # This ensures proper separation between guest and user carts
+                        pass
+                    
+                    # Create new user cart with unique session_id
+                    # Check if session_id already exists for another user
+                    max_retries = 3
+                    for attempt in range(max_retries):
+                        try:
+                            # Check for existing session_id before creating user cart
+                            existing_cart = Cart.objects.filter(session_id=session_id).first()
+                            if existing_cart:
+                                # Generate unique session_id with UUID suffix if collision detected
+                                unique_session_id = f"{session_id}_{uuid.uuid4().hex[:8]}"
+                                logger.warning(
+                                    f"Session ID collision detected for user {user.id}. "
+                                    f"Original: {session_id}, Unique: {unique_session_id}, "
+                                    f"Existing cart: {existing_cart.id} (user: {existing_cart.user_id if existing_cart.user else 'guest'})"
+                                )
+                            else:
+                                unique_session_id = session_id
+                                logger.debug(f"No collision detected, using original session_id: {session_id}")
+                            
+                            cart = Cart.objects.create(
+                                session_id=unique_session_id,  # ✅ Using unique_session_id to avoid collision
+                                user=user,
+                                expires_at=timezone.now() + timedelta(hours=24),
+                            )
+                            logger.info(
+                                f"Created new cart for user {user.id}: cart_id={cart.id}, "
+                                f"session_id={unique_session_id} (collision_resolved={unique_session_id != session_id})"
+                            )
+                            return cart
+                        except Exception as e:
+                            logger.error(f"Cart creation attempt {attempt + 1} failed for user {user.id}: {str(e)}", exc_info=True)
+                            if attempt < max_retries - 1:
+                                time.sleep(0.1 * (attempt + 1))  # Exponential backoff
+                                continue
+                            else:
+                                logger.error(f"Failed to create cart for user {user.id} after {max_retries} attempts")
+                                raise
+                
                 except Exception as e:
-                    if attempt < max_retries - 1:
-                        print(f"⚠️ Cart creation attempt {attempt + 1} failed: {e}")
-                        time.sleep(0.1 * (attempt + 1))  # Exponential backoff
-                        continue
-                    else:
-                        raise e
-        
-        else:
-            # For guest users, use session-based cart
-            try:
-                cart, created = Cart.objects.get_or_create(
-                    session_id=session_id,
-                    user__isnull=True,
-                    is_active=True,
-                    defaults={
-                        'expires_at': timezone.now() + timedelta(hours=24),
-                    }
-                )
-
-                # If cart was found but has a user (shouldn't happen), create new one
-                if not created and cart.user:
-                    cart = Cart.objects.create(
-                        session_id=f"{session_id}_{uuid.uuid4().hex[:8]}",
-                        expires_at=timezone.now() + timedelta(hours=24),
-                    )
-            except Exception as e:
-                # If get_or_create fails due to unique constraint, try to get existing cart
+                    logger.error(f"Error getting/creating cart for authenticated user {user.id}: {str(e)}", exc_info=True)
+                    raise
+            
+            else:
+                # For guest users, use session-based cart
+                logger.info(f"Getting cart for guest user: session_id={session_id}")
+                
                 try:
-                    cart = Cart.objects.get(
+                    cart, created = Cart.objects.get_or_create(
                         session_id=session_id,
                         user__isnull=True,
-                        is_active=True
+                        is_active=True,
+                        defaults={
+                            'expires_at': timezone.now() + timedelta(hours=24),
+                        }
                     )
-                    created = False
-                except Cart.DoesNotExist:
-                    # Create new cart with unique session_id
-                    cart = Cart.objects.create(
-                        session_id=f"{session_id}_{uuid.uuid4().hex[:8]}",
-                        expires_at=timezone.now() + timedelta(hours=24),
-                    )
-                    created = True
-            
-            return cart
+
+                    # If cart was found but has a user (shouldn't happen), create new one
+                    if not created and cart.user:
+                        logger.warning(f"Guest cart has user assigned, creating new cart: session_id={session_id}")
+                        cart = Cart.objects.create(
+                            session_id=f"{session_id}_{uuid.uuid4().hex[:8]}",
+                            expires_at=timezone.now() + timedelta(hours=24),
+                        )
+                        created = True
+                    
+                    logger.info(f"Guest cart {'created' if created else 'found'}: cart_id={cart.id}, session_id={session_id}")
+                    return cart
+                    
+                except Exception as e:
+                    logger.error(f"Error in get_or_create for guest cart: {str(e)}", exc_info=True)
+                    # If get_or_create fails due to unique constraint, try to get existing cart
+                    try:
+                        cart = Cart.objects.get(
+                            session_id=session_id,
+                            user__isnull=True,
+                            is_active=True
+                        )
+                        logger.info(f"Retrieved existing guest cart after error: cart_id={cart.id}")
+                        return cart
+                    except Cart.DoesNotExist:
+                        # Create new cart with unique session_id
+                        try:
+                            cart = Cart.objects.create(
+                                session_id=f"{session_id}_{uuid.uuid4().hex[:8]}",
+                                expires_at=timezone.now() + timedelta(hours=24),
+                            )
+                            logger.info(f"Created new guest cart with unique session_id: cart_id={cart.id}")
+                            return cart
+                        except Exception as create_error:
+                            logger.error(f"Failed to create guest cart with unique session_id: {str(create_error)}", exc_info=True)
+                            raise
+        
+        except Exception as e:
+            logger.error(f"Critical error in get_or_create_cart: user_id={user.id if user and user.is_authenticated else 'guest'}, session_id={session_id}, error={str(e)}", exc_info=True)
+            raise
     
     @staticmethod
     def migrate_session_cart_to_user(session_id, user):

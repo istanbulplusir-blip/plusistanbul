@@ -1,7 +1,7 @@
 {
   "common": {
     "tours": "Turlar",
-    "events": "Etkinlikler", 
+    "events": "Etkinlikler",
     "transfers": "Transferler",
     "carRentals": "Araç Kiralama",
     "cart": "Sepet",
@@ -113,6 +113,9 @@
     "dontHaveAccount": "Hesabınız yok mu?",
     "signInWithGoogle": "Google ile giriş yap",
     "signInWithFacebook": "Facebook ile giriş yap",
+    "googleLoadError": "Google hizmetleri yüklenemedi. Lütfen tekrar deneyin.",
+    "googleInvalidResponse": "Sunucudan geçersiz yanıt",
+    "googleSignInFailed": "Google ile giriş başarısız oldu",
     "quickLogin": "Hızlı Giriş",
     "quickLoginDesc": "Hesabınıza erişmek için giriş yapın",
     "or": "veya",

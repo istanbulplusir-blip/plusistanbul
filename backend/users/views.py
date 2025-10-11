@@ -267,6 +267,9 @@ class OTPVerifyView(APIView):
     permission_classes = [permissions.AllowAny]
     
     def post(self, request):
+        import logging
+        logger = logging.getLogger(__name__)
+        
         serializer = OTPVerifySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
@@ -292,6 +295,7 @@ class OTPVerifyView(APIView):
                 
             otp = OTPCode.objects.get(**otp_filter)
         except OTPCode.DoesNotExist:
+            logger.warning(f"Invalid or expired OTP code for {target}")
             return Response({
                 'error': 'Invalid or expired OTP code.'
             }, status=status.HTTP_400_BAD_REQUEST)
@@ -305,9 +309,19 @@ class OTPVerifyView(APIView):
             # Find user by phone
             try:
                 user = User.objects.get(profile__phone=target)
+                
+                # Upgrade guest users to customer role
+                if user.role == 'guest':
+                    user.role = 'customer'
+                    user.save()
+                    logger.info(f"Upgraded user {user.email} from 'guest' to 'customer' role via OTP login")
+                
+                # Merge guest cart if exists
+                cart_message = self._merge_guest_cart(request, user, logger)
+                
                 refresh = RefreshToken.for_user(user)
                 return Response({
-                    'message': 'OTP verified successfully.',
+                    'message': 'OTP verified successfully.' + cart_message,
                     'user': UserSerializer(user).data,
                     'tokens': {
                         'refresh': str(refresh),
@@ -315,6 +329,7 @@ class OTPVerifyView(APIView):
                     }
                 })
             except User.DoesNotExist:
+                logger.error(f"User not found with phone number: {target}")
                 return Response({
                     'error': 'User not found with this phone number.'
                 }, status=status.HTTP_404_NOT_FOUND)
@@ -324,6 +339,7 @@ class OTPVerifyView(APIView):
             if otp.user:
                 otp.user.is_verified = True
                 otp.user.save()
+                logger.info(f"Phone verified for user: {otp.user.email}")
                 return Response({
                     'message': 'Phone verified successfully.'
                 })
@@ -331,14 +347,22 @@ class OTPVerifyView(APIView):
         elif otp_type == 'email':
             # Mark user as verified and active
             if otp.user:
+                # Set role to customer if not already set
+                if otp.user.role == 'guest':
+                    otp.user.role = 'customer'
+                    logger.info(f"Set role='customer' for user {otp.user.email} via email verification")
+                
                 otp.user.is_email_verified = True
                 otp.user.is_active = True  # Activate user after email verification
                 otp.user.save()
                 
+                # Merge guest cart if exists
+                cart_message = self._merge_guest_cart(request, otp.user, logger)
+                
                 # Generate tokens for auto-login after verification
                 refresh = RefreshToken.for_user(otp.user)
                 return Response({
-                    'message': 'Email verified successfully.',
+                    'message': 'Email verified successfully.' + cart_message,
                     'user': UserSerializer(otp.user).data,
                     'tokens': {
                         'refresh': str(refresh),
@@ -349,6 +373,193 @@ class OTPVerifyView(APIView):
         return Response({
             'message': 'OTP verified successfully.'
         })
+    
+    def _merge_guest_cart(self, request, user, logger):
+        """
+        Merge guest cart to user cart after OTP authentication.
+        Enhanced with better error handling, logging, and transaction support.
+        
+        Returns user-friendly message about merge result.
+        """
+        from django.db import transaction
+        from cart.models import CartService, Cart
+        from orders.models import Order
+        
+        try:
+            session_key = request.session.session_key
+            
+            if not session_key:
+                logger.info(f"No session key found for user {user.email}, skipping cart merge")
+                return ''
+            
+            logger.info(f"Starting cart merge for user {user.email}, session_id={session_key}")
+            
+            # Check if there's a guest cart to merge
+            guest_cart = Cart.objects.filter(
+                session_id=session_key,
+                user__isnull=True,
+                is_active=True
+            ).first()
+            
+            if not guest_cart or not guest_cart.items.exists():
+                logger.info(f"No guest cart found for user {user.email}, session_id={session_key}")
+                return ''
+            
+            guest_items_count = guest_cart.items.count()
+            logger.info(f"Found guest cart with {guest_items_count} items for user {user.email}")
+            
+            # Use transaction to ensure atomicity
+            with transaction.atomic():
+                # Get or create user cart
+                user_cart = CartService.get_or_create_cart(
+                    session_id=session_key,
+                    user=user
+                )
+                logger.info(f"User cart retrieved/created: cart_id={user_cart.id}")
+                
+                # Check for overbooking conflicts before merging
+                overbooking_conflicts = []
+                
+                for guest_item in guest_cart.items.all():
+                    # Check if user already has pending orders for this product/date/variant
+                    if guest_item.product_type == 'tour':
+                        schedule_id = guest_item.booking_data.get('schedule_id')
+                        if schedule_id:
+                            existing_pending_orders = Order.objects.filter(
+                                user=user,
+                                items__product_type='tour',
+                                items__product_id=guest_item.product_id,
+                                items__variant_id=guest_item.variant_id,
+                                items__booking_data__schedule_id=schedule_id,
+                                status='pending'
+                            ).exists()
+                            
+                            if existing_pending_orders:
+                                overbooking_conflicts.append({
+                                    'product_type': guest_item.product_type,
+                                    'product_id': str(guest_item.product_id),
+                                    'schedule_id': schedule_id,
+                                })
+                                logger.warning(f"Overbooking conflict detected for tour {guest_item.product_id}, schedule {schedule_id}")
+                    else:
+                        # For events and other products
+                        existing_pending_orders = Order.objects.filter(
+                            user=user,
+                            items__product_type=guest_item.product_type,
+                            items__product_id=guest_item.product_id,
+                            items__variant_id=guest_item.variant_id,
+                            items__booking_date=guest_item.booking_date,
+                            status='pending'
+                        ).exists()
+                        
+                        if existing_pending_orders:
+                            overbooking_conflicts.append({
+                                'product_type': guest_item.product_type,
+                                'product_id': str(guest_item.product_id),
+                                'booking_date': str(guest_item.booking_date),
+                            })
+                            logger.warning(f"Overbooking conflict detected for {guest_item.product_type} {guest_item.product_id}")
+                
+                # If there are overbooking conflicts, skip those items but merge others
+                if overbooking_conflicts:
+                    logger.warning(f"Found {len(overbooking_conflicts)} overbooking conflicts for user {user.email}")
+                
+                # Merge items (skip conflicting ones)
+                merged_items = 0
+                skipped_items = 0
+                
+                for guest_item in guest_cart.items.all():
+                    # Check if this item has a conflict
+                    has_conflict = False
+                    if guest_item.product_type == 'tour':
+                        schedule_id = guest_item.booking_data.get('schedule_id')
+                        has_conflict = any(
+                            c.get('product_id') == str(guest_item.product_id) and 
+                            c.get('schedule_id') == schedule_id 
+                            for c in overbooking_conflicts
+                        )
+                    else:
+                        has_conflict = any(
+                            c.get('product_id') == str(guest_item.product_id) and 
+                            c.get('booking_date') == str(guest_item.booking_date)
+                            for c in overbooking_conflicts
+                        )
+                    
+                    if has_conflict:
+                        skipped_items += 1
+                        logger.info(f"Skipping conflicting item: {guest_item.product_type} {guest_item.product_id}")
+                        continue
+                    
+                    # Check if item already exists in user cart (duplicate detection)
+                    existing_item = self._find_duplicate_item(user_cart, guest_item)
+                    
+                    if existing_item:
+                        # Merge quantities for duplicate items
+                        old_quantity = existing_item.quantity
+                        existing_item.quantity += guest_item.quantity
+                        existing_item.save()
+                        merged_items += 1
+                        logger.info(f"Merged duplicate item: {guest_item.product_type} {guest_item.product_id}, quantity {old_quantity} -> {existing_item.quantity}")
+                    else:
+                        # Move item to user cart
+                        guest_item.cart = user_cart
+                        guest_item.save()
+                        merged_items += 1
+                        logger.info(f"Moved item to user cart: {guest_item.product_type} {guest_item.product_id}")
+                
+                # Only delete guest cart after successful merge
+                guest_cart.delete()
+                logger.info(f"Successfully merged cart for user {user.email}: {merged_items} items merged, {skipped_items} items skipped")
+                
+                # Build user-friendly message
+                if merged_items > 0:
+                    if skipped_items > 0:
+                        return f' Cart merged with {merged_items} items. {skipped_items} items skipped due to conflicts.'
+                    else:
+                        return f' Cart merged with {merged_items} items.'
+                elif skipped_items > 0:
+                    return ' Cart merge skipped due to overbooking conflicts.'
+                else:
+                    return ''
+            
+        except Exception as e:
+            # Don't fail the authentication if cart merge fails
+            logger.error(f"Error merging guest cart for user {user.email}: {str(e)}", exc_info=True)
+            return ''
+    
+    def _find_duplicate_item(self, cart, item):
+        """
+        Find duplicate item in cart based on product type and relevant identifiers.
+        
+        For tours: compare schedule_id from booking_data
+        For other products: compare booking_date
+        """
+        if item.product_type == 'tour':
+            # For tours, use schedule_id for accurate duplicate detection
+            schedule_id = item.booking_data.get('schedule_id')
+            if schedule_id:
+                return cart.items.filter(
+                    product_type=item.product_type,
+                    product_id=item.product_id,
+                    variant_id=item.variant_id,
+                    booking_data__schedule_id=schedule_id
+                ).first()
+            else:
+                # Fallback to basic matching if no schedule_id
+                return cart.items.filter(
+                    product_type=item.product_type,
+                    product_id=item.product_id,
+                    variant_id=item.variant_id,
+                    booking_date=item.booking_date
+                ).first()
+        else:
+            # For other products, compare booking_date and variant
+            return cart.items.filter(
+                product_type=item.product_type,
+                product_id=item.product_id,
+                variant_id=item.variant_id,
+                booking_date=item.booking_date
+            ).first()
 
 
 class PasswordResetRequestView(APIView):
@@ -523,8 +734,213 @@ if 'ResetPasswordView' not in globals():
 class GoogleLoginView(APIView):
     """Login/Register via Google ID token, then issue JWT."""
     permission_classes = [permissions.AllowAny]
+    
+    def _merge_guest_cart_google(self, request, user, logger):
+        """
+        Merge guest cart to user cart after Google OAuth authentication.
+        
+        Returns dict with:
+        - message: User-friendly message about merge result
+        - stats: Dictionary with merge statistics (items_merged, conflicts, etc.)
+        """
+        from django.db import transaction
+        from cart.models import CartService, Cart
+        from orders.models import Order
+        
+        merge_result = {
+            'message': '',
+            'stats': {
+                'items_merged': 0,
+                'conflicts': 0,
+                'items_skipped': 0
+            }
+        }
+        
+        try:
+            session_key = request.session.session_key
+            
+            if not session_key:
+                logger.info(f"No session key found for user {user.email}, skipping cart merge")
+                return merge_result
+            
+            logger.info(f"Starting cart merge for user {user.email}, session_id={session_key}")
+            
+            # Check if there's a guest cart to merge
+            guest_cart = Cart.objects.filter(
+                session_id=session_key,
+                user__isnull=True,
+                is_active=True
+            ).first()
+            
+            if not guest_cart or not guest_cart.items.exists():
+                logger.info(f"No guest cart found for user {user.email}, session_id={session_key}")
+                return merge_result
+            
+            guest_items_count = guest_cart.items.count()
+            logger.info(f"Found guest cart with {guest_items_count} items for user {user.email}")
+            
+            # Use transaction to ensure atomicity
+            with transaction.atomic():
+                # Get or create user cart
+                user_cart = CartService.get_or_create_cart(
+                    session_id=session_key,
+                    user=user
+                )
+                logger.info(f"User cart retrieved/created: cart_id={user_cart.id}")
+                
+                # Check for overbooking conflicts before merging
+                overbooking_conflicts = []
+                
+                for guest_item in guest_cart.items.all():
+                    # Check if user already has pending orders for this product/date/variant
+                    if guest_item.product_type == 'tour':
+                        schedule_id = guest_item.booking_data.get('schedule_id')
+                        if schedule_id:
+                            existing_pending_orders = Order.objects.filter(
+                                user=user,
+                                items__product_type='tour',
+                                items__product_id=guest_item.product_id,
+                                items__variant_id=guest_item.variant_id,
+                                items__booking_data__schedule_id=schedule_id,
+                                status='pending'
+                            ).exists()
+                            
+                            if existing_pending_orders:
+                                overbooking_conflicts.append({
+                                    'product_type': guest_item.product_type,
+                                    'product_id': str(guest_item.product_id),
+                                    'schedule_id': schedule_id,
+                                })
+                                logger.warning(f"Overbooking conflict detected for tour {guest_item.product_id}, schedule {schedule_id}")
+                    else:
+                        # For events and other products
+                        existing_pending_orders = Order.objects.filter(
+                            user=user,
+                            items__product_type=guest_item.product_type,
+                            items__product_id=guest_item.product_id,
+                            items__variant_id=guest_item.variant_id,
+                            items__booking_date=guest_item.booking_date,
+                            status='pending'
+                        ).exists()
+                        
+                        if existing_pending_orders:
+                            overbooking_conflicts.append({
+                                'product_type': guest_item.product_type,
+                                'product_id': str(guest_item.product_id),
+                                'booking_date': str(guest_item.booking_date),
+                            })
+                            logger.warning(f"Overbooking conflict detected for {guest_item.product_type} {guest_item.product_id}")
+                
+                # If there are overbooking conflicts, skip those items but merge others
+                if overbooking_conflicts:
+                    merge_result['stats']['conflicts'] = len(overbooking_conflicts)
+                    logger.warning(f"Found {len(overbooking_conflicts)} overbooking conflicts for user {user.email}")
+                
+                # Merge items (skip conflicting ones)
+                merged_items = 0
+                skipped_items = 0
+                
+                for guest_item in guest_cart.items.all():
+                    # Check if this item has a conflict
+                    has_conflict = False
+                    if guest_item.product_type == 'tour':
+                        schedule_id = guest_item.booking_data.get('schedule_id')
+                        has_conflict = any(
+                            c.get('product_id') == str(guest_item.product_id) and 
+                            c.get('schedule_id') == schedule_id 
+                            for c in overbooking_conflicts
+                        )
+                    else:
+                        has_conflict = any(
+                            c.get('product_id') == str(guest_item.product_id) and 
+                            c.get('booking_date') == str(guest_item.booking_date)
+                            for c in overbooking_conflicts
+                        )
+                    
+                    if has_conflict:
+                        skipped_items += 1
+                        logger.info(f"Skipping conflicting item: {guest_item.product_type} {guest_item.product_id}")
+                        continue
+                    
+                    # Check if item already exists in user cart (duplicate detection)
+                    existing_item = self._find_duplicate_item(user_cart, guest_item)
+                    
+                    if existing_item:
+                        # Merge quantities for duplicate items
+                        old_quantity = existing_item.quantity
+                        existing_item.quantity += guest_item.quantity
+                        existing_item.save()
+                        merged_items += 1
+                        logger.info(f"Merged duplicate item: {guest_item.product_type} {guest_item.product_id}, quantity {old_quantity} -> {existing_item.quantity}")
+                    else:
+                        # Move item to user cart
+                        guest_item.cart = user_cart
+                        guest_item.save()
+                        merged_items += 1
+                        logger.info(f"Moved item to user cart: {guest_item.product_type} {guest_item.product_id}")
+                
+                merge_result['stats']['items_merged'] = merged_items
+                merge_result['stats']['items_skipped'] = skipped_items
+                
+                # Only delete guest cart after successful merge
+                guest_cart.delete()
+                logger.info(f"Successfully merged cart for user {user.email}: {merged_items} items merged, {skipped_items} items skipped")
+                
+                # Build user-friendly message
+                if merged_items > 0:
+                    if skipped_items > 0:
+                        merge_result['message'] = f' Cart merged with {merged_items} items. {skipped_items} items skipped due to conflicts.'
+                    else:
+                        merge_result['message'] = f' Cart merged with {merged_items} items.'
+                elif skipped_items > 0:
+                    merge_result['message'] = ' Cart merge skipped due to overbooking conflicts.'
+                
+        except Exception as e:
+            # Don't fail the login if cart merge fails, but log the error
+            logger.error(f"Error merging guest cart for user {user.email}: {str(e)}", exc_info=True)
+            merge_result['message'] = ''
+            merge_result['stats']['error'] = str(e)
+        
+        return merge_result
+    
+    def _find_duplicate_item(self, cart, item):
+        """
+        Find duplicate item in cart based on product type and relevant identifiers.
+        
+        For tours: compare schedule_id from booking_data
+        For other products: compare booking_date
+        """
+        if item.product_type == 'tour':
+            # For tours, use schedule_id for accurate duplicate detection
+            schedule_id = item.booking_data.get('schedule_id')
+            if schedule_id:
+                return cart.items.filter(
+                    product_type=item.product_type,
+                    product_id=item.product_id,
+                    variant_id=item.variant_id,
+                    booking_data__schedule_id=schedule_id
+                ).first()
+            else:
+                # Fallback to basic matching if no schedule_id
+                return cart.items.filter(
+                    product_type=item.product_type,
+                    product_id=item.product_id,
+                    variant_id=item.variant_id,
+                    booking_date=item.booking_date
+                ).first()
+        else:
+            # For other products, compare booking_date and variant
+            return cart.items.filter(
+                product_type=item.product_type,
+                product_id=item.product_id,
+                variant_id=item.variant_id,
+                booking_date=item.booking_date
+            ).first()
 
     def post(self, request):
+        import logging
+        logger = logging.getLogger(__name__)
+        
         serializer = GoogleAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         token_str = serializer.validated_data['id_token']
@@ -532,6 +948,7 @@ class GoogleLoginView(APIView):
         try:
             payload = verify_google_id_token(token_str)
         except Exception as e:
+            logger.error(f"Google token verification failed: {str(e)}")
             return Response({'error': 'Invalid Google token', 'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         email = payload.get('email')
@@ -541,16 +958,19 @@ class GoogleLoginView(APIView):
         last_name = rest[0] if rest else ''
 
         if not email or not email_verified:
+            logger.warning(f"Email not verified by Google: {email}")
             return Response({'error': 'Email not verified by Google'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = User.objects.filter(email=email).first()
         created = False
         if not user:
+            # Create new user with role='customer'
             user = User(
                 username=email,
                 email=email,
                 first_name=first_name,
                 last_name=last_name,
+                role='customer',  # Set role to customer for OAuth users
                 is_active=True,
             )
             user.set_unusable_password()
@@ -558,8 +978,14 @@ class GoogleLoginView(APIView):
                 user.is_email_verified = True
             user.save()
             created = True
+            logger.info(f"Created new user via Google OAuth: {email} with role='customer'")
         else:
             updated = False
+            # Upgrade guest users to customer role
+            if user.role == 'guest':
+                user.role = 'customer'
+                updated = True
+                logger.info(f"Upgraded user {email} from 'guest' to 'customer' role")
             if hasattr(user, 'is_email_verified') and not user.is_email_verified:
                 user.is_email_verified = True
                 updated = True
@@ -568,119 +994,16 @@ class GoogleLoginView(APIView):
                 updated = True
             if updated:
                 user.save()
+                logger.info(f"Updated existing user via Google OAuth: {email}")
 
         refresh = RefreshToken.for_user(user)
         
-        # Automatically merge cart after OAuth login
-        try:
-            from cart.models import CartService, Cart
-            session_key = request.session.session_key
-            
-            if session_key:
-                # Check if there's a guest cart to merge
-                guest_cart = Cart.objects.filter(
-                    session_id=session_key,
-                    user__isnull=True,
-                    is_active=True
-                ).first()
-                
-                if guest_cart and guest_cart.items.exists():
-                    # Get user cart
-                    user_cart = CartService.get_or_create_cart(
-                        session_id=session_key,
-                        user=user
-                    )
-                    
-                    # Check for overbooking conflicts before merging
-                    from orders.models import Order
-                    overbooking_conflicts = []
-                    
-                    for guest_item in guest_cart.items.all():
-                        # Check if user already has pending orders for this product/date/variant
-                        if guest_item.product_type == 'tour':
-                            schedule_id = guest_item.booking_data.get('schedule_id')
-                            if schedule_id:
-                                existing_pending_orders = Order.objects.filter(
-                                    user=user,
-                                    items__product_type='tour',
-                                    items__product_id=guest_item.product_id,
-                                    items__variant_id=guest_item.variant_id,
-                                    items__booking_data__schedule_id=schedule_id,
-                                    status='pending'
-                                ).exists()
-                                
-                                if existing_pending_orders:
-                                    overbooking_conflicts.append({
-                                        'product_type': guest_item.product_type,
-                                        'product_id': guest_item.product_id,
-                                        'product_title': guest_item.product_title,
-                                        'message': 'شما قبلاً این تور را رزرو کرده‌اید. ابتدا سفارش قبلی را تکمیل کنید.'
-                                    })
-                        else:
-                            # For events and other products
-                            existing_pending_orders = Order.objects.filter(
-                                user=user,
-                                items__product_type=guest_item.product_type,
-                                items__product_id=guest_item.product_id,
-                                items__variant_id=guest_item.variant_id,
-                                items__booking_date=guest_item.booking_date,
-                                status='pending'
-                            ).exists()
-                            
-                            if existing_pending_orders:
-                                overbooking_conflicts.append({
-                                    'product_type': guest_item.product_type,
-                                    'product_id': guest_item.product_id,
-                                    'product_title': guest_item.product_title,
-                                    'message': 'شما قبلاً این محصول را رزرو کرده‌اید. ابتدا سفارش قبلی را تکمیل کنید.'
-                                })
-                    
-                    # If there are overbooking conflicts, don't merge cart
-                    if overbooking_conflicts:
-                        cart_message = ' Cart merge skipped due to overbooking conflicts. Please check your orders.'
-                    else:
-                        # Merge items
-                        merged_items = 0
-                        for guest_item in guest_cart.items.all():
-                            # Check if item already exists in user cart
-                            if guest_item.product_type == 'tour':
-                                existing_item = user_cart.items.filter(
-                                    product_type=guest_item.product_type,
-                                    product_id=guest_item.product_id,
-                                    variant_id=guest_item.variant_id,
-                                    booking_data__schedule_id=guest_item.booking_data.get('schedule_id')
-                                ).first()
-                            else:
-                                existing_item = user_cart.items.filter(
-                                    product_type=guest_item.product_type,
-                                    product_id=guest_item.product_id,
-                                    variant_id=guest_item.variant_id
-                                ).first()
-                            
-                            if existing_item:
-                                # Update quantity
-                                existing_item.quantity += guest_item.quantity
-                                existing_item.save()
-                            else:
-                                # Move item to user cart
-                                guest_item.cart = user_cart
-                                guest_item.save()
-                            
-                            merged_items += 1
-                        
-                        cart_message = f' Cart merged with {merged_items} items.' if merged_items > 0 else ''
-                    
-                    # Delete guest cart
-                    guest_cart.delete()
-                else:
-                    cart_message = ''
-            else:
-                cart_message = ''
-        except Exception as e:
-            # Don't fail the login if cart merge fails
-            cart_message = ''
+        # Automatically merge cart after OAuth login with enhanced error handling
+        cart_merge_result = self._merge_guest_cart_google(request, user, logger)
+        cart_message = cart_merge_result.get('message', '')
+        merge_stats = cart_merge_result.get('stats', {})
         
-        return Response({
+        response_data = {
             'message': ('Google sign-up successful' if created else 'Google sign-in successful') + cart_message,
             'user': {
                 'id': str(user.id),
@@ -692,4 +1015,10 @@ class GoogleLoginView(APIView):
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
             }
-        })
+        }
+        
+        # Add merge statistics if available
+        if merge_stats and merge_stats.get('items_merged', 0) > 0:
+            response_data['cart_merge'] = merge_stats
+        
+        return Response(response_data)

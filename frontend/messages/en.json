@@ -1,7 +1,7 @@
 {
   "common": {
     "tours": "Tours",
-    "events": "Events", 
+    "events": "Events",
     "transfers": "Transfers",
     "carRentals": "Car Rentals",
     "cart": "Cart",
@@ -115,6 +115,9 @@
     "dontHaveAccount": "Don't have an account?",
     "signInWithGoogle": "Sign in with Google",
     "signInWithFacebook": "Sign in with Facebook",
+    "googleLoadError": "Failed to load Google services. Please try again.",
+    "googleInvalidResponse": "Invalid response from server",
+    "googleSignInFailed": "Google sign-in failed",
     "quickLogin": "Quick Login",
     "quickLoginDesc": "Sign in to access your account",
     "or": "or",

@@ -86,6 +86,17 @@ from .models import (
     TourCategory, Tour, TourVariant, TourSchedule, TourScheduleVariantCapacity, TourItinerary, 
     TourPricing, TourOption, TourReview, TourBooking, ReviewReport, ReviewResponse, TourCancellationPolicy, TourGallery
 )
+from django.forms import inlineformset_factory
+
+
+class TourVariantFormSet(inlineformset_factory(Tour, TourVariant, fields=['name', 'base_price', 'capacity', 'is_active'], extra=1)):
+    """Custom formset for TourVariant that handles unsaved parent objects."""
+    
+    def __init__(self, *args, **kwargs):
+        # If parent object doesn't exist yet, don't try to access its related objects
+        if 'instance' in kwargs and (kwargs['instance'] is None or not kwargs['instance'].pk):
+            kwargs['queryset'] = TourVariant.objects.none()
+        super().__init__(*args, **kwargs)
 
 
 class TourVariantInline(admin.TabularInline):
@@ -94,9 +105,14 @@ class TourVariantInline(admin.TabularInline):
     model = TourVariant
     extra = 1
     fields = ['name', 'base_price', 'capacity', 'is_active']
+    formset = TourVariantFormSet
+    
+    # Allow inlines to be used without a saved parent object
+    can_delete = True
+    show_change_link = False
     
     def get_formset(self, request, obj=None, **kwargs):
-        """Customize formset to handle translatable fields."""
+        """Customize formset to handle translatable fields and unsaved parent objects."""
         formset = super().get_formset(request, obj, **kwargs)
         form = formset.form
         
@@ -460,6 +476,73 @@ class TourCategoryAdmin(TranslatableAdmin):
     list_display = ['get_name', 'icon', 'color', 'tour_count', 'is_active']
     list_filter = ['is_active']
     search_fields = ['translations__name', 'slug']  # Required for autocomplete_fields
+    list_per_page = 20  # Limit results for better performance
+    list_editable = ['is_active']  # Allow editing is_active directly in list view
+    
+    # Fix popup issues with enhanced approach
+    def response_add(self, request, obj, post_url_continue=None):
+        """Fix popup response for adding new categories."""
+        if request.GET.get('_popup'):
+            from django.http import HttpResponse
+            from django.utils.html import format_html
+            return HttpResponse(
+                format_html(
+                    '<script type="text/javascript">'
+                    'if (window.opener && window.opener.dismissAddRelatedObjectPopup) {'
+                    '  window.opener.dismissAddRelatedObjectPopup(window, "{}", "{}");'
+                    '} else {'
+                    '  window.close();'
+                    '}'
+                    '</script>',
+                    obj.pk,
+                    str(obj)
+                )
+            )
+        return super().response_add(request, obj, post_url_continue)
+    
+    def response_change(self, request, obj):
+        """Fix popup response for changing categories."""
+        if request.GET.get('_popup'):
+            from django.http import HttpResponse
+            from django.utils.html import format_html
+            return HttpResponse(
+                format_html(
+                    '<script type="text/javascript">'
+                    'if (window.opener && window.opener.dismissChangeRelatedObjectPopup) {'
+                    '  window.opener.dismissChangeRelatedObjectPopup(window, "{}", "{}");'
+                    '} else {'
+                    '  window.close();'
+                    '}'
+                    '</script>',
+                    obj.pk,
+                    str(obj)
+                )
+            )
+        return super().response_change(request, obj)
+    
+    def get_queryset(self, request):
+        """Override to show only active categories."""
+        qs = super().get_queryset(request)
+        # Show only active categories
+        return qs.filter(is_active=True)
+    
+    def get_form(self, request, obj=None, **kwargs):
+        """Custom form to ensure category field works properly."""
+        form = super().get_form(request, obj, **kwargs)
+        if 'category' in form.base_fields:
+            form.base_fields['category'].help_text = "Select an existing category or create a new one"
+            # Ensure the field is not disabled
+            form.base_fields['category'].disabled = False
+        return form
+    
+    def get_readonly_fields(self, request, obj=None):
+        """Custom readonly fields."""
+        readonly_fields = list(super().get_readonly_fields(request, obj))
+        # Ensure category is not readonly
+        if 'category' in readonly_fields:
+            readonly_fields.remove('category')
+        return readonly_fields
+    
     
     fieldsets = (
         (_('Basic Information'), {
@@ -514,15 +597,31 @@ class TourAdmin(TranslatableAdmin):
     ordering = ['-created_at']
     readonly_fields = ['id', 'created_at', 'updated_at', 'completion_status_display', 'setup_recommendations_display']
 
-    # Add autocomplete fields for related models to help with navigation
-    autocomplete_fields = ['category']
+    # Enhanced solution: Use default dropdown with better configuration
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Custom formfield for category selection."""
+        if db_field.name == "category":
+            kwargs["queryset"] = TourCategory.objects.filter(is_active=True)
+            kwargs["empty_label"] = "Select a category..."
+            # Force widget refresh
+            kwargs["widget"] = None
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def get_form(self, request, obj=None, **kwargs):
+        """Custom form to ensure category field works properly."""
+        form = super().get_form(request, obj, **kwargs)
+        if 'category' in form.base_fields:
+            form.base_fields['category'].help_text = "Select an existing category or create a new one"
+            # Ensure the field is not disabled
+            form.base_fields['category'].disabled = False
+        return form
 
     # Enable save as feature to duplicate tours
     save_as = True
     save_as_continue = True
     
-    # Temporarily remove inline models to fix circular dependency issue
-    # Users can add variants, schedules, and other related models after creating the tour
+    # Temporarily remove TourVariantInline to fix primary key issue
+    # Users can add variants after creating the tour
     inlines = [
         TourItineraryInline,
         TourGalleryInline,
@@ -696,14 +795,19 @@ class TourAdmin(TranslatableAdmin):
 
     
     def save_model(self, request, obj, form, change):
-        """On save, create default schedule if this is a new tour."""
+        """On save, create default schedule and variant if this is a new tour."""
         try:
             with transaction.atomic():
+                # Set flag to skip variant validation during initial creation
+                if not change:  # New tour
+                    obj._skip_variant_validation = True
+                
                 super().save_model(request, obj, form, change)
                 
-                # Create default schedule if this is a new tour
+                # Create default schedule and variant if this is a new tour
                 if not change:  # New tour
                     try:
+                        # Create default schedule
                         obj.create_default_schedule()
                     except IntegrityError:
                         # Schedule already exists, ignore
@@ -711,6 +815,28 @@ class TourAdmin(TranslatableAdmin):
                     except Exception as e:
                         # Log other errors but don't block tour creation
                         print(f"Error creating default schedule: {str(e)}")
+                    
+                    # Create default variant if none exist
+                    if not obj.variants.exists():
+                        try:
+                            from .models import TourVariant
+                            # Set a flag to indicate we're creating variants
+                            obj._creating_variants = True
+                            TourVariant.objects.create(
+                                tour=obj,
+                                name='Standard',
+                                base_price=obj.price or 0,
+                                capacity=obj.max_participants or 10,
+                                is_active=True
+                            )
+                        except Exception as e:
+                            # Log error but don't block tour creation
+                            print(f"Error creating default variant: {str(e)}")
+                    
+                    # Final validation: ensure tour has at least one variant
+                    if not obj.variants.exists():
+                        from django.contrib import messages
+                        messages.warning(request, "Warning: Tour was created without variants. Please add variants manually.")
         except Exception as e:
             from django.contrib import messages
             messages.error(request, f"Error saving tour: {str(e)}")

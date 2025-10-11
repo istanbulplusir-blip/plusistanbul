@@ -144,8 +144,8 @@ class OTPRequestSerializer(serializers.Serializer):
     phone = serializers.CharField(required=False)
     email = serializers.CharField(required=False)
     otp_type = serializers.ChoiceField(choices=[
-        ('phone', 'Phone verification'),
-        ('email', 'Email verification'),
+        ('email_verification', 'Email verification'),
+        ('phone_verification', 'Phone verification'),
         ('password_reset', 'Password reset'),
         ('login', 'Login'),
     ])
@@ -157,10 +157,10 @@ class OTPRequestSerializer(serializers.Serializer):
         if not phone and not email:
             raise serializers.ValidationError(_('Phone or email is required.'))
         
-        if attrs['otp_type'] in ['phone', 'login'] and not phone:
+        if attrs['otp_type'] in ['phone_verification', 'login'] and not phone:
             raise serializers.ValidationError(_('Phone is required for this OTP type.'))
         
-        if attrs['otp_type'] == 'email' and not email:
+        if attrs['otp_type'] in ['email_verification', 'password_reset'] and not email:
             raise serializers.ValidationError(_('Email is required for this OTP type.'))
         
         return attrs
@@ -173,8 +173,8 @@ class OTPVerifySerializer(serializers.Serializer):
     email = serializers.CharField(required=False)
     code = serializers.CharField(max_length=6, min_length=6)
     otp_type = serializers.ChoiceField(choices=[
-        ('phone', 'Phone verification'),
-        ('email', 'Email verification'),
+        ('email_verification', 'Email verification'),
+        ('phone_verification', 'Phone verification'),
         ('password_reset', 'Password reset'),
         ('login', 'Login'),
     ])

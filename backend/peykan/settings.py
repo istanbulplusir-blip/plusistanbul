@@ -205,6 +205,11 @@ STATICFILES_DIRS = [
 MEDIA_URL = config('MEDIA_URL', default='/media/')
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Production override for MEDIA_URL
+if not DEBUG:
+    MEDIA_URL = '/media/'
+    STATIC_URL = '/static/'
+
 # Image processing settings
 IMAGE_MAX_SIZE = (1920, 1080)  # Maximum image dimensions
 IMAGE_QUALITY = 85  # JPEG quality for optimization
@@ -243,6 +248,7 @@ SITE_ID = 1
 
 # Google OAuth (ID token audience)
 GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='')
+GOOGLE_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET', default='')
 
 # CORS Settings
 # IMPORTANT: When using credentials (cookies) the wildcard origin (*) is invalid.
@@ -381,21 +387,21 @@ CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
-# Celery Beat Schedule
-CELERY_BEAT_SCHEDULE = {
-    'cleanup-expired-reservations': {
-        'task': 'events.tasks.cleanup_expired_reservations',
-        'schedule': 300.0,  # Every 5 minutes
-    },
-    'cleanup-expired-carts': {
-        'task': 'cart.tasks.cleanup_expired_carts',
-        'schedule': 600.0,  # Every 10 minutes
-    },
-    'update-capacity-cache': {
-        'task': 'events.tasks.update_capacity_cache',
-        'schedule': 1800.0,  # Every 30 minutes
-    },
-}
+# Celery Beat Schedule - Disabled for now
+# CELERY_BEAT_SCHEDULE = {
+#     'cleanup-expired-reservations': {
+#         'task': 'events.tasks.cleanup_expired_reservations',
+#         'schedule': 300.0,  # Every 5 minutes
+#     },
+#     'cleanup-expired-carts': {
+#         'task': 'cart.tasks.cleanup_expired_carts',
+#         'schedule': 600.0,  # Every 10 minutes
+#     },
+#     'update-capacity-cache': {
+#         'task': 'events.tasks.update_capacity_cache',
+#         'schedule': 1800.0,  # Every 30 minutes
+#     },
+# }
 
 # Session Settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'

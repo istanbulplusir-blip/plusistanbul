@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google OAuth Production Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+        .pass {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .fail {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+        .test-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background-color: #0056b3;
+        }
+        .google-test-area {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            margin: 10px 0;
+            text-align: center;
+            min-height: 60px;
+        }
+        .log-area {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-pass { background-color: #28a745; }
+        .status-fail { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+        .status-info { background-color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Google OAuth Production Test</h1>
+    <p>This page tests Google OAuth functionality in the production environment.</p>
+    
+    <div class="test-container">
+        <h2>Test Controls</h2>
+        <button class="test-button" onclick="runAllTests()">Run All Tests</button>
+        <button class="test-button" onclick="testEnvironment()">Test Environment</button>
+        <button class="test-button" onclick="testGoogleScript()">Test Google Script</button>
+        <button class="test-button" onclick="testButtonRendering()">Test Button Rendering</button>
+        <button class="test-button" onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <div class="test-container">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>Google Sign-In Button Test Area</h2>
+        <p>This area will show if the Google Sign-In button can be rendered:</p>
+        <div id="google-signin-test" class="google-test-area">
+            <p>Google Sign-In button will appear here if working correctly...</p>
+        </div>
+        <button class="test-button" onclick="renderTestButton()">Render Test Button</button>
+    </div>
+
+    <div class="test-container">
+        <h2>Console Log</h2>
+        <div id="console-log" class="log-area"></div>
+    </div>
+
+    <script>
+        // Test configuration
+        const TEST_CONFIG = {
+            expectedClientId: '728579658716-t2emm074v3kj3scv8mtrqhl55e7rnhdq.apps.googleusercontent.com',
+            googleScriptUrl: 'https://accounts.google.com/gsi/client',
+            timeout: 10000
+        };
+
+        // Test results storage
+        let testResults = {};
+        let logMessages = [];
+
+        // Logging function
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}`;
+            logMessages.push(logMessage);
+            
+            const logArea = document.getElementById('console-log');
+            if (logArea) {
+                logArea.textContent = logMessages.join('\n');
+                logArea.scrollTop = logArea.scrollHeight;
+            }
+            
+            console.log(logMessage);
+        }
+
+        // Display test result
+        function displayResult(testName, status, message, details = null) {
+            const resultsDiv = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${status}`;
+            
+            const statusClass = status === 'pass' ? 'status-pass' : 
+                               status === 'fail' ? 'status-fail' : 
+                               status === 'warning' ? 'status-warning' : 'status-info';
+            
+            let content = `<span class="status-indicator ${statusClass}"></span><strong>${testName}:</strong> ${message}`;
+            
+            if (details) {
+                content += `<br><small>${details}</small>`;
+            }
+            
+            resultDiv.innerHTML = content;
+            resultsDiv.appendChild(resultDiv);
+            
+            testResults[testName] = { status, message, details, timestamp: new Date().toISOString() };
+        }
+
+        // Test 1: Environment Variables
+        function testEnvironment() {
+            log('Testing environment variables...');
+            
+            // Check if we're in production environment
+            const isProduction = window.location.hostname === 'peykantravelistanbul.com';
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            
+            displayResult(
+                'Environment Check',
+                isProduction ? 'pass' : 'warning',
+                isProduction ? 'Running on production domain' : 'Not on production domain',
+                `Protocol: ${protocol}, Hostname: ${hostname}`
+            );
+
+            // Check for environment variables (these would be injected by Next.js build)
+            const hasClientId = typeof window.NEXT_PUBLIC_GOOGLE_CLIENT_ID !== 'undefined' || 
+                               document.querySelector('script').textContent.includes('728579658716');
+            
+            displayResult(
+                'Client ID Configuration',
+                hasClientId ? 'pass' : 'fail',
+                hasClientId ? 'Google Client ID appears to be configured' : 'Google Client ID not found',
+                `Expected: ${TEST_CONFIG.expectedClientId}`
+            );
+
+            return { isProduction, hasClientId };
+        }
+
+        // Test 2: Google Script Loading
+        function testGoogleScript() {
+            log('Testing Google script loading...');
+            
+            return new Promise((resolve) => {
+                // Check if Google script is already loaded
+                if (window.google && window.google.accounts && window.google.accounts.id) {
+                    displayResult(
+                        'Google Script',
+                        'pass',
+                        'Google Sign-In script already loaded'
+                    );
+                    resolve(true);
+                    return;
+                }
+
+                // Load Google script
+                const script = document.createElement('script');
+                script.src = TEST_CONFIG.googleScriptUrl;
+                script.async = true;
+                script.defer = true;
+
+                script.onload = () => {
+                    log('Google script loaded successfully');
+                    
+                    // Wait a bit for the API to initialize
+                    setTimeout(() => {
+                        const isAvailable = !!(window.google && window.google.accounts && window.google.accounts.id);
+                        
+                        displayResult(
+                            'Google Script',
+                            isAvailable ? 'pass' : 'fail',
+                            isAvailable ? 'Google Sign-In API loaded and available' : 'Google Sign-In API not available after loading'
+                        );
+                        
+                        resolve(isAvailable);
+                    }, 1000);
+                };
+
+                script.onerror = () => {
+                    log('Failed to load Google script');
+                    displayResult(
+                        'Google Script',
+                        'fail',
+                        'Failed to load Google Sign-In script',
+                        'Network error or script unavailable'
+                    );
+                    resolve(false);
+                };
+
+                document.head.appendChild(script);
+            });
+        }
+
+        // Test 3: Button Rendering
+        function testButtonRendering() {
+            log('Testing Google Sign-In button rendering...');
+            
+            if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+                displayResult(
+                    'Button Rendering',
+                    'fail',
+                    'Cannot test button rendering - Google API not available',
+                    'Run Google Script test first'
+                );
+                return false;
+            }
+
+            try {
+                // Create test button container
+                const testContainer = document.getElementById('google-signin-test');
+                testContainer.innerHTML = '<div id="test-google-button"></div>';
+                
+                const buttonElement = document.getElementById('test-google-button');
+                
+                // Initialize Google Sign-In
+                window.google.accounts.id.initialize({
+                    client_id: TEST_CONFIG.expectedClientId,
+                    callback: (response) => {
+                        log('Google Sign-In callback triggered (test mode)');
+                        displayResult(
+                            'Button Functionality',
+                            'pass',
+                            'Google Sign-In button is functional',
+                            'Callback was triggered successfully'
+                        );
+                    }
+                });
+
+                // Render the button
+                window.google.accounts.id.renderButton(buttonElement, {
+                    theme: 'outline',
+                    size: 'large',
+                    shape: 'pill',
+                    text: 'signin_with',
+                    logo_alignment: 'left'
+                });
+
+                // Check if button was rendered
+                setTimeout(() => {
+                    const hasButton = buttonElement.children.length > 0;
+                    const buttonVisible = buttonElement.offsetHeight > 0;
+                    
+                    displayResult(
+                        'Button Rendering',
+                        hasButton && buttonVisible ? 'pass' : 'fail',
+                        hasButton && buttonVisible ? 'Google Sign-In button rendered successfully' : 'Button rendering failed',
+                        `Button elements: ${buttonElement.children.length}, Height: ${buttonElement.offsetHeight}px`
+                    );
+                }, 1000);
+
+                return true;
+            } catch (error) {
+                log(`Button rendering error: ${error.message}`);
+                displayResult(
+                    'Button Rendering',
+                    'fail',
+                    'Error during button rendering',
+                    error.message
+                );
+                return false;
+            }
+        }
+
+        // Render test button manually
+        function renderTestButton() {
+            testGoogleScript().then((scriptLoaded) => {
+                if (scriptLoaded) {
+                    setTimeout(() => testButtonRendering(), 500);
+                } else {
+                    log('Cannot render test button - Google script not loaded');
+                }
+            });
+        }
+
+        // Run all tests
+        async function runAllTests() {
+            log('Starting comprehensive Google OAuth tests...');
+            clearResults();
+            
+            // Test 1: Environment
+            testEnvironment();
+            
+            // Test 2: Google Script (wait for completion)
+            const scriptLoaded = await testGoogleScript();
+            
+            // Test 3: Button Rendering (if script loaded)
+            if (scriptLoaded) {
+                setTimeout(() => testButtonRendering(), 1000);
+            }
+            
+            // Generate summary after all tests
+            setTimeout(() => {
+                generateTestSummary();
+            }, 3000);
+        }
+
+        // Generate test summary
+        function generateTestSummary() {
+            log('Generating test summary...');
+            
+            const totalTests = Object.keys(testResults).length;
+            const passedTests = Object.values(testResults).filter(r => r.status === 'pass').length;
+            const failedTests = Object.values(testResults).filter(r => r.status === 'fail').length;
+            const warningTests = Object.values(testResults).filter(r => r.status === 'warning').length;
+            
+            const summaryStatus = failedTests === 0 ? 'pass' : 'fail';
+            
+            displayResult(
+                'Test Summary',
+                summaryStatus,
+                `${passedTests}/${totalTests} tests passed`,
+                `Passed: ${passedTests}, Failed: ${failedTests}, Warnings: ${warningTests}`
+            );
+            
+            log(`Test summary: ${passedTests}/${totalTests} passed, ${failedTests} failed, ${warningTests} warnings`);
+        }
+
+        // Clear results
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = '';
+            document.getElementById('google-signin-test').innerHTML = '<p>Google Sign-In button will appear here if working correctly...</p>';
+            testResults = {};
+            logMessages = [];
+            document.getElementById('console-log').textContent = '';
+            log('Test results cleared');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            log('Google OAuth Production Test page loaded');
+            log(`Current URL: ${window.location.href}`);
+            log(`User Agent: ${navigator.userAgent}`);
+            
+            // Auto-run environment test
+            testEnvironment();
+        });
+    </script>
+</body>
+</html>

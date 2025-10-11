@@ -9,6 +9,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from django.views.i18n import JavaScriptCatalog
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_http_methods
 
 def health_check(request):
     """Simple health check endpoint for Docker."""
@@ -18,8 +22,20 @@ def health_check(request):
         'version': '1.0.0'
     })
 
+@ensure_csrf_cookie
+@require_http_methods(["GET"])
+def csrf_token_view(request):
+    """Return CSRF token for frontend."""
+    return JsonResponse({
+        'csrfToken': get_token(request)
+    })
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
+    # Custom jsi18n endpoint without authentication requirement
+    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
+    
     # Lightweight health endpoint for uptime checks
     path('api/health', lambda request: JsonResponse({
         'status': 'ok'
@@ -36,6 +52,9 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    
+    # CSRF token endpoint
+    path('api/v1/csrf-token/', csrf_token_view, name='csrf_token'),
     
     # API v1
     path('api/v1/', include([
@@ -62,21 +81,21 @@ if settings.DEBUG:
         path('__debug__/', include(debug_toolbar.urls)),
     ] + urlpatterns
     
-    # Serve media files in development with proper headers
-    from django.views.static import serve
-    from django.conf import settings
-    
-    def serve_media(request, path):
-        """Serve media files with proper headers for development."""
-        response = serve(request, path, document_root=settings.MEDIA_ROOT)
-        response['Cache-Control'] = 'public, max-age=3600'  # 1 hour cache
-        response['Access-Control-Allow-Origin'] = '*'
-        return response
-    
-    # Add media serving with custom view
-    urlpatterns += [
-        path('media/<path:path>', serve_media, name='media'),
-    ]
-    
     # Serve static files in development
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) 
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Serve media files (both development and production)
+from django.views.static import serve
+from django.conf import settings
+
+def serve_media(request, path):
+    """Serve media files with proper headers."""
+    response = serve(request, path, document_root=settings.MEDIA_ROOT)
+    response['Cache-Control'] = 'public, max-age=3600'  # 1 hour cache
+    response['Access-Control-Allow-Origin'] = '*'
+    return response
+
+# Add media serving for all environments
+urlpatterns += [
+    path('media/<path:path>', serve_media, name='media'),
+] 

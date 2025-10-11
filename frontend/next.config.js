@@ -27,7 +27,7 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
     qualities: [25, 50, 75, 85, 90, 100], // Add quality options for Next.js 15
-    
+
     remotePatterns: [
       {
         protocol: 'https',
@@ -35,12 +35,7 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8000',
-        pathname: '/**',
-      },
+      // Removed localhost:8000 for production
       {
         protocol: 'https',
         hostname: 'peykantravelistanbul.com',
@@ -53,13 +48,8 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
-      // Media files from Django backend
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8000',
-        pathname: '/media/**',
-      },
+      // Media files from Django backend (production only)
+      // Removed localhost:8000 for production
       {
         protocol: 'https',
         hostname: 'peykantravelistanbul.com',
@@ -73,20 +63,20 @@ const nextConfig = {
         pathname: '/media/**',
       },
     ],
-    
+
     // Image optimization settings
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  
+
   async rewrites() {
     // Use environment variable to determine API URL
-    const apiUrl = process.env.NODE_ENV === 'production' 
+    const apiUrl = process.env.NODE_ENV === 'production'
       ? 'https://peykantravelistanbul.com'  // دامنه اصلی
       : 'http://localhost:8000'; // Local development
-    
+
     console.log('Next.js API URL:', apiUrl);
-    
+
     return [
       // Specific API routes first (more specific routes should come first)
       {
@@ -142,7 +132,7 @@ const nextConfig = {
       },
     ];
   },
-  
+
   // Enable trailing slash for API routes to match Django expectations
   trailingSlash: true,
 };

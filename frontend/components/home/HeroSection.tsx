@@ -88,8 +88,8 @@ import { getHeroSlides, HeroSlide, getAboutStatistics, AboutStatistic } from '@/
 const createFallbackSlides = (t: (key: string) => string): HeroSlide[] => [
   {
     id: 'fallback-1',
-      title: t('home.hero.slide1.title') || "Discover Amazing Places",
-      subtitle: t('home.hero.slide1.subtitle') || "Book tours, events & transfers with ease",
+    title: t('home.hero.slide1.title') || "Discover Amazing Places",
+    subtitle: t('home.hero.slide1.subtitle') || "Book tours, events & transfers with ease",
     description: t('home.hero.slide1.description') || "Experience unforgettable journeys with our premium travel services",
     button_text: 'Explore Tours',
     button_url: '/tours',
@@ -128,8 +128,8 @@ const createFallbackSlides = (t: (key: string) => string): HeroSlide[] => [
   },
   {
     id: 'fallback-2',
-      title: t('home.hero.slide2.title') || "Explore Istanbul's Magic",
-      subtitle: t('home.hero.slide2.subtitle') || "Where History Meets Modernity",
+    title: t('home.hero.slide2.title') || "Explore Istanbul's Magic",
+    subtitle: t('home.hero.slide2.subtitle') || "Where History Meets Modernity",
     description: t('home.hero.slide2.description') || "Discover the enchanting city of Istanbul with our curated experiences",
     button_text: 'Explore Events',
     button_url: '/events',
@@ -168,8 +168,8 @@ const createFallbackSlides = (t: (key: string) => string): HeroSlide[] => [
   },
   {
     id: 'fallback-3',
-      title: t('home.hero.slide3.title') || "Live Music & Entertainment",
-      subtitle: t('home.hero.slide3.subtitle') || "Feel the Rhythm of Istanbul",
+    title: t('home.hero.slide3.title') || "Live Music & Entertainment",
+    subtitle: t('home.hero.slide3.subtitle') || "Feel the Rhythm of Istanbul",
     description: t('home.hero.slide3.description') || "Experience world-class concerts and entertainment in iconic venues",
     button_text: 'Book Now',
     button_url: '/events',
@@ -414,12 +414,12 @@ export default function HeroSection() {
           button_text: 'Explore Tours',
           button_url: '/tours',
           button_type: 'primary' as const,
-          desktop_image: 'http://localhost:8000/media/hero/hero-main.jpg',
-          tablet_image: 'http://localhost:8000/media/hero/hero-main.jpg',
-          mobile_image: 'http://localhost:8000/media/hero/hero-main.jpg',
-          desktop_image_url: 'http://localhost:8000/media/hero/hero-main.jpg',
-          tablet_image_url: 'http://localhost:8000/media/hero/hero-main.jpg',
-          mobile_image_url: 'http://localhost:8000/media/hero/hero-main.jpg',
+          desktop_image: 'https://peykantravelistanbul.com/media/hero/hero-main.jpg',
+          tablet_image: 'https://peykantravelistanbul.com/media/hero/hero-main.jpg',
+          mobile_image: 'https://peykantravelistanbul.com/media/hero/hero-main.jpg',
+          desktop_image_url: 'https://peykantravelistanbul.com/media/hero/hero-main.jpg',
+          tablet_image_url: 'https://peykantravelistanbul.com/media/hero/hero-main.jpg',
+          mobile_image_url: 'https://peykantravelistanbul.com/media/hero/hero-main.jpg',
           order: 0,
           display_duration: 5000,
           show_for_authenticated: true,
@@ -501,14 +501,14 @@ export default function HeroSection() {
 
     const colorMap: { [key: number]: string } = {
       0: 'text-green-300',
-      1: 'text-blue-300', 
+      1: 'text-blue-300',
       2: 'text-yellow-300',
       3: 'text-purple-300'
     }
 
     return aboutStatistics.slice(0, 4).map((stat, index) => {
       const iconKey = stat.icon?.toLowerCase() || stat.label?.toLowerCase() || 'star'
-      const IconComponent = Object.keys(iconMap).find(key => iconKey.includes(key)) 
+      const IconComponent = Object.keys(iconMap).find(key => iconKey.includes(key))
         ? iconMap[Object.keys(iconMap).find(key => iconKey.includes(key))!]
         : FaStar
 
@@ -607,11 +607,10 @@ export default function HeroSection() {
                             <Button
                               variant={currentSlideData.button_type === 'primary' ? 'default' : 'outline'}
                               size="lg"
-                              className={`${
-                                currentSlideData.button_type === 'primary'
-                                  ? 'bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-primary-500/25'
-                                  : 'bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white hover:text-gray-900 px-8 py-4 rounded-xl'
-                              } transition-all duration-300`}
+                              className={`${currentSlideData.button_type === 'primary'
+                                ? 'bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-primary-500/25'
+                                : 'bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white hover:text-gray-900 px-8 py-4 rounded-xl'
+                                } transition-all duration-300`}
                               onClick={() => {
                                 if (currentSlideData.button_url) {
                                   if (currentSlideData.button_url.startsWith('http')) {
@@ -674,7 +673,7 @@ export default function HeroSection() {
                 muted={currentSlideData?.video_muted ?? true}
                 loop={currentSlideData?.video_loop ?? true}
                 controls={currentSlideData?.show_video_controls ?? false}
-              className="w-full h-full object-cover"
+                className="w-full h-full object-cover"
               />
             ) : (
               <OptimizedImage
@@ -688,18 +687,18 @@ export default function HeroSection() {
                 blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
               />
             )}
-            
+
             {/* Video Control Button - only show if video has controls */}
             {hasVideo && currentSlideData?.show_video_controls && (
-            <motion.button
-              onClick={() => setIsVideoPlaying(!isVideoPlaying)}
-              className="absolute top-4 right-4 w-12 h-12 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all duration-300 hover:scale-110 z-20"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              aria-label={isVideoPlaying ? 'Pause video' : 'Play video'}
-            >
-              {isVideoPlaying ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-0.5" />}
-            </motion.button>
+              <motion.button
+                onClick={() => setIsVideoPlaying(!isVideoPlaying)}
+                className="absolute top-4 right-4 w-12 h-12 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all duration-300 hover:scale-110 z-20"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                aria-label={isVideoPlaying ? 'Pause video' : 'Play video'}
+              >
+                {isVideoPlaying ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-0.5" />}
+              </motion.button>
             )}
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-primary-900/40 to-secondary-900/30"></div>
 
@@ -734,11 +733,10 @@ export default function HeroSection() {
                         <Button
                           variant={currentSlideData.button_type === 'primary' ? 'default' : 'outline'}
                           size="lg"
-                          className={`${
-                            currentSlideData.button_type === 'primary'
-                              ? 'bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white text-xl px-10 py-5 rounded-2xl shadow-2xl'
-                              : 'bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white hover:text-gray-900 text-xl px-10 py-5 rounded-2xl'
-                          } transition-all duration-300`}
+                          className={`${currentSlideData.button_type === 'primary'
+                            ? 'bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white text-xl px-10 py-5 rounded-2xl shadow-2xl'
+                            : 'bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white hover:text-gray-900 text-xl px-10 py-5 rounded-2xl'
+                            } transition-all duration-300`}
                           onClick={() => {
                             if (currentSlideData.button_url) {
                               if (currentSlideData.button_url.startsWith('http')) {
@@ -757,30 +755,30 @@ export default function HeroSection() {
 
                     {/* Fallback button if no API button is available */}
                     {(!currentSlideData?.button_text || !currentSlideData?.button_url) && (
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button
-                        variant="default"
-                        size="lg"
-                        className="bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white text-xl px-10 py-5 rounded-2xl shadow-2xl"
-                        onClick={() => router.push('/tours')}
-                      >
-                        <FaMapMarkerAlt className="w-6 h-6 mr-3" />
-                        {t('home.hero.slide2.viewFeaturedTour') || 'Explore Istanbul Tours'}
-                      </Button>
-                    </motion.div>
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button
+                          variant="default"
+                          size="lg"
+                          className="bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white text-xl px-10 py-5 rounded-2xl shadow-2xl"
+                          onClick={() => router.push('/tours')}
+                        >
+                          <FaMapMarkerAlt className="w-6 h-6 mr-3" />
+                          {t('home.hero.slide2.viewFeaturedTour') || 'Explore Istanbul Tours'}
+                        </Button>
+                      </motion.div>
                     )}
 
                     {/* Video control button - only show if video has controls */}
                     {hasVideo && currentSlideData?.show_video_controls && (
-                    <motion.button
-                      className="flex items-center gap-3 text-white/80 hover:text-white transition-colors duration-300"
-                      onClick={() => setIsVideoPlaying(!isVideoPlaying)}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {isVideoPlaying ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5" />}
-                      <span className="text-lg">{isVideoPlaying ? 'Pause' : 'Play'} Video</span>
-                    </motion.button>
+                      <motion.button
+                        className="flex items-center gap-3 text-white/80 hover:text-white transition-colors duration-300"
+                        onClick={() => setIsVideoPlaying(!isVideoPlaying)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        {isVideoPlaying ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5" />}
+                        <span className="text-lg">{isVideoPlaying ? 'Pause' : 'Play'} Video</span>
+                      </motion.button>
                     )}
                   </motion.div>
                 </div>
@@ -851,11 +849,10 @@ export default function HeroSection() {
                       <Button
                         variant={currentSlideData.button_type === 'primary' ? 'default' : 'outline'}
                         size="lg"
-                        className={`${
-                          currentSlideData.button_type === 'primary'
-                            ? 'bg-gradient-to-r from-purple-500 to-primary-500 hover:from-purple-600 hover:to-primary-600 text-white text-xl px-10 py-5 rounded-2xl shadow-2xl hover:shadow-purple-500/25'
-                            : 'bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white hover:text-gray-900 text-xl px-10 py-5 rounded-2xl'
-                        } transition-all duration-300`}
+                        className={`${currentSlideData.button_type === 'primary'
+                          ? 'bg-gradient-to-r from-purple-500 to-primary-500 hover:from-purple-600 hover:to-primary-600 text-white text-xl px-10 py-5 rounded-2xl shadow-2xl hover:shadow-purple-500/25'
+                          : 'bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white hover:text-gray-900 text-xl px-10 py-5 rounded-2xl'
+                          } transition-all duration-300`}
                         onClick={() => {
                           if (currentSlideData.button_url) {
                             if (currentSlideData.button_url.startsWith('http')) {
@@ -871,15 +868,15 @@ export default function HeroSection() {
                       </Button>
                     ) : (
                       /* Fallback button if no API button is available */
-                    <Button
-                      variant="default"
-                      size="lg"
-                      className="bg-gradient-to-r from-purple-500 to-primary-500 hover:from-purple-600 hover:to-primary-600 text-white text-xl px-10 py-5 rounded-2xl shadow-2xl hover:shadow-purple-500/25"
-                      onClick={() => router.push('/events')}
-                    >
-                      <FaMusic className="w-6 h-6 mr-3" />
-                      {t('home.hero.slide3.viewFeaturedEvent') || 'Discover Events'}
-                    </Button>
+                      <Button
+                        variant="default"
+                        size="lg"
+                        className="bg-gradient-to-r from-purple-500 to-primary-500 hover:from-purple-600 hover:to-primary-600 text-white text-xl px-10 py-5 rounded-2xl shadow-2xl hover:shadow-purple-500/25"
+                        onClick={() => router.push('/events')}
+                      >
+                        <FaMusic className="w-6 h-6 mr-3" />
+                        {t('home.hero.slide3.viewFeaturedEvent') || 'Discover Events'}
+                      </Button>
                     )}
                   </motion.div>
                 </div>
@@ -938,11 +935,10 @@ export default function HeroSection() {
                           <Button
                             variant={currentSlideData.button_type === 'primary' ? 'default' : 'outline'}
                             size="lg"
-                            className={`${
-                              currentSlideData.button_type === 'primary'
-                                ? 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white text-lg px-8 py-4 rounded-2xl shadow-2xl'
-                                : 'bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white hover:text-gray-900 text-lg px-8 py-4 rounded-2xl'
-                            } transition-all duration-300`}
+                            className={`${currentSlideData.button_type === 'primary'
+                              ? 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white text-lg px-8 py-4 rounded-2xl shadow-2xl'
+                              : 'bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white hover:text-gray-900 text-lg px-8 py-4 rounded-2xl'
+                              } transition-all duration-300`}
                             onClick={() => {
                               if (currentSlideData.button_url) {
                                 if (currentSlideData.button_url.startsWith('http')) {
@@ -958,15 +954,15 @@ export default function HeroSection() {
                           </Button>
                         ) : (
                           /* Fallback button if no API button is available */
-                        <Button
-                          variant="default"
-                          size="lg"
-                          className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white text-lg px-8 py-4 rounded-2xl shadow-2xl"
-                          onClick={() => router.push('/transfers/booking')}
-                        >
-                          <FaBus className="w-5 h-5 mr-2" />
-                          Book Transfer Now
-                        </Button>
+                          <Button
+                            variant="default"
+                            size="lg"
+                            className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white text-lg px-8 py-4 rounded-2xl shadow-2xl"
+                            onClick={() => router.push('/transfers/booking')}
+                          >
+                            <FaBus className="w-5 h-5 mr-2" />
+                            Book Transfer Now
+                          </Button>
                         )}
                       </motion.div>
                     </div>
@@ -1072,11 +1068,10 @@ export default function HeroSection() {
                             <Button
                               variant={currentSlideData.button_type === 'primary' ? 'default' : 'outline'}
                               size="lg"
-                              className={`${
-                                currentSlideData.button_type === 'primary'
-                                  ? 'bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-primary-500/25'
-                                  : 'bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white hover:text-gray-900 px-5 py-2.5 rounded-xl'
-                              } transition-all duration-300`}
+                              className={`${currentSlideData.button_type === 'primary'
+                                ? 'bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-primary-500/25'
+                                : 'bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white hover:text-gray-900 px-5 py-2.5 rounded-xl'
+                                } transition-all duration-300`}
                               onClick={() => {
                                 if (currentSlideData.button_url) {
                                   if (currentSlideData.button_url.startsWith('http')) {
@@ -1143,7 +1138,7 @@ export default function HeroSection() {
                 />
               ) : (
                 <OptimizedImage
-                  src={currentSlideData?.desktop_image_url || currentHeroSlide?.desktop_image_url || "http://localhost:8000/media/hero/hero-main.jpg"}
+                  src={currentSlideData?.desktop_image_url || currentHeroSlide?.desktop_image_url || "https://peykantravelistanbul.com/media/hero/hero-main.jpg"}
                   alt={`Hero Background - Slide ${currentSlide + 1}`}
                   fill
                   className="object-cover"
@@ -1195,17 +1190,17 @@ export default function HeroSection() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-              <OptimizedImage
-                src={currentHeroSlide?.desktop_image_url || "http://localhost:8000/media/hero/hero-main.jpg"}
-                alt={`Hero Background - Slide ${currentSlide + 1}`}
-                fill
-                className="object-cover"
-                priority
-                quality={90}
-                sizes="100vw"
-                placeholder="blur"
-                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-              />
+                <OptimizedImage
+                  src={currentHeroSlide?.desktop_image_url || "https://peykantravelistanbul.com/media/hero/hero-main.jpg"}
+                  alt={`Hero Background - Slide ${currentSlide + 1}`}
+                  fill
+                  className="object-cover"
+                  priority
+                  quality={90}
+                  sizes="100vw"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                />
               )}
             </motion.div>
           </AnimatePresence>
@@ -1227,9 +1222,8 @@ export default function HeroSection() {
           {/* Enhanced Navigation */}
           <motion.button
             onClick={prevSlide}
-            className={`hidden lg:flex absolute top-1/2 transform -translate-y-1/2 w-20 h-20 bg-white/10 dark:bg-gray-900/10 backdrop-blur-xl hover:bg-white/20 dark:hover:bg-gray-900/20 text-white rounded-full shadow-2xl items-center justify-center text-4xl border-2 border-white/20 dark:border-gray-700/20 transition-all duration-500 hover:scale-110 active:scale-95 ${
-              isRTL ? 'right-8' : 'left-8'
-            }`}
+            className={`hidden lg:flex absolute top-1/2 transform -translate-y-1/2 w-20 h-20 bg-white/10 dark:bg-gray-900/10 backdrop-blur-xl hover:bg-white/20 dark:hover:bg-gray-900/20 text-white rounded-full shadow-2xl items-center justify-center text-4xl border-2 border-white/20 dark:border-gray-700/20 transition-all duration-500 hover:scale-110 active:scale-95 ${isRTL ? 'right-8' : 'left-8'
+              }`}
             whileHover={{
               scale: 1.1,
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
@@ -1242,9 +1236,8 @@ export default function HeroSection() {
 
           <motion.button
             onClick={nextSlide}
-            className={`hidden lg:flex absolute top-1/2 transform -translate-y-1/2 w-20 h-20 bg-white/10 dark:bg-gray-900/10 backdrop-blur-xl hover:bg-white/20 dark:hover:bg-gray-900/20 text-white rounded-full shadow-2xl items-center justify-center text-4xl border-2 border-white/20 dark:border-gray-700/20 transition-all duration-500 hover:scale-110 active:scale-95 ${
-              isRTL ? 'left-8' : 'right-8'
-            }`}
+            className={`hidden lg:flex absolute top-1/2 transform -translate-y-1/2 w-20 h-20 bg-white/10 dark:bg-gray-900/10 backdrop-blur-xl hover:bg-white/20 dark:hover:bg-gray-900/20 text-white rounded-full shadow-2xl items-center justify-center text-4xl border-2 border-white/20 dark:border-gray-700/20 transition-all duration-500 hover:scale-110 active:scale-95 ${isRTL ? 'left-8' : 'right-8'
+              }`}
             whileHover={{
               scale: 1.1,
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
@@ -1283,11 +1276,10 @@ export default function HeroSection() {
               <motion.button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`relative overflow-hidden rounded-full transition-all duration-500 ${
-                  currentSlide === index
-                    ? 'w-12 h-4 bg-gradient-to-r from-primary-500 to-secondary-500 shadow-lg'
-                    : 'w-4 h-4 bg-white/50 hover:bg-white/70 backdrop-blur-sm'
-                }`}
+                className={`relative overflow-hidden rounded-full transition-all duration-500 ${currentSlide === index
+                  ? 'w-12 h-4 bg-gradient-to-r from-primary-500 to-secondary-500 shadow-lg'
+                  : 'w-4 h-4 bg-white/50 hover:bg-white/70 backdrop-blur-sm'
+                  }`}
                 whileHover={{ scale: 1.2 }}
                 whileTap={{ scale: 0.9 }}
                 aria-label={`${t('home.navigation.goToSlide')} ${index + 1}`}

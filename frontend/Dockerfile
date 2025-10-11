@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies with clean cache
-RUN npm ci --only=production --no-audit --no-fund
+# Install all dependencies (including devDependencies for build)
+RUN npm ci --no-audit --no-fund
 
 # Copy source code
 COPY . .
@@ -35,7 +35,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/package*.json ./
 COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./
-COPY --from=builder --chown=nextjs:nodejs /app/i18n.ts ./
+# Copy i18n directory instead of i18n.ts
+COPY --from=builder --chown=nextjs:nodejs /app/i18n ./i18n
 
 # Install only production dependencies
 RUN npm ci --only=production --no-audit --no-fund && npm cache clean --force

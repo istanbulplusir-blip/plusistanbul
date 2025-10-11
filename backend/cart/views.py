@@ -33,21 +33,65 @@ class CartView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]  # Allow guest access
     
     def get_object(self):
-        user = self.request.user if self.request.user.is_authenticated else None
+        """
+        Retrieve or create cart for the current user/session.
         
-        # Get consistent session ID
-        session_id = CartService.get_session_id(self.request)
-        
-        cart = CartService.get_or_create_cart(
-            session_id=session_id,
-            user=user
-        )
-        # Clear expired items on each fetch
+        Handles both authenticated and guest users with comprehensive
+        error handling and logging.
+        """
         try:
-            cart.clear_expired_items()
-        except Exception:
-            pass
-        return cart
+            user = self.request.user if self.request.user.is_authenticated else None
+            
+            # Get consistent session ID
+            session_id = CartService.get_session_id(self.request)
+            
+            # Log cart retrieval attempt
+            logger.info(
+                f"Cart retrieval: user={user.id if user else 'guest'}, "
+                f"session_id={session_id}"
+            )
+            
+            # Get or create cart
+            cart = CartService.get_or_create_cart(
+                session_id=session_id,
+                user=user
+            )
+            
+            # Clear expired items on each fetch
+            try:
+                cart.clear_expired_items()
+            except AttributeError as e:
+                # CartItem doesn't have expires_at field
+                logger.warning(
+                    f"Skipping expired items clearing for cart {cart.id}: "
+                    f"CartItem model missing expires_at field - {str(e)}"
+                )
+            except Exception as e:
+                # Other errors during clearing
+                logger.warning(
+                    f"Failed to clear expired items for cart {cart.id}: {str(e)}"
+                )
+            
+            # Log successful cart retrieval with details
+            logger.info(
+                f"Cart retrieved successfully: cart_id={cart.id}, "
+                f"user_id={user.id if user else None}, "
+                f"session_id={session_id}, "
+                f"items_count={cart.items.count()}"
+            )
+            
+            return cart
+            
+        except Exception as e:
+            # Log detailed error information
+            logger.error(
+                f"Error retrieving cart: user={user.id if user and user.is_authenticated else 'guest'}, "
+                f"session_id={session_id if 'session_id' in locals() else 'unknown'}, "
+                f"error={str(e)}",
+                exc_info=True
+            )
+            # Re-raise to let DRF handle the response
+            raise
 
 
 class AddToCartView(APIView):
@@ -1574,6 +1618,7 @@ class CartSummaryView(APIView):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@transaction.atomic  # ✅ Wrap in transaction for select_for_update
 def merge_cart_view(request):
     """Merge session cart with user cart."""
     
@@ -1582,43 +1627,62 @@ def merge_cart_view(request):
     if not user or not user.is_authenticated:
         return Response({'message': 'Authentication required to merge cart.'}, status=status.HTTP_401_UNAUTHORIZED)
     
-    # Get the base session key (without user prefix)
-    session_key = request.session.session_key
-
-    # If no session key in request.session, try to get from request.data
-    if not session_key and request.data and request.data.get('session_key'):
+    # Get the session key from request data (sent by frontend)
+    session_key = None
+    if request.data and request.data.get('session_key'):
         session_key = request.data.get('session_key')
+    
+    # Fallback to request session key if not provided in data
+    if not session_key:
+        session_key = request.session.session_key
 
     if not session_key:
         return Response({'message': 'No session cart found to merge.'})
     
     # Log guest cart identification for debugging
-    print(f"🔍 Merging guest cart (session: {session_key}) with user cart (user: {user.id}, email: {user.email})")
+    logger.info(f"🔍 Merging guest cart (session: {session_key}) with user cart (user: {user.id}, email: {user.email})")
     
-    # Retry mechanism for database lock issues
+    # Retry mechanism for database lock issues and transaction errors
     max_retries = 3
+    user_cart = None
     for attempt in range(max_retries):
         try:
-            # Get user cart using CartService
-            session_id = CartService.get_session_id(request)
+            # Get user cart using CartService with the same session key as guest cart
             user_cart = CartService.get_or_create_cart(
-                session_id=session_id,
+                session_id=session_key,
                 user=user
             )
-            # Lock user cart for update
+            # Lock user cart for update (now safe within @transaction.atomic)
             user_cart = Cart.objects.select_for_update().get(id=user_cart.id)
+            logger.info(f"✅ User cart locked successfully: cart_id={user_cart.id}")
             break  # Success, exit retry loop
-        except Exception as e:
+        except transaction.TransactionManagementError as e:
+            # Transaction-specific errors
+            logger.error(f"❌ Transaction error on attempt {attempt + 1}: {str(e)}", exc_info=True)
             if attempt < max_retries - 1:
-                print(f"⚠️ Cart creation attempt {attempt + 1} failed: {e}")
                 import time
                 time.sleep(0.1 * (attempt + 1))  # Exponential backoff
                 continue
             else:
-                print(f"❌ Failed to create/get user cart after {max_retries} attempts: {e}")
+                logger.error(f"❌ Failed to create/get user cart after {max_retries} attempts due to transaction error")
+                return Response({
+                    'message': 'Failed to prepare user cart for merge due to database transaction error.',
+                    'error': str(e),
+                    'code': 'TRANSACTION_ERROR'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            # Other errors
+            logger.warning(f"⚠️ Cart creation attempt {attempt + 1} failed: {str(e)}")
+            if attempt < max_retries - 1:
+                import time
+                time.sleep(0.1 * (attempt + 1))  # Exponential backoff
+                continue
+            else:
+                logger.error(f"❌ Failed to create/get user cart after {max_retries} attempts: {str(e)}", exc_info=True)
                 return Response({
                     'message': 'Failed to prepare user cart for merge.',
-                    'error': str(e)
+                    'error': str(e),
+                    'code': 'CART_CREATION_ERROR'
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     # Look for session cart with the base session key
@@ -1627,14 +1691,14 @@ def merge_cart_view(request):
         try:
             # First try to find guest cart (user__isnull=True)
             session_cart = Cart.objects.select_for_update().get(session_id=session_key, user__isnull=True)
-            print(f"🔍 Found guest cart with {session_cart.items.count()} items")
+            logger.info(f"🔍 Found guest cart with {session_cart.items.count()} items")
             break  # Success, exit retry loop
         except Cart.DoesNotExist:
-            # If no guest cart found, check if there's already a user cart with this session_key
+            # If no guest cart found, check if there's already a user cart
             # This happens when CartService already migrated the cart
             try:
-                existing_user_cart = Cart.objects.get(session_id=session_key, user=user)
-                print(f"🔍 Session cart already migrated to user cart with {existing_user_cart.items.count()} items")
+                existing_user_cart = Cart.objects.get(user=user, is_active=True)
+                logger.info(f"🔍 User cart already exists with {existing_user_cart.items.count()} items")
                 return Response({
                     'message': 'Cart already merged successfully.',
                     'items_count': existing_user_cart.items.count()
@@ -1642,17 +1706,32 @@ def merge_cart_view(request):
             except Cart.DoesNotExist:
                 pass
             break  # Not a retryable error, exit loop
-        except Exception as e:
+        except transaction.TransactionManagementError as e:
+            # Transaction-specific errors
+            logger.error(f"❌ Transaction error looking up session cart on attempt {attempt + 1}: {str(e)}", exc_info=True)
             if attempt < max_retries - 1:
-                print(f"⚠️ Session cart lookup attempt {attempt + 1} failed: {e}")
                 import time
                 time.sleep(0.05 * (attempt + 1))
                 continue
             else:
-                print(f"❌ Failed to find session cart after {max_retries} attempts: {e}")
+                logger.error(f"❌ Failed to find session cart after {max_retries} attempts due to transaction error")
+                return Response({
+                    'message': 'Failed to access session cart due to database transaction error.',
+                    'error': str(e),
+                    'code': 'TRANSACTION_ERROR'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            logger.warning(f"⚠️ Session cart lookup attempt {attempt + 1} failed: {str(e)}")
+            if attempt < max_retries - 1:
+                import time
+                time.sleep(0.05 * (attempt + 1))
+                continue
+            else:
+                logger.error(f"❌ Failed to find session cart after {max_retries} attempts: {str(e)}", exc_info=True)
                 return Response({
                     'message': 'Failed to access session cart.',
-                    'error': str(e)
+                    'error': str(e),
+                    'code': 'CART_LOOKUP_ERROR'
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     if not session_cart:
@@ -1667,13 +1746,13 @@ def merge_cart_view(request):
                 ).first()
                 break  # Success or no results, exit retry loop
             except Exception as e:
+                logger.warning(f"⚠️ Guest cart search attempt {attempt + 1} failed: {str(e)}")
                 if attempt < max_retries - 1:
-                    print(f"⚠️ Guest cart search attempt {attempt + 1} failed: {e}")
                     import time
                     time.sleep(0.05 * (attempt + 1))
                     continue
                 else:
-                    print(f"❌ Failed to search guest cart after {max_retries} attempts: {e}")
+                    logger.error(f"❌ Failed to search guest cart after {max_retries} attempts: {str(e)}")
 
         if not session_cart:
             # Also try to find by session_key from request data
@@ -1682,7 +1761,7 @@ def merge_cart_view(request):
                 for attempt in range(max_retries):
                     try:
                         session_cart = Cart.objects.select_for_update().get(session_id=request_session_key, user__isnull=True)
-                        print(f"🔍 Found guest cart by request session_key with {session_cart.items.count()} items")
+                        logger.info(f"🔍 Found guest cart by request session_key with {session_cart.items.count()} items")
                         break
                     except Cart.DoesNotExist:
                         # Try partial match
@@ -1693,22 +1772,22 @@ def merge_cart_view(request):
                                 is_active=True
                             ).first()
                             if session_cart:
-                                print(f"🔍 Found guest cart by partial request session_key with {session_cart.items.count()} items")
+                                logger.info(f"🔍 Found guest cart by partial request session_key with {session_cart.items.count()} items")
                                 break
                         except Exception:
                             pass
                         break  # Not retryable, exit
                     except Exception as e:
+                        logger.warning(f"⚠️ Request session cart lookup attempt {attempt + 1} failed: {str(e)}")
                         if attempt < max_retries - 1:
-                            print(f"⚠️ Request session cart lookup attempt {attempt + 1} failed: {e}")
                             import time
                             time.sleep(0.05 * (attempt + 1))
                             continue
                         else:
-                            print(f"❌ Failed to find request session cart after {max_retries} attempts: {e}")
+                            logger.error(f"❌ Failed to find request session cart after {max_retries} attempts: {str(e)}")
 
             if not session_cart:
-                print(f"🔍 No guest cart found for session: {session_key}")
+                logger.info(f"🔍 No guest cart found for session: {session_key}")
                 return Response({
                     'message': 'No session cart found to merge.',
                     'debug_info': {
@@ -1882,7 +1961,7 @@ def merge_cart_view(request):
                 new_quantity = existing_item.quantity + session_item.quantity
                 if new_quantity > 10:  # Max quantity per item
                     skipped_items += 1
-                    print(f"🔍 Skipped item due to quantity limit: {session_item.product_type} #{session_item.product_id}")
+                    logger.info(f"🔍 Skipped item due to quantity limit: {session_item.product_type} #{session_item.product_id}")
                     continue
 
                 # Merge with retry mechanism
@@ -1890,16 +1969,16 @@ def merge_cart_view(request):
                     try:
                         existing_item.quantity = new_quantity
                         existing_item.save()
-                        print(f"🔍 Merged existing item: {session_item.product_type} #{session_item.product_id} (qty: {session_item.quantity})")
+                        logger.info(f"🔍 Merged existing item: {session_item.product_type} #{session_item.product_id} (qty: {session_item.quantity})")
                         break
                     except Exception as e:
+                        logger.warning(f"⚠️ Item merge attempt {attempt + 1} failed: {str(e)}")
                         if attempt < max_retries - 1:
-                            print(f"⚠️ Item merge attempt {attempt + 1} failed: {e}")
                             import time
                             time.sleep(0.05 * (attempt + 1))
                             continue
                         else:
-                            print(f"❌ Failed to merge existing item after {max_retries} attempts: {e}")
+                            logger.error(f"❌ Failed to merge existing item after {max_retries} attempts: {str(e)}")
                             skipped_items += 1
                             break
         else:
@@ -1908,7 +1987,7 @@ def merge_cart_view(request):
                 try:
                     session_item.cart = user_cart
                     session_item.save()
-                    print(f"🔍 Moved guest item to user cart: {session_item.product_type} #{session_item.product_id} (qty: {session_item.quantity})")
+                    logger.info(f"🔍 Moved guest item to user cart: {session_item.product_type} #{session_item.product_id} (qty: {session_item.quantity})")
                     break
                 except Exception as e:
                     if attempt < max_retries - 1:

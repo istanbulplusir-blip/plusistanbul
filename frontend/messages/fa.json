@@ -2,7 +2,7 @@
   "common": {
     "tours": "تورها",
     "events": "رویدادها",
-    "transfers": "انتقالات", 
+    "transfers": "انتقالات",
     "carRentals": "اجاره خودرو",
     "cart": "سبد خرید",
     "login": "ورود",
@@ -115,6 +115,9 @@
     "dontHaveAccount": "حساب ندارید؟",
     "signInWithGoogle": "ورود با گوگل",
     "signInWithFacebook": "ورود با فیس‌بوک",
+    "googleLoadError": "بارگذاری خدمات گوگل ناموفق بود. لطفاً دوباره تلاش کنید.",
+    "googleInvalidResponse": "پاسخ نامعتبر از سرور",
+    "googleSignInFailed": "ورود با گوگل ناموفق بود",
     "quickLogin": "ورود سریع",
     "quickLoginDesc": "برای دسترسی به حساب خود وارد شوید",
     "or": "یا",
