@@ -32,6 +32,7 @@ router.register(r'footer-links', views.FooterLinkViewSet, basename='footerlink')
 router.register(r'transfer-booking-section', views.TransferBookingSectionViewSet, basename='transferbookingsection')
 router.register(r'faq-settings', views.FAQSettingsViewSet, basename='faqsettings')
 router.register(r'whatsapp-info', views.WhatsAppInfoViewSet, basename='whatsappinfo')
+router.register(r'navigation-menu', views.NavigationMenuViewSet, basename='navigationmenu')
 
 urlpatterns = [
     # Include router URLs

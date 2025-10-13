@@ -17,7 +17,7 @@ from .models import (
     CTASection, CTAButton, CTAFeature,
     Footer, FooterLink,
     TransferBookingSection,
-    FAQSettings
+    FAQSettings, NavigationMenu
 )
 from .whatsapp_service import CentralizedWhatsAppService
 
@@ -31,7 +31,7 @@ from .serializers import (
     CTASectionSerializer, CTAButtonSerializer, CTAFeatureSerializer,
     FooterSerializer, FooterLinkSerializer,
     TransferBookingSectionSerializer,
-    FAQSettingsSerializer
+    FAQSettingsSerializer, NavigationMenuSerializer
 )
 
 
@@ -764,6 +764,38 @@ class FAQSettingsViewSet(viewsets.ModelViewSet):
     queryset = FAQSettings.objects.filter(is_active=True)
     serializer_class = FAQSettingsSerializer
     permission_classes = [permissions.AllowAny]
+
+
+class NavigationMenuViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for NavigationMenu model.
+    Read-only for public access.
+    """
+
+    def get_queryset(self):
+        """Get NavigationMenu queryset."""
+        from .models import NavigationMenu
+        return NavigationMenu.objects.filter(is_active=True).order_by('order', 'created_at')
+
+    def get_permissions(self):
+        """Set permissions based on action."""
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [permissions.IsAdminUser()]
+        return [permissions.AllowAny()]
+
+    serializer_class = NavigationMenuSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['is_active', 'is_external', 'target_blank']
+    ordering_fields = ['order', 'created_at']
+    ordering = ['order', 'created_at']
+
+    @action(detail=False, methods=['get'])
+    def active(self, request):
+        """Get only currently active navigation menu items."""
+        from .models import NavigationMenu
+        queryset = NavigationMenu.objects.filter(is_active=True).order_by('order', 'created_at')
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class WhatsAppInfoViewSet(viewsets.ViewSet):

@@ -13,7 +13,7 @@ from .models import (
     CTASection, CTAButton, CTAFeature,
     Footer, FooterLink,
     TransferBookingSection,
-    FAQSettings
+    FAQSettings, NavigationMenu
 )
 
 
@@ -633,6 +633,34 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             settings = SiteSettings.objects.first()
             return self.change_view(request, str(settings.pk), extra_context=extra_context)
         return super().changelist_view(request, extra_context=extra_context)
+
+
+@admin.register(NavigationMenu)
+class NavigationMenuAdmin(TranslatableAdmin):
+    """
+    Admin interface for NavigationMenu model.
+    """
+
+    list_display = [
+        'label', 'url', 'order', 'is_active', 'is_external', 'target_blank', 'created_at'
+    ]
+    list_filter = ['is_active', 'is_external', 'target_blank', 'created_at']
+    list_editable = ['order', 'is_active']
+    search_fields = ['translations__label', 'url']
+    ordering = ['order', 'created_at']
+
+    fieldsets = (
+        (_('Basic Information'), {
+            'fields': ('label', 'url', 'icon')
+        }),
+        (_('Display Settings'), {
+            'fields': ('order', 'is_active')
+        }),
+        (_('Link Settings'), {
+            'fields': ('is_external', 'target_blank'),
+            'description': _('Configure how the link behaves when clicked')
+        }),
+    )
 
 
 @admin.register(ImageOptimization)

@@ -638,6 +638,30 @@ class SiteSettingsSerializer(serializers.ModelSerializer, ImageFieldSerializerMi
         return self.get_image_url(obj, 'default_meta_image', 'meta')
 
 
+class NavigationMenuSerializer(serializers.ModelSerializer, ImageFieldSerializerMixin):
+    """
+    Serializer for NavigationMenu model.
+    """
+
+    class Meta:
+        from .models import NavigationMenu
+        model = None  # Will be set dynamically
+        fields = [
+            'id', 'label', 'url', 'icon', 'order', 'is_active', 
+            'is_external', 'target_blank', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Set model dynamically to avoid circular imports
+        from .models import NavigationMenu
+        self.Meta.model = NavigationMenu
+
+    def get_label(self, obj):
+        return obj.label
+
+
 class ImageOptimizationSerializer(serializers.ModelSerializer):
     """
     Serializer for ImageOptimization model.

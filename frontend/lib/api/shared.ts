@@ -211,6 +211,19 @@ export interface TransferBookingSection {
   updated_at: string;
 }
 
+export interface NavigationMenuItem {
+  id: string;
+  label: string;
+  url: string;
+  icon?: string;
+  order: number;
+  is_active: boolean;
+  is_external: boolean;
+  target_blank: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface WhatsAppInfo {
   phone: string;
   formatted_phone: string;
@@ -382,4 +395,13 @@ export const getFAQSettings = async (): Promise<FAQSettings | null> => {
     const activeSettings = response.data?.results?.find((setting: { is_active: boolean }) => setting.is_active) || response.data?.results?.[0]
     return activeSettings || null
   })
+}
+
+export const getNavigationMenu = async (): Promise<NavigationMenuItem[]> => {
+  const result = await safeApiCall(async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await apiClient.get('/shared/navigation-menu/active/') as any
+    return response.data
+  })
+  return result || []
 }

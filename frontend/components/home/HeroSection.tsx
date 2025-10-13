@@ -7,7 +7,7 @@ import OptimizedImage from '@/components/common/OptimizedImage'
 import { Button } from '@/components/ui/Button'
 import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
-import { getHeroSlides, HeroSlide, getAboutStatistics, AboutStatistic } from '@/lib/api/shared'
+import { getHeroSlides, HeroSlide, getAboutStatistics, AboutStatistic, getSiteSettings, SiteSettings } from '@/lib/api/shared'
 
 // README: Modern Hero Design 2025 for Travel Platforms
 /*
@@ -376,6 +376,7 @@ export default function HeroSection() {
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([])
   const [, setLoadingSlides] = useState(true)
   const [aboutStatistics, setAboutStatistics] = useState<AboutStatistic[]>([])
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null)
 
   // Fallback slides defined in component scope
   const fallbackSlides = useMemo(() => createFallbackSlides(t), [t])
@@ -397,15 +398,25 @@ export default function HeroSection() {
     setIsRTL(htmlDir === 'rtl')
   }, [])
 
-  // Fetch hero slides from API
+  // Fetch hero slides and site settings from API
   useEffect(() => {
-    const fetchHeroSlides = async () => {
+    const fetchData = async () => {
       setLoadingSlides(true)
+      
+      // Fetch site settings first
+      const settings = await getSiteSettings()
+      setSiteSettings(settings)
+      
+      // Fetch hero slides
       const fetchedSlides = await getHeroSlides()
       console.log('Fetched hero slides:', fetchedSlides)
+      
       if (fetchedSlides && fetchedSlides.length > 0) {
         setHeroSlides(fetchedSlides)
       } else {
+        // Use site settings default hero image if available
+        const defaultHeroImage = settings?.default_hero_image_url || '/images/hero-main.jpg'
+        
         setHeroSlides([{
           id: 'fallback',
           title: 'Welcome to Peykan Tourism',
@@ -414,12 +425,12 @@ export default function HeroSection() {
           button_text: 'Explore Tours',
           button_url: '/tours',
           button_type: 'primary' as const,
-          desktop_image: 'http://localhost:8000/media/hero/hero-main.jpg',
-          tablet_image: 'http://localhost:8000/media/hero/hero-main.jpg',
-          mobile_image: 'http://localhost:8000/media/hero/hero-main.jpg',
-          desktop_image_url: 'http://localhost:8000/media/hero/hero-main.jpg',
-          tablet_image_url: 'http://localhost:8000/media/hero/hero-main.jpg',
-          mobile_image_url: 'http://localhost:8000/media/hero/hero-main.jpg',
+          desktop_image: defaultHeroImage,
+          tablet_image: defaultHeroImage,
+          mobile_image: defaultHeroImage,
+          desktop_image_url: defaultHeroImage,
+          tablet_image_url: defaultHeroImage,
+          mobile_image_url: defaultHeroImage,
           order: 0,
           display_duration: 5000,
           show_for_authenticated: true,
@@ -452,7 +463,7 @@ export default function HeroSection() {
       setLoadingSlides(false)
     }
 
-    fetchHeroSlides()
+    fetchData()
   }, [])
 
   // Fetch about statistics from API
@@ -1143,7 +1154,7 @@ export default function HeroSection() {
                 />
               ) : (
                 <OptimizedImage
-                  src={currentSlideData?.desktop_image_url || currentHeroSlide?.desktop_image_url || "http://localhost:8000/media/hero/hero-main.jpg"}
+                  src={currentSlideData?.desktop_image_url || currentHeroSlide?.desktop_image_url || siteSettings?.default_hero_image_url || "/images/hero-main.jpg"}
                   alt={`Hero Background - Slide ${currentSlide + 1}`}
                   fill
                   className="object-cover"
@@ -1152,6 +1163,7 @@ export default function HeroSection() {
                   sizes="100vw"
                   placeholder="blur"
                   blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                  fallbackSrc="/images/hero-main.jpg"
                 />
               )}
             </div>
@@ -1196,7 +1208,7 @@ export default function HeroSection() {
                 />
               ) : (
               <OptimizedImage
-                src={currentHeroSlide?.desktop_image_url || "http://localhost:8000/media/hero/hero-main.jpg"}
+                src={currentHeroSlide?.desktop_image_url || siteSettings?.default_hero_image_url || "/images/hero-main.jpg"}
                 alt={`Hero Background - Slide ${currentSlide + 1}`}
                 fill
                 className="object-cover"
@@ -1205,6 +1217,7 @@ export default function HeroSection() {
                 sizes="100vw"
                 placeholder="blur"
                 blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                fallbackSrc="/images/hero-main.jpg"
               />
               )}
             </motion.div>

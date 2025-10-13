@@ -21,6 +21,7 @@ import Image from 'next/image';
 import { useAuth } from '../lib/contexts/AuthContext';
 import { useTheme } from '../lib/contexts/ThemeContext';
 import LoginQuickModal from './auth/LoginQuickModal';
+import { getSiteSettings, SiteSettings, getNavigationMenu, NavigationMenuItem } from '@/lib/api/shared';
 import { useCart } from '../lib/hooks/useCart';
 import { DropdownProvider } from '@/contexts/DropdownContext';
 
@@ -41,7 +42,40 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartRotate, setCartRotate] = useState(false);
   
+  // Site settings state
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  
+  // Navigation menu state
+  const [navigationMenu, setNavigationMenu] = useState<NavigationMenuItem[]>([]);
+  const [menuLoading, setMenuLoading] = useState(true);
+  
   const prefix = `/${locale}`;
+
+  // Fetch site settings and navigation menu
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setSettingsLoading(true);
+        setMenuLoading(true);
+        
+        const [settings, menu] = await Promise.all([
+          getSiteSettings(),
+          getNavigationMenu()
+        ]);
+        
+        setSiteSettings(settings);
+        setNavigationMenu(menu);
+      } catch (error) {
+        console.error('Error fetching navbar data:', error);
+      } finally {
+        setSettingsLoading(false);
+        setMenuLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Handle scroll effect
   useEffect(() => {
@@ -87,14 +121,23 @@ export default function Navbar() {
     setPrevTotalItems(totalItems);
   }, [totalItems, prevTotalItems]);
 
-  const navItems = [
-    { href: `${prefix}/`, label: navT('home'), icon: null },
-    { href: `${prefix}/tours`, label: navT('tours'), icon: null },
-    { href: `${prefix}/events`, label: navT('events'), icon: null },
-    { href: `${prefix}/transfers/booking`, label: navT('transfers'), icon: null },
-    { href: `${prefix}/car-rentals`, label: navT('carRentals'), icon: null },
-    { href: `${prefix}/contact`, label: navT('contact'), icon: null },
-  ];
+  // Create navigation items from API or fallback to static
+  const navItems = navigationMenu.length > 0 
+    ? navigationMenu.map(item => ({
+        href: item.is_external ? item.url : `${prefix}${item.url}`,
+        label: item.label,
+        icon: item.icon,
+        isExternal: item.is_external,
+        targetBlank: item.target_blank
+      }))
+    : [
+        { href: `${prefix}/`, label: navT('home'), icon: null, isExternal: false, targetBlank: false },
+        { href: `${prefix}/tours`, label: navT('tours'), icon: null, isExternal: false, targetBlank: false },
+        { href: `${prefix}/events`, label: navT('events'), icon: null, isExternal: false, targetBlank: false },
+        { href: `${prefix}/transfers/booking`, label: navT('transfers'), icon: null, isExternal: false, targetBlank: false },
+        { href: `${prefix}/car-rentals`, label: navT('carRentals'), icon: null, isExternal: false, targetBlank: false },
+        { href: `${prefix}/contact`, label: navT('contact'), icon: null, isExternal: false, targetBlank: false },
+      ];
 
   const isActive = (href: string) => {
     if (href === `${prefix}/`) {
@@ -102,6 +145,35 @@ export default function Navbar() {
     }
     return pathname.includes(href.replace(prefix, ''));
   };
+
+  // Show loading state while fetching data
+  if (settingsLoading || menuLoading) {
+    return (
+      <motion.nav 
+        className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md shadow-sm border-b border-gray-200/30 dark:border-gray-800/30"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
+              <div className="flex flex-col">
+                <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div className="h-3 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-1"></div>
+              </div>
+            </div>
+            <div className="hidden md:flex items-center gap-2">
+              <div className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </motion.nav>
+    );
+  }
 
   return (
     <DropdownProvider>
@@ -131,8 +203,8 @@ export default function Navbar() {
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <Image
-                    src="/logo.png"
-                    alt="Peykan Tourism Logo"
+                    src={siteSettings?.default_meta_image_url || "/logo.png"}
+                    alt={`${siteSettings?.site_name || 'Peykan Tourism'} Logo`}
                     width={100}
                     height={100}
                     className="w-20 h-20 sm:w-16 sm:h-16 object-contain"
@@ -143,10 +215,10 @@ export default function Navbar() {
                 </motion.div>
                 <div className="flex flex-col">
                   <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-display">
-                    Peykan
+                    {siteSettings?.site_name?.split(' ')[0] || 'Peykan'}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400 -mt-0.5">
-                    Tourism & Travel
+                    {siteSettings?.site_name?.split(' ').slice(1).join(' ') || 'Tourism & Travel'}
                   </span>
                 </div>
               </div>
@@ -163,6 +235,8 @@ export default function Navbar() {
                 >
                   <Link 
                     href={item.href}
+                    target={item.targetBlank ? '_blank' : undefined}
+                    rel={item.isExternal ? 'noopener noreferrer' : undefined}
                     className={`relative px-3 md:px-4 py-2 rounded-xl font-medium transition-all duration-300 group text-sm md:text-base ${
                       isActive(item.href)
                         ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
@@ -430,7 +504,9 @@ export default function Navbar() {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
                       <Link 
-                        href={item.href} 
+                        href={item.href}
+                        target={item.targetBlank ? '_blank' : undefined}
+                        rel={item.isExternal ? 'noopener noreferrer' : undefined}
                         className={`block text-base font-medium transition-all duration-300 p-2.5 rounded-lg ${
                           isActive(item.href)
                             ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' 
