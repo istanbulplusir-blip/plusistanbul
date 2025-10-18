@@ -556,7 +556,8 @@
     "upcomingEvents": "Upcoming Events",
     "featuredEvents": "Featured Events",
     "popularEvents": "Popular Events",
-    "pastEvents": "Past Events"
+    "pastEvents": "Past Events",
+    "noEventsFound": "No events found"
   },
   "about": {
     "label": "About Us",

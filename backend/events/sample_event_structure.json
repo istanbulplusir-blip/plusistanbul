@@ -1,0 +1,390 @@
+{
+    "event": {
+        "id": "uuid-here",
+        "slug": "istanbul-music-festival-2025",
+        "translations": {
+            "fa": {
+                "title": "جشنواره موسیقی استانبول ۲۰۲۵",
+                "short_description": "شبی فراموش‌نشدنی با بهترین خوانندگان جهان",
+                "description": "جشنواره موسیقی استانبول یکی از بزرگترین رویدادهای موسیقی در خاورمیانه است...",
+                "highlights": "• اجرای زنده توسط سامی یوسف و ماهر زین\n• سیستم صوتی و نورپردازی حرفه‌ای...",
+                "rules": "• ورود با بلیط معتبر الزامی است\n• دوربین‌های حرفه‌ای مجاز نیستند...",
+                "required_items": "• بلیط چاپی یا الکترونیکی\n• کارت شناسایی معتبر..."
+            },
+            "en": {
+                "title": "Istanbul Music Festival 2025",
+                "short_description": "An unforgettable night with the world's best singers",
+                "description": "Istanbul Music Festival is one of the largest music events in the Middle East...",
+                "highlights": "• Live performance by Sami Yusuf and Maher Zain\n• Professional sound and lighting system...",
+                "rules": "• Entry with valid ticket is mandatory\n• Professional cameras are not allowed...",
+                "required_items": "• Printed or electronic ticket\n• Valid ID card..."
+            },
+            "ar": {
+                "title": "مهرجان اسطنبول الموسيقي ٢٠٢٥",
+                "short_description": "ليلة لا تُنسى مع أفضل المغنين في العالم",
+                "description": "مهرجان اسطنبول الموسيقي هو واحد من أكبر الفعاليات الموسيقية في الشرق الأوسط...",
+                "highlights": "• أداء مباشر من سامي يوسف وماهر زين\n• نظام صوت وإضاءة احترافي...",
+                "rules": "• الدخول بتذكرة صالحة إلزامي\n• الكاميرات الاحترافية غير مسموح بها...",
+                "required_items": "• تذكرة مطبوعة أو إلكترونية\n• بطاقة هوية صالحة..."
+            }
+        },
+        "category": {
+            "id": "uuid-here",
+            "slug": "music-concert",
+            "translations": {
+                "fa": {
+                    "name": "کنسرت موسیقی",
+                    "description": "کنسرت‌های موسیقی زنده با هنرمندان برجسته"
+                },
+                "en": {
+                    "name": "Music Concert",
+                    "description": "Live music concerts with renowned artists"
+                },
+                "ar": {
+                    "name": "حفلة موسيقية",
+                    "description": "حفلات موسيقية حية مع فنانين مشهورين"
+                }
+            },
+            "icon": "music",
+            "color": "#FF6B6B"
+        },
+        "venue": {
+            "id": "uuid-here",
+            "slug": "grand-hall-istanbul",
+            "translations": {
+                "fa": {
+                    "name": "سالن بزرگ استانبول",
+                    "description": "یکی از بهترین سالن‌های کنسرت در استانبول با امکانات مدرن",
+                    "address": "میدان تقسیم، خیابان استقلال، استانبول، ترکیه"
+                },
+                "en": {
+                    "name": "Grand Hall Istanbul",
+                    "description": "One of the best concert halls in Istanbul with modern facilities",
+                    "address": "Taksim Square, Istiklal Street, Istanbul, Turkey"
+                },
+                "ar": {
+                    "name": "القاعة الكبرى اسطنبول",
+                    "description": "واحدة من أفضل قاعات الحفلات الموسيقية في اسطنبول مع مرافق حديثة",
+                    "address": "ميدان تقسيم، شارع الاستقلال، اسطنبول، تركيا"
+                }
+            },
+            "city": "Istanbul",
+            "country": "Turkey",
+            "total_capacity": 5000,
+            "coordinates": {
+                "lat": 41.0082,
+                "lng": 28.9784
+            },
+            "facilities": [
+                "parking",
+                "restaurant",
+                "wheelchair_access",
+                "vip_lounge"
+            ]
+        },
+        "artists": [
+            {
+                "id": "uuid-here",
+                "slug": "sami-yusuf",
+                "translations": {
+                    "fa": {
+                        "name": "سامی یوسف",
+                        "bio": "خواننده و آهنگساز بریتانیایی-ایرانی، برنده جوایز متعدد بین‌المللی"
+                    },
+                    "en": {
+                        "name": "Sami Yusuf",
+                        "bio": "British-Iranian singer and composer, winner of multiple international awards"
+                    },
+                    "ar": {
+                        "name": "سامي يوسف",
+                        "bio": "مغني وملحن بريطاني-إيراني، حائز على جوائز دولية متعددة"
+                    }
+                },
+                "website": "https://samiyusuf.com",
+                "social_media": {
+                    "instagram": "@samiyusuf",
+                    "twitter": "@samiyusuf",
+                    "facebook": "samiyusufofficial"
+                }
+            },
+            {
+                "id": "uuid-here",
+                "slug": "maher-zain",
+                "translations": {
+                    "fa": {
+                        "name": "ماهر زین",
+                        "bio": "خواننده و ترانه‌سرای سوئدی-لبنانی با شهرت جهانی"
+                    },
+                    "en": {
+                        "name": "Maher Zain",
+                        "bio": "Swedish-Lebanese singer and songwriter with worldwide fame"
+                    },
+                    "ar": {
+                        "name": "ماهر زين",
+                        "bio": "مغني وكاتب أغاني سويدي-لبناني ذو شهرة عالمية"
+                    }
+                },
+                "website": "https://maherzain.com",
+                "social_media": {
+                    "instagram": "@maherzainofficial",
+                    "twitter": "@maherzain",
+                    "facebook": "maherzainofficial"
+                }
+            }
+        ],
+        "ticket_types": [
+            {
+                "id": "uuid-here",
+                "ticket_type": "vip",
+                "translations": {
+                    "fa": {
+                        "name": "بلیط VIP",
+                        "description": "بلیط ویژه با امکانات اختصاصی و نزدیک‌ترین صندلی‌ها به صحنه"
+                    },
+                    "en": {
+                        "name": "VIP Ticket",
+                        "description": "Premium ticket with exclusive facilities and closest seats to the stage"
+                    },
+                    "ar": {
+                        "name": "تذكرة VIP",
+                        "description": "تذكرة مميزة مع مرافق حصرية وأقرب المقاعد إلى المسرح"
+                    }
+                },
+                "price_modifier": 2.0,
+                "capacity": 500,
+                "benefits": [
+                    "Front row seats",
+                    "VIP lounge access",
+                    "Free drinks",
+                    "Meet & greet opportunity"
+                ]
+            },
+            {
+                "id": "uuid-here",
+                "ticket_type": "normal",
+                "translations": {
+                    "fa": {
+                        "name": "بلیط عادی",
+                        "description": "بلیط استاندارد با دسترسی به تمام امکانات"
+                    },
+                    "en": {
+                        "name": "Normal Ticket",
+                        "description": "Standard ticket with access to all facilities"
+                    },
+                    "ar": {
+                        "name": "تذكرة عادية",
+                        "description": "تذكرة قياسية مع الوصول إلى جميع المرافق"
+                    }
+                },
+                "price_modifier": 1.0,
+                "capacity": 3000,
+                "benefits": [
+                    "Standard seating",
+                    "Access to all facilities"
+                ]
+            },
+            {
+                "id": "uuid-here",
+                "ticket_type": "eco",
+                "translations": {
+                    "fa": {
+                        "name": "بلیط اقتصادی",
+                        "description": "بلیط مقرون به صرفه با امکانات پایه"
+                    },
+                    "en": {
+                        "name": "Economy Ticket",
+                        "description": "Affordable ticket with basic facilities"
+                    },
+                    "ar": {
+                        "name": "تذكرة اقتصادية",
+                        "description": "تذكرة بأسعار معقولة مع مرافق أساسية"
+                    }
+                },
+                "price_modifier": 0.7,
+                "capacity": 1000,
+                "benefits": [
+                    "Economy seating",
+                    "Basic facilities"
+                ]
+            },
+            {
+                "id": "uuid-here",
+                "ticket_type": "wheelchair",
+                "translations": {
+                    "fa": {
+                        "name": "بلیط ویلچر",
+                        "description": "بلیط ویژه برای افراد دارای معلولیت حرکتی"
+                    },
+                    "en": {
+                        "name": "Wheelchair Ticket",
+                        "description": "Special ticket for persons with mobility disabilities"
+                    },
+                    "ar": {
+                        "name": "تذكرة كرسي متحرك",
+                        "description": "تذكرة خاصة للأشخاص ذوي الإعاقة الحركية"
+                    }
+                },
+                "price_modifier": 1.0,
+                "capacity": 50,
+                "benefits": [
+                    "Wheelchair accessible seating",
+                    "Companion seat included",
+                    "Easy access to facilities"
+                ]
+            }
+        ],
+        "options": [
+            {
+                "id": "uuid-here",
+                "option_type": "parking",
+                "translations": {
+                    "fa": {
+                        "name": "پارکینگ",
+                        "description": "پارکینگ اختصاصی در محل رویداد"
+                    },
+                    "en": {
+                        "name": "Parking",
+                        "description": "Dedicated parking at the event venue"
+                    },
+                    "ar": {
+                        "name": "موقف سيارات",
+                        "description": "موقف سيارات مخصص في مكان الحدث"
+                    }
+                },
+                "price": 10.00,
+                "currency": "USD",
+                "max_quantity": 500
+            },
+            {
+                "id": "uuid-here",
+                "option_type": "food",
+                "translations": {
+                    "fa": {
+                        "name": "بسته غذایی",
+                        "description": "شامل نوشیدنی و اسنک"
+                    },
+                    "en": {
+                        "name": "Food Package",
+                        "description": "Includes drinks and snacks"
+                    },
+                    "ar": {
+                        "name": "باقة طعام",
+                        "description": "تشمل المشروبات والوجبات الخفيفة"
+                    }
+                },
+                "price": 25.00,
+                "currency": "USD",
+                "max_quantity": 1000
+            }
+        ],
+        "cancellation_policies": [
+            {
+                "hours_before": 48,
+                "refund_percentage": 80,
+                "description": "Full refund minus service fee"
+            },
+            {
+                "hours_before": 24,
+                "refund_percentage": 50,
+                "description": "Half refund"
+            },
+            {
+                "hours_before": 0,
+                "refund_percentage": 0,
+                "description": "No refund"
+            }
+        ],
+        "performances": [
+            {
+                "id": "uuid-here",
+                "date": "2025-10-19",
+                "start_time": "20:00:00",
+                "end_time": "23:00:00",
+                "is_available": true,
+                "is_special": true,
+                "max_capacity": 5000,
+                "sections": [
+                    {
+                        "name": "VIP Section",
+                        "description": "VIP Section with 500 seats",
+                        "total_capacity": 500,
+                        "base_price": 300.00,
+                        "currency": "USD",
+                        "is_premium": true,
+                        "is_wheelchair_accessible": false,
+                        "ticket_types": [
+                            {
+                                "ticket_type_id": "uuid-here",
+                                "price_modifier": 2.0,
+                                "final_price": 600.00,
+                                "allocated_capacity": 500,
+                                "available_capacity": 500
+                            }
+                        ],
+                        "seats": [
+                            {
+                                "row_number": "R01",
+                                "seat_number": "S01",
+                                "status": "available",
+                                "price": 600.00,
+                                "currency": "USD",
+                                "is_premium": true,
+                                "is_wheelchair_accessible": false
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Section A",
+                        "description": "Section A with 1500 seats",
+                        "total_capacity": 1500,
+                        "base_price": 150.00,
+                        "currency": "USD",
+                        "is_premium": false,
+                        "is_wheelchair_accessible": true,
+                        "ticket_types": [
+                            {
+                                "ticket_type_id": "uuid-here",
+                                "price_modifier": 1.0,
+                                "final_price": 150.00,
+                                "allocated_capacity": 1500,
+                                "available_capacity": 1500
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Section B",
+                        "description": "Section B with 2000 seats",
+                        "total_capacity": 2000,
+                        "base_price": 100.00,
+                        "currency": "USD",
+                        "is_premium": false,
+                        "is_wheelchair_accessible": false
+                    },
+                    {
+                        "name": "Section C",
+                        "description": "Section C with 1000 seats",
+                        "total_capacity": 1000,
+                        "base_price": 70.00,
+                        "currency": "USD",
+                        "is_premium": false,
+                        "is_wheelchair_accessible": false
+                    }
+                ]
+            }
+        ],
+        "style": "music",
+        "price": 150.00,
+        "currency": "USD",
+        "door_open_time": "18:00:00",
+        "start_time": "20:00:00",
+        "end_time": "23:00:00",
+        "age_restriction": 12,
+        "is_active": true,
+        "is_featured": true,
+        "is_popular": true,
+        "is_special": true,
+        "is_seasonal": false,
+        "cancellation_hours": 48,
+        "refund_percentage": 80
+    }
+}

@@ -74,6 +74,34 @@ dist/
 build/
 *.egg-info/
 
+# Documentation files (keep important ones)
+# Most docs are in docs/ folder
+
+# Test files
+*_test.py
+test_*.py
+*_tests.py
+tests_*.py
+pytest.ini
+
+# Backup files
+*.backup
+*.backup.*
+db.sqlite3.backup*
+
+# Development scripts
+setup_test_data.bat
+setup-dev-env.bat
+setup-dev-env.ps1
+start_celery.bat
+create_test_hero_slides.py
+
+# PDF test files
+invoice_*.pdf
+
+# TypeScript build info
+*.tsbuildinfo
+
 # Coverage reports
 htmlcov/
 .coverage

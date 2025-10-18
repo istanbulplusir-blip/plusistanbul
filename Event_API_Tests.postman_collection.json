@@ -1,0 +1,615 @@
+{
+    "info": {
+        "name": "Event API Tests - 3 Languages",
+        "description": "Complete API tests for the sample event with Persian, English, and Arabic support",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Events",
+            "item": [
+                {
+                    "name": "List All Events",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/events/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "events",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Event Details (Persian)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/events/{{event_slug}}/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "events",
+                                "{{event_slug}}",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Event Details (English)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "en",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/events/{{event_slug}}/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "events",
+                                "{{event_slug}}",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Event Details (Arabic)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/events/{{event_slug}}/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "events",
+                                "{{event_slug}}",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Search Events",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/events/search/?q=music",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "events",
+                                "search",
+                                ""
+                            ],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "music"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Filter by Category",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/events/?category=music-concert",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "events",
+                                ""
+                            ],
+                            "query": [
+                                {
+                                    "key": "category",
+                                    "value": "music-concert"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Filter by Venue",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/events/?venue=grand-hall-istanbul",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "events",
+                                ""
+                            ],
+                            "query": [
+                                {
+                                    "key": "venue",
+                                    "value": "grand-hall-istanbul"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Filter by Date Range",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/events/?date_from=2025-10-19&date_to=2025-10-25",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "events",
+                                ""
+                            ],
+                            "query": [
+                                {
+                                    "key": "date_from",
+                                    "value": "2025-10-19"
+                                },
+                                {
+                                    "key": "date_to",
+                                    "value": "2025-10-25"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Categories",
+            "item": [
+                {
+                    "name": "List Categories (Persian)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/categories/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "categories",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Categories (English)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "en",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/categories/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "categories",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Categories (Arabic)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "ar",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/categories/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "categories",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Venues",
+            "item": [
+                {
+                    "name": "List Venues (Persian)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/venues/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "venues",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Venues (English)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "en",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/venues/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "venues",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Venue Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/venues/grand-hall-istanbul/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "venues",
+                                "grand-hall-istanbul",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Artists",
+            "item": [
+                {
+                    "name": "List Artists (Persian)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/artists/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "artists",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Artists (English)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "en",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/artists/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "artists",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Artist Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/artists/sami-yusuf/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "artists",
+                                "sami-yusuf",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Performances",
+            "item": [
+                {
+                    "name": "Get Event Performances",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/events/{{event_slug}}/performances/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "events",
+                                "{{event_slug}}",
+                                "performances",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Performance Seats",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/events/{{event_id}}/performances/{{performance_id}}/seats/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "events",
+                                "{{event_id}}",
+                                "performances",
+                                "{{performance_id}}",
+                                "seats",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Performance Seats (with filters)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/events/{{event_id}}/performances/{{performance_id}}/seats/?section=VIP Section&include_seats=true",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "events",
+                                "{{event_id}}",
+                                "performances",
+                                "{{performance_id}}",
+                                "seats",
+                                ""
+                            ],
+                            "query": [
+                                {
+                                    "key": "section",
+                                    "value": "VIP Section"
+                                },
+                                {
+                                    "key": "include_seats",
+                                    "value": "true"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Capacity",
+            "item": [
+                {
+                    "name": "Get Event Capacity Info",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept-Language",
+                                "value": "fa",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/events/{{event_id}}/capacity_info/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "events",
+                                "{{event_id}}",
+                                "capacity_info",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000",
+            "type": "string"
+        },
+        {
+            "key": "event_slug",
+            "value": "istanbul-music-festival-2025",
+            "type": "string"
+        },
+        {
+            "key": "event_id",
+            "value": "your-event-uuid-here",
+            "type": "string"
+        },
+        {
+            "key": "performance_id",
+            "value": "your-performance-uuid-here",
+            "type": "string"
+        }
+    ]
+}

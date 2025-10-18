@@ -557,7 +557,8 @@
     "upcomingEvents": "Yaklaşan Etkinlikler",
     "featuredEvents": "Öne Çıkan Etkinlikler",
     "popularEvents": "Popüler Etkinlikler",
-    "pastEvents": "Geçmiş Etkinlikler"
+    "pastEvents": "Geçmiş Etkinlikler",
+    "noEventsFound": "Etkinlik bulunamadı"
   },
   "about": {
     "label": "Hakkımızda",

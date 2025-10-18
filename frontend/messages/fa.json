@@ -557,7 +557,8 @@
     "upcomingEvents": "رویدادهای آینده",
     "featuredEvents": "رویدادهای ویژه",
     "popularEvents": "رویدادهای محبوب",
-    "pastEvents": "رویدادهای گذشته"
+    "pastEvents": "رویدادهای گذشته",
+    "noEventsFound": "رویدادی یافت نشد"
   },
   "about": {
     "label": "درباره ما",
