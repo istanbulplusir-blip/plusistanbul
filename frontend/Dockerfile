@@ -4,6 +4,14 @@ FROM node:20.18.0-alpine AS builder
 # Set working directory
 WORKDIR /app
 
+# Set build-time environment variables for Next.js
+ARG NEXT_PUBLIC_API_URL=https://peykantravelistanbul.com/api/v1
+ARG NEXT_PUBLIC_SITE_URL=https://peykantravelistanbul.com
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID=728579658716-t2emm074v3kj3scv8mtrqhl55e7rnhdq.apps.googleusercontent.com
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=$NEXT_PUBLIC_GOOGLE_CLIENT_ID
+
 # Copy package files
 COPY package*.json ./
 
