@@ -52,7 +52,7 @@ export interface Banner {
   position: 'top' | 'middle' | 'bottom' | 'sidebar' | 'popup'
   image: string
   mobile_image?: string
-  image_url: string
+  image_url_field: string  // Changed from image_url to match serializer
   mobile_image_url?: string
   link_url?: string
   link_target: '_self' | '_blank'

@@ -749,11 +749,11 @@ class AboutSectionAdmin(TranslatableAdmin):
     list_filter = ['is_active', 'created_at']
     list_editable = ['is_active']
     search_fields = ['translations__title', 'translations__subtitle']
-    readonly_fields = ['id', 'slug', 'created_at', 'updated_at']
+    readonly_fields = ['id', 'created_at', 'updated_at']
 
     fieldsets = (
         (_('Basic Information'), {
-            'fields': ('slug', 'is_active')
+            'fields': ('is_active',)
         }),
         (_('Content'), {
             'fields': ('title', 'subtitle', 'description', 'button_text', 'button_url'),
@@ -766,10 +766,6 @@ class AboutSectionAdmin(TranslatableAdmin):
             'classes': ('collapse',),
         }),
     )
-
-    def get_prepopulated_fields(self, request, obj=None):
-        """Auto-populate slug field."""
-        return {'slug': ('title',)}
 
 
 @admin.register(AboutStatistic)
@@ -837,7 +833,7 @@ class CTASectionAdmin(TranslatableAdmin):
 
     fieldsets = (
         (_('Basic Information'), {
-            'fields': ('slug', 'is_active')
+            'fields': ('is_active',)
         }),
         (_('Content'), {
             'fields': ('title', 'subtitle', 'description'),
@@ -846,10 +842,6 @@ class CTASectionAdmin(TranslatableAdmin):
             'fields': ('background_image',),
         }),
     )
-
-    def get_prepopulated_fields(self, request, obj=None):
-        """Auto-populate slug field."""
-        return {'slug': ('title',)}
 
 
 @admin.register(CTAButton)
@@ -866,16 +858,12 @@ class CTAButtonAdmin(TranslatableAdmin):
 
     fieldsets = (
         (_('Basic Information'), {
-            'fields': ('slug', 'cta_section', 'order', 'is_active')
+            'fields': ('cta_section', 'order', 'is_active')
         }),
         (_('Content'), {
             'fields': ('text', 'url', 'button_type'),
         }),
     )
-
-    def get_prepopulated_fields(self, request, obj=None):
-        """Auto-populate slug field."""
-        return {'slug': ('text',)}
 
 
 @admin.register(CTAFeature)
@@ -892,16 +880,12 @@ class CTAFeatureAdmin(TranslatableAdmin):
 
     fieldsets = (
         (_('Basic Information'), {
-            'fields': ('slug', 'cta_section', 'order', 'is_active')
+            'fields': ('cta_section', 'order', 'is_active')
         }),
         (_('Content'), {
             'fields': ('text', 'icon'),
         }),
     )
-
-    def get_prepopulated_fields(self, request, obj=None):
-        """Auto-populate slug field."""
-        return {'slug': ('text',)}
 
 
 @admin.register(Footer)
@@ -917,7 +901,7 @@ class FooterAdmin(TranslatableAdmin):
 
     fieldsets = (
         (_('Basic Information'), {
-            'fields': ('slug', 'is_active')
+            'fields': ('is_active',)
         }),
         (_('Company Information'), {
             'fields': ('company_name', 'company_description', 'logo'),
@@ -935,10 +919,6 @@ class FooterAdmin(TranslatableAdmin):
             'fields': ('copyright_text', 'trusted_by_text'),
         }),
     )
-
-    def get_prepopulated_fields(self, request, obj=None):
-        """Auto-populate slug field."""
-        return {'slug': ('company_name',)}
 
     def has_add_permission(self, request):
         """Prevent adding multiple instances."""
@@ -970,16 +950,12 @@ class FooterLinkAdmin(TranslatableAdmin):
 
     fieldsets = (
         (_('Basic Information'), {
-            'fields': ('slug', 'footer', 'order', 'is_active')
+            'fields': ('footer', 'order', 'is_active')
         }),
         (_('Link Details'), {
             'fields': ('label', 'url', 'link_type'),
         }),
     )
-
-    def get_prepopulated_fields(self, request, obj=None):
-        """Auto-populate slug field."""
-        return {'slug': ('label',)}
 
 
 @admin.register(TransferBookingSection)
@@ -995,7 +971,7 @@ class TransferBookingSectionAdmin(TranslatableAdmin):
 
     fieldsets = (
         (_('Basic Information'), {
-            'fields': ('slug', 'is_active')
+            'fields': ('is_active',)
         }),
         (_('Content'), {
             'fields': ('title', 'subtitle', 'description', 'button_text', 'button_url'),
@@ -1011,10 +987,6 @@ class TransferBookingSectionAdmin(TranslatableAdmin):
         }),
     )
 
-    def get_prepopulated_fields(self, request, obj=None):
-        """Auto-populate slug field."""
-        return {'slug': ('title',)}
-
 
 @admin.register(FAQSettings)
 class FAQSettingsAdmin(TranslatableAdmin):
@@ -1029,7 +1001,7 @@ class FAQSettingsAdmin(TranslatableAdmin):
 
     fieldsets = (
         (_('Basic Information'), {
-            'fields': ('slug', 'is_active')
+            'fields': ('is_active',)
         }),
         (_('Content'), {
             'fields': ('title', 'subtitle'),
@@ -1038,10 +1010,6 @@ class FAQSettingsAdmin(TranslatableAdmin):
             'fields': ('items_per_page', 'show_categories', 'show_search'),
         }),
     )
-
-    def get_prepopulated_fields(self, request, obj=None):
-        """Auto-populate slug field."""
-        return {'slug': ('title',)}
 
     def has_add_permission(self, request):
         """Prevent adding multiple instances."""
