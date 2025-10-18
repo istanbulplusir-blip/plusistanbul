@@ -1,0 +1,527 @@
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@latest/dist/font-face.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Leaflet CSS */
+@import 'leaflet/dist/leaflet.css';
+
+/* Custom map styles */
+.leaflet-container {
+  font-family: inherit;
+  direction: rtl;
+}
+
+.leaflet-popup-content {
+  margin: 8px 12px;
+  line-height: 1.4;
+  direction: rtl;
+}
+
+.leaflet-popup-content h3 {
+  margin: 0 0 4px 0;
+  font-weight: 600;
+}
+
+.leaflet-popup-content p {
+  margin: 2px 0;
+  font-size: 0.875rem;
+}
+
+/* Custom marker styles */
+.custom-marker {
+  background: #3b82f6;
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.custom-marker.selected {
+  background: #10b981;
+  width: 24px;
+  height: 24px;
+}
+
+/* Map container styles */
+.map-container {
+  height: 400px;
+  width: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+/* Location picker styles */
+.location-picker-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.location-picker-content {
+  background: white;
+  border-radius: 0.75rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Search input styles */
+.location-search-input {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Location list styles */
+.location-list {
+  max-height: 200px;
+  overflow-y: auto;
+  direction: rtl;
+}
+
+.location-item {
+  direction: rtl;
+  text-align: right;
+  padding: 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.location-item:hover {
+  background-color: #f9fafb;
+}
+
+.location-item:last-child {
+  border-bottom: none;
+}
+
+/* Smooth transitions for theme switching */
+@layer base {
+  * {
+    @apply transition-colors duration-200;
+  }
+  
+  html {
+    @apply transition-all duration-300;
+  }
+  
+  body {
+    @apply transition-all duration-300;
+  }
+}
+
+/* RTL/LTR Support */
+@layer utilities {
+  /* RTL spacing utilities */
+  .rtl\:space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
+  }
+  
+  .rtl\:gap-2 {
+    gap: 0.5rem;
+  }
+  
+  .rtl\:gap-3 {
+    gap: 0.75rem;
+  }
+  
+  .rtl\:gap-4 {
+    gap: 1rem;
+  }
+  
+  .rtl\:gap-6 {
+    gap: 1.5rem;
+  }
+  
+  .rtl\:gap-8 {
+    gap: 2rem;
+  }
+  
+  /* RTL text alignment */
+  .rtl\:text-right {
+    text-align: right;
+  }
+  
+  .rtl\:text-left {
+    text-align: left;
+  }
+  
+  /* RTL flex direction */
+  .rtl\:flex-row-reverse {
+    flex-direction: row-reverse;
+  }
+  
+  /* RTL margin and padding */
+  .rtl\:mr-4 {
+    margin-right: 1rem;
+  }
+  
+  .rtl\:ml-4 {
+    margin-left: 1rem;
+  }
+  
+  .rtl\:pr-0 {
+    padding-right: 0;
+  }
+  
+  .rtl\:pl-0 {
+    padding-left: 0;
+  }
+  
+  .rtl\:pl-32 {
+    padding-left: 8rem;
+  }
+  
+  .rtl\:pr-32 {
+    padding-right: 8rem;
+  }
+  
+  .rtl\:pl-40 {
+    padding-left: 10rem;
+  }
+  
+  .rtl\:pr-40 {
+    padding-right: 10rem;
+  }
+  
+  /* RTL positioning */
+  .rtl\:left-0 {
+    left: 0;
+  }
+  
+  .rtl\:right-0 {
+    right: 0;
+  }
+}
+
+/* Design Consistency */
+@layer components {
+  /* Consistent button styles */
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 shadow-sm hover:shadow-md hover:scale-105;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-blue-600 px-8 py-3 rounded-lg font-semibold transition-all duration-300 shadow-sm hover:shadow-md hover:scale-105 border border-blue-600;
+  }
+  
+  /* Consistent card styles */
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 dark:border-gray-700;
+  }
+  
+  /* Consistent section spacing */
+  .section-padding {
+    @apply py-12 sm:py-16 lg:py-20;
+  }
+  
+  .section-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Consistent typography */
+  .heading-1 {
+    @apply text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight;
+  }
+
+  .heading-2 {
+    @apply text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-gray-100 leading-tight;
+  }
+
+  .heading-3 {
+    @apply text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-gray-100 leading-tight;
+  }
+
+  .heading-4 {
+    @apply text-xl lg:text-2xl font-medium text-gray-900 dark:text-gray-100 leading-tight;
+  }
+
+  .heading-5 {
+    @apply text-lg lg:text-xl font-medium text-gray-900 dark:text-gray-100;
+  }
+  
+  .body-text {
+    @apply text-lg text-gray-600 dark:text-gray-300 leading-relaxed;
+  }
+  
+  .caption-text {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+  }
+  
+  /* Consistent colors */
+  .text-primary {
+    @apply text-blue-600 dark:text-blue-400;
+  }
+  
+  .bg-primary {
+    @apply bg-blue-600 dark:bg-blue-500;
+  }
+  
+  .border-primary {
+    @apply border-blue-600 dark:border-blue-400;
+  }
+  
+  /* Consistent animations */
+  .hover-scale {
+    @apply transition-all duration-300 hover:scale-105;
+  }
+  
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-md;
+  }
+  
+  /* Consistent shadows */
+  .shadow-soft {
+    @apply shadow-sm;
+  }
+  
+  .shadow-medium {
+    @apply shadow-md;
+  }
+  
+  .shadow-strong {
+    @apply shadow-md;
+  }
+}
+
+/* Dark mode improvements */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply antialiased;
+  }
+  
+  /* Remove focus outlines from all clickable elements */
+  button:focus,
+  a:focus,
+  input:focus,
+  select:focus,
+  textarea:focus,
+  [role="button"]:focus {
+    outline: none;
+    box-shadow: none;
+  }
+  
+  /* Better selection */
+  ::selection {
+    @apply bg-blue-600 text-white;
+  }
+  
+  ::-moz-selection {
+    @apply bg-blue-600 text-white;
+  }
+}
+
+/* Custom scrollbar */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(59 130 246) rgb(229 231 235);
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-gray-200 dark:bg-gray-700;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-blue-600 rounded-full;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-blue-700;
+  }
+}
+
+/* CSS Animations */
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 0.6s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* RTL specific improvements */
+[dir="rtl"] {
+  /* RTL specific font adjustments */
+  font-family: 'Vazirmatn VF', 'Vazir VF', 'Vazir', 'Tahoma', sans-serif;
+
+  /* RTL text alignment */
+  text-align: right;
+
+  /* RTL direction for flexbox */
+  direction: rtl;
+
+  /* RTL specific spacing */
+  --tw-space-x-reverse: 1;
+}
+
+[dir="ltr"] {
+  /* LTR specific font adjustments */
+  font-family: 'Inter', 'Arial', sans-serif;
+  
+  /* LTR text alignment */
+  text-align: left;
+  
+  /* LTR direction for flexbox */
+  direction: ltr;
+  
+  /* LTR specific spacing */
+  --tw-space-x-reverse: 0;
+}
+
+/* RTL utility classes */
+.rtl\:space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+.rtl\:text-right {
+  text-align: right;
+}
+
+.rtl\:text-left {
+  text-align: left;
+}
+
+.rtl\:flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
+.rtl\:justify-end {
+  justify-content: flex-end;
+}
+
+.rtl\:justify-start {
+  justify-content: flex-start;
+}
+
+.rtl\:ml-auto {
+  margin-left: auto;
+}
+
+.rtl\:mr-auto {
+  margin-right: auto;
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  .section-padding {
+    @apply py-12;
+  }
+  
+  .heading-1 {
+    @apply text-3xl lg:text-4xl;
+  }
+  
+  .heading-2 {
+    @apply text-2xl lg:text-3xl;
+  }
+  
+  .heading-3 {
+    @apply text-xl lg:text-2xl;
+  }
+  
+  .body-text {
+    @apply text-base;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break {
+    page-break-before: always;
+  }
+} 
+
+/* Custom shadow utilities for modern components */
+@layer utilities {
+  .shadow-2xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .shadow-3xl {
+    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.35);
+  }
+  
+  .shadow-glass {
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  
+  .shadow-glass-dark {
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+} 
