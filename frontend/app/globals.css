@@ -11,6 +11,40 @@
 .leaflet-container {
   font-family: inherit;
   direction: rtl;
+  /* Fix for iOS touch issues */
+  touch-action: pan-y pinch-zoom;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Disable zoom controls on mobile */
+@media (max-width: 768px) {
+  .leaflet-control-zoom {
+    display: none !important;
+  }
+}
+
+/* Improve touch target size for iOS */
+.leaflet-container a,
+.leaflet-container button {
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+/* Fix iOS double-tap zoom issue */
+.leaflet-container * {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Improve marker clickability on iOS */
+.leaflet-marker-icon {
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .leaflet-popup-content {
@@ -52,6 +86,24 @@
   border-radius: 0.5rem;
   overflow: hidden;
   border: 1px solid #e5e7eb;
+  /* iOS touch improvements */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y pinch-zoom;
+}
+
+/* Prevent iOS zoom on double tap for map */
+.leaflet-container,
+.leaflet-container * {
+  touch-action: pan-y pinch-zoom !important;
+}
+
+/* Fix iOS Safari zoom controls flickering */
+.leaflet-control-container {
+  pointer-events: none;
+}
+
+.leaflet-control-container>* {
+  pointer-events: auto;
 }
 
 /* Location picker styles */
@@ -113,11 +165,11 @@
   * {
     @apply transition-colors duration-200;
   }
-  
+
   html {
     @apply transition-all duration-300;
   }
-  
+
   body {
     @apply transition-all duration-300;
   }
@@ -125,83 +177,84 @@
 
 /* RTL/LTR Support */
 @layer utilities {
+
   /* RTL spacing utilities */
-  .rtl\:space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+  .rtl\:space-x-reverse> :not([hidden])~ :not([hidden]) {
     --tw-space-x-reverse: 1;
   }
-  
+
   .rtl\:gap-2 {
     gap: 0.5rem;
   }
-  
+
   .rtl\:gap-3 {
     gap: 0.75rem;
   }
-  
+
   .rtl\:gap-4 {
     gap: 1rem;
   }
-  
+
   .rtl\:gap-6 {
     gap: 1.5rem;
   }
-  
+
   .rtl\:gap-8 {
     gap: 2rem;
   }
-  
+
   /* RTL text alignment */
   .rtl\:text-right {
     text-align: right;
   }
-  
+
   .rtl\:text-left {
     text-align: left;
   }
-  
+
   /* RTL flex direction */
   .rtl\:flex-row-reverse {
     flex-direction: row-reverse;
   }
-  
+
   /* RTL margin and padding */
   .rtl\:mr-4 {
     margin-right: 1rem;
   }
-  
+
   .rtl\:ml-4 {
     margin-left: 1rem;
   }
-  
+
   .rtl\:pr-0 {
     padding-right: 0;
   }
-  
+
   .rtl\:pl-0 {
     padding-left: 0;
   }
-  
+
   .rtl\:pl-32 {
     padding-left: 8rem;
   }
-  
+
   .rtl\:pr-32 {
     padding-right: 8rem;
   }
-  
+
   .rtl\:pl-40 {
     padding-left: 10rem;
   }
-  
+
   .rtl\:pr-40 {
     padding-right: 10rem;
   }
-  
+
   /* RTL positioning */
   .rtl\:left-0 {
     left: 0;
   }
-  
+
   .rtl\:right-0 {
     right: 0;
   }
@@ -209,29 +262,30 @@
 
 /* Design Consistency */
 @layer components {
+
   /* Consistent button styles */
   .btn-primary {
     @apply bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 shadow-sm hover:shadow-md hover:scale-105;
   }
-  
+
   .btn-secondary {
     @apply bg-white hover:bg-gray-50 text-blue-600 px-8 py-3 rounded-lg font-semibold transition-all duration-300 shadow-sm hover:shadow-md hover:scale-105 border border-blue-600;
   }
-  
+
   /* Consistent card styles */
   .card {
     @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 dark:border-gray-700;
   }
-  
+
   /* Consistent section spacing */
   .section-padding {
     @apply py-12 sm:py-16 lg:py-20;
   }
-  
+
   .section-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
-  
+
   /* Consistent typography */
   .heading-1 {
     @apply text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight;
@@ -252,46 +306,46 @@
   .heading-5 {
     @apply text-lg lg:text-xl font-medium text-gray-900 dark:text-gray-100;
   }
-  
+
   .body-text {
     @apply text-lg text-gray-600 dark:text-gray-300 leading-relaxed;
   }
-  
+
   .caption-text {
     @apply text-sm text-gray-500 dark:text-gray-400;
   }
-  
+
   /* Consistent colors */
   .text-primary {
     @apply text-blue-600 dark:text-blue-400;
   }
-  
+
   .bg-primary {
     @apply bg-blue-600 dark:bg-blue-500;
   }
-  
+
   .border-primary {
     @apply border-blue-600 dark:border-blue-400;
   }
-  
+
   /* Consistent animations */
   .hover-scale {
     @apply transition-all duration-300 hover:scale-105;
   }
-  
+
   .hover-lift {
     @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-md;
   }
-  
+
   /* Consistent shadows */
   .shadow-soft {
     @apply shadow-sm;
   }
-  
+
   .shadow-medium {
     @apply shadow-md;
   }
-  
+
   .shadow-strong {
     @apply shadow-md;
   }
@@ -302,11 +356,11 @@
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     @apply antialiased;
   }
-  
+
   /* Remove focus outlines from all clickable elements */
   button:focus,
   a:focus,
@@ -317,12 +371,12 @@
     outline: none;
     box-shadow: none;
   }
-  
+
   /* Better selection */
   ::selection {
     @apply bg-blue-600 text-white;
   }
-  
+
   ::-moz-selection {
     @apply bg-blue-600 text-white;
   }
@@ -334,19 +388,19 @@
     scrollbar-width: thin;
     scrollbar-color: rgb(59 130 246) rgb(229 231 235);
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-track {
     @apply bg-gray-200 dark:bg-gray-700;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
     @apply bg-blue-600 rounded-full;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     @apply bg-blue-700;
   }
@@ -358,6 +412,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -369,6 +424,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -423,19 +479,19 @@
 [dir="ltr"] {
   /* LTR specific font adjustments */
   font-family: 'Inter', 'Arial', sans-serif;
-  
+
   /* LTR text alignment */
   text-align: left;
-  
+
   /* LTR direction for flexbox */
   direction: ltr;
-  
+
   /* LTR specific spacing */
   --tw-space-x-reverse: 0;
 }
 
 /* RTL utility classes */
-.rtl\:space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+.rtl\:space-x-reverse> :not([hidden])~ :not([hidden]) {
   --tw-space-x-reverse: 1;
 }
 
@@ -472,19 +528,19 @@
   .section-padding {
     @apply py-12;
   }
-  
+
   .heading-1 {
     @apply text-3xl lg:text-4xl;
   }
-  
+
   .heading-2 {
     @apply text-2xl lg:text-3xl;
   }
-  
+
   .heading-3 {
     @apply text-xl lg:text-2xl;
   }
-  
+
   .body-text {
     @apply text-base;
   }
@@ -495,33 +551,120 @@
   .no-print {
     display: none !important;
   }
-  
+
   .print-break {
     page-break-before: always;
   }
-} 
+}
+
+/* iOS Safari Date Picker Fixes */
+@supports (-webkit-touch-callout: none) {
+
+  /* iOS Safari specific styles */
+  input[type="date"] {
+    -webkit-appearance: menulist-button !important;
+    appearance: menulist-button !important;
+    background: white !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.5rem !important;
+    padding: 12px 40px 12px 12px !important;
+    font-size: 16px !important;
+    /* Prevent zoom on iOS */
+    min-height: 48px !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
+
+  input[type="date"]::-webkit-date-and-time-value {
+    text-align: left;
+    direction: ltr;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 1 !important;
+    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e") no-repeat center !important;
+    background-size: 16px 16px !important;
+    width: 20px !important;
+    height: 20px !important;
+    cursor: pointer !important;
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: #6b7280 !important;
+  }
+
+  /* Dark mode support for date picker */
+  .dark input[type="date"] {
+    background: #374151 !important;
+    border-color: #6b7280 !important;
+    color: #f9fafb !important;
+  }
+
+  .dark input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) !important;
+  }
+}
+
+/* Fallback for non-iOS browsers */
+@supports not (-webkit-touch-callout: none) {
+  input[type="date"] {
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+    appearance: none;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e") no-repeat center;
+    background-size: 16px 16px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+}
+
+/* Enhanced mobile touch targets */
+@media (max-width: 768px) {
+  input[type="date"] {
+    font-size: 16px !important;
+    /* Prevent zoom on iOS */
+    min-height: 48px !important;
+    touch-action: manipulation !important;
+  }
+
+  /* Improve date picker button touch target on mobile */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    width: 44px !important;
+    height: 44px !important;
+    padding: 12px !important;
+    margin-right: -12px !important;
+  }
+}
 
 /* Custom shadow utilities for modern components */
 @layer utilities {
   .shadow-2xl {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
-  
+
   .shadow-3xl {
     box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.35);
   }
-  
+
   .shadow-glass {
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     border: 1px solid rgba(255, 255, 255, 0.18);
   }
-  
+
   .shadow-glass-dark {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     border: 1px solid rgba(255, 255, 255, 0.18);
   }
-} 
+}

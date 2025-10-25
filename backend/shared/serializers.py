@@ -14,18 +14,28 @@ class ImageFieldSerializerMixin:
     
     def get_default_image_url(self, model_type='product'):
         """Get default image URL based on model type."""
+        from django.conf import settings
+        
+        # Build base URL
+        if settings.DEBUG:
+            base_url = "http://localhost:8000"
+        else:
+            domain = settings.ALLOWED_HOSTS[0] if settings.ALLOWED_HOSTS else 'peykantravelistanbul.com'
+            domain = domain.replace('http://', '').replace('https://', '').strip('/')
+            base_url = f"https://{domain}"
+        
         defaults = {
-            'product': '/media/defaults/no-image.png',
-            'tour': '/media/defaults/tour-default.png',
-            'event': '/media/defaults/event-default.png',
-            'venue': '/media/defaults/venue-default.png',
-            'artist': '/media/defaults/artist-default.png',
-            'transfer': '/media/defaults/transfer-default.png',
-            'about': '/media/defaults/no-image.png',
-            'cta': '/media/defaults/no-image.png',
-            'logo': '/media/defaults/no-image.png',
-            'hero': '/media/defaults/no-image.png',
-            'banner': '/media/defaults/no-image.png',
+            'product': f'{base_url}/media/defaults/no-image.png',
+            'tour': f'{base_url}/media/defaults/tour-default.png',
+            'event': f'{base_url}/media/defaults/event-default.png',
+            'venue': f'{base_url}/media/defaults/venue-default.png',
+            'artist': f'{base_url}/media/defaults/artist-default.png',
+            'transfer': f'{base_url}/media/defaults/transfer-default.png',
+            'about': f'{base_url}/media/defaults/no-image.png',
+            'cta': f'{base_url}/media/defaults/no-image.png',
+            'logo': f'{base_url}/media/defaults/no-image.png',
+            'hero': f'{base_url}/media/defaults/no-image.png',
+            'banner': f'{base_url}/media/defaults/no-image.png',
         }
         return defaults.get(model_type, defaults['product'])
     
@@ -519,12 +529,15 @@ class HeroSliderSerializer(serializers.ModelSerializer, ImageFieldSerializerMixi
         """Get video file URL."""
         if obj.video_file:
             try:
+                from .utils import get_image_url
                 request = self.context.get('request')
-                if request:
-                    return request.build_absolute_uri(obj.video_file.url)
-                return obj.video_file.url
-            except:
+                return get_image_url(obj.video_file, request)
+            except Exception as e:
+                print(f"Error getting video URL: {e}")
                 return None
+        elif obj.video_url:
+            # Return external video URL as is
+            return obj.video_url
         return None
 
     def get_video_thumbnail_url(self, obj):

@@ -15,8 +15,8 @@ ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=$NEXT_PUBLIC_GOOGLE_CLIENT_ID
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies with clean cache
-RUN npm ci --only=production --no-audit --no-fund
+# Install ALL dependencies (including devDependencies) for build
+RUN npm ci --no-audit --no-fund
 
 # Copy source code
 COPY . .
@@ -45,6 +45,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/package*.json ./
 COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./
 # Copy i18n directory instead of i18n.ts
 COPY --from=builder --chown=nextjs:nodejs /app/i18n ./i18n
+# Copy lib directory for custom image loader
+COPY --from=builder --chown=nextjs:nodejs /app/lib ./lib
 
 # Install only production dependencies
 RUN npm ci --only=production --no-audit --no-fund && npm cache clean --force

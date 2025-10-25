@@ -8,11 +8,13 @@ import { tokenService } from '../services/tokenService';
 // Create axios instance with improved configuration
 const apiClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1',
-  timeout: 5000, // Reduced timeout to 5 seconds for better responsiveness
+  timeout: 10000, // 10 seconds timeout
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // Enable cookies for CORS
+  // Only use withCredentials in development (localhost)
+  // In production with HTTPS and same domain, it's not needed
+  withCredentials: process.env.NODE_ENV === 'development',
 });
 
 // Retry configuration
@@ -32,16 +34,16 @@ apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Get token from token service
     const authHeader = tokenService.getAuthHeader();
-    
+
     if ('Authorization' in authHeader && config.headers) {
       config.headers.Authorization = authHeader.Authorization;
     }
-    
+
     // Add Accept-Language header based on current locale
     if (config.headers) {
       // Get current language from URL or localStorage
       let currentLanguage = 'fa'; // Default to Persian
-      
+
       if (typeof window !== 'undefined') {
         // Try to get from URL first
         const pathname = window.location.pathname;
@@ -56,15 +58,15 @@ apiClient.interceptors.request.use(
           }
         }
       }
-      
+
       config.headers['Accept-Language'] = currentLanguage;
     }
-    
+
     // Add retry count to config using a custom property
     if (!(config as InternalAxiosRequestConfig & { retryCount?: number }).retryCount) {
       (config as InternalAxiosRequestConfig & { retryCount?: number }).retryCount = 0;
     }
-    
+
     return config;
   },
   (error) => {
@@ -80,54 +82,54 @@ apiClient.interceptors.response.use(
   },
   async (error) => {
     console.error('API Response error:', error);
-    
+
     // Handle authentication errors
     if (error.response?.status === 401) {
       // Try to refresh token
       const refreshSuccess = await tokenService.refreshToken();
-      
+
       if (refreshSuccess) {
         // Retry the original request with new token
         const originalRequest = error.config;
         const authHeader = tokenService.getAuthHeader();
-        
+
         if ('Authorization' in authHeader) {
           originalRequest.headers.Authorization = authHeader.Authorization;
         }
-        
+
         return apiClient(originalRequest);
       } else {
         // Refresh failed, clear auth and redirect to login
         tokenService.clearTokens();
-        
+
         // Redirect to login if in browser
         if (typeof window !== 'undefined') {
           window.location.href = '/login';
         }
       }
     }
-    
+
     // Handle network errors and timeouts with retry logic
     if (error.code === 'ECONNABORTED' || !error.response) {
       const config = error.config;
-      
+
       // Check if we can retry this request
       if (config) {
         const configWithRetry = config as InternalAxiosRequestConfig & { retryCount?: number };
         const retryCount = configWithRetry.retryCount || 0;
         if (retryCount < MAX_RETRIES) {
           configWithRetry.retryCount = retryCount + 1;
-          
+
           console.log(`Retrying request (${configWithRetry.retryCount}/${MAX_RETRIES})...`);
-          
+
           // Wait before retrying
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (configWithRetry.retryCount || 1)));
-          
+
           // Retry the request
           return apiClient(config);
         }
       }
-      
+
       // No more retries, provide user-friendly error
       if (error.code === 'ECONNABORTED') {
         console.error('Request timeout after retries');
@@ -137,7 +139,7 @@ apiClient.interceptors.response.use(
         error.message = 'Network error: Unable to connect to the server. Please check your connection and try again.';
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -145,119 +147,119 @@ apiClient.interceptors.response.use(
 // Enhanced request method with deduplication
 const enhancedApiClient = {
   ...apiClient,
-  
+
   // Override get method to add deduplication
   async get(url: string, config?: AxiosRequestConfig) {
     const requestKey = createRequestKey({ ...config, method: 'GET', url } as InternalAxiosRequestConfig);
-    
+
     // Check if there's already a pending request
     if (pendingRequests.has(requestKey)) {
       return pendingRequests.get(requestKey);
     }
-    
+
     // Create new request
     const requestPromise = apiClient.get(url, config);
-    
+
     // Store the request promise
     pendingRequests.set(requestKey, requestPromise);
-    
+
     // Clean up after request completes
     requestPromise.finally(() => {
       pendingRequests.delete(requestKey);
     });
-    
+
     return requestPromise;
   },
-  
+
   // Override post method to add deduplication
   async post(url: string, data?: unknown, config?: AxiosRequestConfig) {
     const requestKey = createRequestKey({ ...config, method: 'POST', url, data } as InternalAxiosRequestConfig);
-    
+
     // Check if there's already a pending request
     if (pendingRequests.has(requestKey)) {
       return pendingRequests.get(requestKey);
     }
-    
+
     // Create new request
     const requestPromise = apiClient.post(url, data, config);
-    
+
     // Store the request promise
     pendingRequests.set(requestKey, requestPromise);
-    
+
     // Clean up after request completes
     requestPromise.finally(() => {
       pendingRequests.delete(requestKey);
     });
-    
+
     return requestPromise;
   },
-  
+
   // Override put method to add deduplication
   async put(url: string, data?: unknown, config?: AxiosRequestConfig) {
     const requestKey = createRequestKey({ ...config, method: 'PUT', url, data } as InternalAxiosRequestConfig);
-    
+
     // Check if there's already a pending request
     if (pendingRequests.has(requestKey)) {
       return pendingRequests.get(requestKey);
     }
-    
+
     // Create new request
     const requestPromise = apiClient.put(url, data, config);
-    
+
     // Store the request promise
     pendingRequests.set(requestKey, requestPromise);
-    
+
     // Clean up after request completes
     requestPromise.finally(() => {
       pendingRequests.delete(requestKey);
     });
-    
+
     return requestPromise;
   },
-  
+
   // Override delete method to add deduplication
   async delete(url: string, config?: AxiosRequestConfig) {
     const requestKey = createRequestKey({ ...config, method: 'DELETE', url } as InternalAxiosRequestConfig);
-    
+
     // Check if there's already a pending request
     if (pendingRequests.has(requestKey)) {
       return pendingRequests.get(requestKey);
     }
-    
+
     // Create new request
     const requestPromise = apiClient.delete(url, config);
-    
+
     // Store the request promise
     pendingRequests.set(requestKey, requestPromise);
-    
+
     // Clean up after request completes
     requestPromise.finally(() => {
       pendingRequests.delete(requestKey);
     });
-    
+
     return requestPromise;
   },
-  
+
   // Override patch method to add deduplication
   async patch(url: string, data?: unknown, config?: AxiosRequestConfig) {
     const requestKey = createRequestKey({ ...config, method: 'PATCH', url, data } as InternalAxiosRequestConfig);
-    
+
     // Check if there's already a pending request
     if (pendingRequests.has(requestKey)) {
       return pendingRequests.get(requestKey);
     }
-    
+
     // Create new request
     const requestPromise = apiClient.patch(url, data, config);
-    
+
     // Store the request promise
     pendingRequests.set(requestKey, requestPromise);
-    
+
     // Clean up after request completes
     requestPromise.finally(() => {
       pendingRequests.delete(requestKey);
     });
-    
+
     return requestPromise;
   }
 };

@@ -1313,6 +1313,18 @@ class NavigationMenu(BaseTranslatableModel):
         verbose_name_plural = _('Navigation Menu Items')
         ordering = ['order']
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            # Generate slug from label field
+            from django.utils.text import slugify
+            label = getattr(self, 'label', None)
+            if label:
+                self.slug = slugify(label, allow_unicode=True)
+            else:
+                # If no label yet, use URL as fallback
+                self.slug = slugify(self.url.strip('/').replace('/', '-'), allow_unicode=True)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.label
 

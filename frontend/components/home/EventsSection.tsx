@@ -31,11 +31,11 @@ export default function EventsSection() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isRTL, setIsRTL] = useState(false)
-  
+
   // Touch interaction state for mobile
   const [touchedCard, setTouchedCard] = useState<string | null>(null)
   const [touchTimeout, setTouchTimeout] = useState<NodeJS.Timeout | null>(null)
-  
+
   // Slider state
   const [currentSlide, setCurrentSlide] = useState(0)
   const [itemsPerSlide, setItemsPerSlide] = useState(3)
@@ -95,7 +95,7 @@ export default function EventsSection() {
   }, [])
 
   const today = useMemo(() => new Date(new Date().toDateString()), [])
-  
+
   const getNextPerformanceDetails = useCallback((ev: Event): { date: string; start_time: string } | null => {
     if (Array.isArray(ev.performances) && ev.performances.length > 0) {
       const sorted = [...ev.performances].sort((a: { date: string; start_time?: string }, b: { date: string }) => new Date(a?.date).getTime() - new Date(b?.date).getTime())
@@ -135,32 +135,32 @@ export default function EventsSection() {
   }, [categorizedEvents, events])
 
   const upcomingEvents = useMemo(() => {
-    return categorizedEvents.upcoming.length > 0 
-      ? categorizedEvents.upcoming 
+    return categorizedEvents.upcoming.length > 0
+      ? categorizedEvents.upcoming
       : events.filter((ev) => {
-          const nd = getNextPerformanceDate(ev)
-          return nd !== null && nd >= today
-        })
+        const nd = getNextPerformanceDate(ev)
+        return nd !== null && nd >= today
+      })
   }, [categorizedEvents.upcoming, events, today, getNextPerformanceDate])
 
   const pastEvents = useMemo(() => {
-    return categorizedEvents.past.length > 0 
-      ? categorizedEvents.past 
+    return categorizedEvents.past.length > 0
+      ? categorizedEvents.past
       : events.filter((ev) => {
-          const nd = getNextPerformanceDate(ev)
-          return nd !== null && nd < today
-        })
+        const nd = getNextPerformanceDate(ev)
+        return nd !== null && nd < today
+      })
   }, [categorizedEvents.past, events, today, getNextPerformanceDate])
 
   const featuredEvents = useMemo(() => {
-    return categorizedEvents.featured.length > 0 
-      ? categorizedEvents.featured 
+    return categorizedEvents.featured.length > 0
+      ? categorizedEvents.featured
       : events.filter((ev) => ev.is_featured)
   }, [categorizedEvents.featured, events])
 
   const popularEvents = useMemo(() => {
-    return categorizedEvents.popular.length > 0 
-      ? categorizedEvents.popular 
+    return categorizedEvents.popular.length > 0
+      ? categorizedEvents.popular
       : events.filter((ev) => ev.is_popular)
   }, [categorizedEvents.popular, events])
 
@@ -169,7 +169,7 @@ export default function EventsSection() {
     if (touchTimeout) {
       clearTimeout(touchTimeout)
     }
-    
+
     if (touchedCard === eventId) {
       // If already touched, toggle off
       setTouchedCard(null)
@@ -184,7 +184,7 @@ export default function EventsSection() {
     const timeout = setTimeout(() => {
       setTouchedCard(null)
     }, 2000) // Show for 2 seconds after touch
-    
+
     setTouchTimeout(timeout)
   }, [])
 
@@ -248,7 +248,7 @@ export default function EventsSection() {
     try {
       setIsLoading(true)
       setError(null)
-      
+
       // Try to fetch categorized events first
       try {
         const categorizedData = await getHomeEvents()
@@ -259,7 +259,7 @@ export default function EventsSection() {
           featured: (categorizedData.featured_events || []) as unknown as Event[],
           popular: (categorizedData.popular_events || []) as unknown as Event[]
         })
-        
+
         // Deduplicate events within each category and create allEvents
         const deduplicateEvents = (eventsArray: any[]) => { // eslint-disable-line @typescript-eslint/no-explicit-any
           if (!Array.isArray(eventsArray)) return []
@@ -297,11 +297,11 @@ export default function EventsSection() {
         setEvents(allEvents)
       } catch (categorizedError) {
         console.warn('Categorized events API not available, falling back to regular API:', categorizedError)
-        
+
         // Fallback to regular events API
         const res = await getEvents({ ordering: '-created_at', page_size: 6 })
         setEvents(Array.isArray(res?.results) ? res.results : [])
-        
+
         // Categorize manually for fallback
         const today = new Date(new Date().toDateString())
         const categorized = {
@@ -311,7 +311,7 @@ export default function EventsSection() {
           featured: [] as Event[],
           popular: [] as Event[]
         }
-        
+
         res?.results?.forEach(event => {
           const nextDate = getNextPerformanceDate(event)
           if (nextDate && nextDate >= today) {
@@ -319,12 +319,12 @@ export default function EventsSection() {
           } else if (nextDate && nextDate < today) {
             categorized.past.push(event)
           }
-          
+
           if (event.performances?.some((p: EventPerformance) => p.is_special)) {
             categorized.special.push(event)
           }
         })
-        
+
         setCategorizedEvents(categorized)
       }
     } catch (err) {
@@ -345,15 +345,15 @@ export default function EventsSection() {
 
   useEffect(() => {
     let isMounted = true
-    
+
     const loadData = async () => {
       if (isMounted) {
         await fetchEvents()
       }
     }
-    
+
     loadData()
-    
+
     return () => {
       isMounted = false
     }
@@ -361,8 +361,31 @@ export default function EventsSection() {
 
   // Helper function to get event image
   const getEventImage = useCallback((event: Event): string => {
+    // Use image field (relative path) which will be proxied by Next.js rewrites
     if (event.image) {
+      // If it's already a relative path starting with /media/, use it directly
+      if (event.image.startsWith('/media/')) {
+        return event.image
+      }
+      // If it's a full URL, extract the path
+      if (event.image.startsWith('http://') || event.image.startsWith('https://')) {
+        try {
+          const url = new URL(event.image)
+          return url.pathname
+        } catch {
+          return event.image
+        }
+      }
       return event.image
+    }
+    // Fallback to image_url if image is not available
+    if (event.image_url) {
+      try {
+        const url = new URL(event.image_url)
+        return url.pathname
+      } catch {
+        return event.image_url
+      }
     }
     return '/images/event-image.jpg'
   }, [])
@@ -406,9 +429,9 @@ export default function EventsSection() {
   const renderStars = useCallback((rating: number = 0) => (
     <div className="flex gap-0.5" role="img" aria-label={`Rating: ${rating} out of 5 stars`}>
       {Array.from({ length: 5 }, (_, i) => (
-        <FaStar 
-          key={i} 
-          className={`h-4 w-4 ${i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300 dark:text-gray-600'}`} 
+        <FaStar
+          key={i}
+          className={`h-4 w-4 ${i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300 dark:text-gray-600'}`}
           aria-hidden="true"
         />
       ))}
@@ -499,11 +522,11 @@ export default function EventsSection() {
                 <article className="group relative bg-white/20 dark:bg-gray-800/20 backdrop-blur-md rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-700 overflow-hidden border border-white/30 dark:border-gray-700/30 hover:scale-105 hover:shadow-secondary-500/25 cursor-pointer">
                   {/* Shimmer Effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out z-10" />
-                  
+
                   {/* Image Container */}
                   <div className="relative w-full h-64 sm:h-80 md:h-96 overflow-hidden">
                     <OptimizedImage
-                      src={specialEvent.image || '/images/event-hero.jpg'}
+                      src={getEventImage(specialEvent)}
                       alt={specialEvent.title}
                       fill
                       className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
@@ -511,10 +534,10 @@ export default function EventsSection() {
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 100vw, 100vw"
                       fallbackSrc="/images/event-image.jpg"
                     />
-                    
+
                     {/* Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-                    
+
                     {/* Top Badges */}
                     <div className="absolute top-4 left-4 z-20 flex flex-col space-y-2">
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-secondary-400 to-primary-500 text-white shadow-lg border border-secondary-300/50 animate-fade-in-down backdrop-blur-sm">
@@ -542,7 +565,7 @@ export default function EventsSection() {
                       <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-3 line-clamp-2 drop-shadow-lg">
                         {specialEvent.title}
                       </h3>
-                      
+
                       {/* Event Details */}
                       <div className="flex flex-wrap items-center gap-4 text-sm sm:text-base mb-4">
                         {(() => {
@@ -555,30 +578,29 @@ export default function EventsSection() {
                             </div>
                           ) : null
                         })()}
-                        
-                                                 {/* Price */}
-                         <div className="inline-flex items-center px-3 py-1 rounded-lg bg-white/20 backdrop-blur-xl border border-white/30 text-white font-bold">
-                           💰 {formatPrice(getEventMinPrice(specialEvent), 'USD')} 
-                           <span className="ml-2 text-sm font-medium opacity-80">{tEvents('fromPrice')}</span>
-                         </div>
+
+                        {/* Price */}
+                        <div className="inline-flex items-center px-3 py-1 rounded-lg bg-white/20 backdrop-blur-xl border border-white/30 text-white font-bold">
+                          💰 {formatPrice(getEventMinPrice(specialEvent), 'USD')}
+                          <span className="ml-2 text-sm font-medium opacity-80">{tEvents('fromPrice')}</span>
+                        </div>
                       </div>
 
                       {/* Capacity Info */}
                       {specialEvent.capacity_overview && specialEvent.capacity_overview.total_capacity > 0 && (
                         <div className="space-y-2">
                           <div className="text-sm text-white/90">
-                            🎫 {specialEvent.capacity_overview.available_capacity > 0 ? 
-                              `${tEvents('available') || 'Available'}: ${specialEvent.capacity_overview.available_capacity} / ${specialEvent.capacity_overview.total_capacity}` : 
+                            🎫 {specialEvent.capacity_overview.available_capacity > 0 ?
+                              `${tEvents('available') || 'Available'}: ${specialEvent.capacity_overview.available_capacity} / ${specialEvent.capacity_overview.total_capacity}` :
                               `${tEvents('soldOut') || 'Sold Out'}: 0 / ${specialEvent.capacity_overview.total_capacity}`
                             }
                           </div>
                           <div className="w-full bg-white/20 rounded-full h-2 backdrop-blur-sm">
                             <div
-                              className={`h-2 rounded-full transition-all duration-300 ${
-                                specialEvent.capacity_overview.available_capacity > 0 ? 'bg-gradient-to-r from-secondary-400 to-primary-500' : 'bg-gradient-to-r from-red-400 to-red-600'
-                              }`}
-                              style={{ 
-                                width: `${Math.max(0, Math.min(100, (specialEvent.capacity_overview.available_capacity / specialEvent.capacity_overview.total_capacity) * 100))}%` 
+                              className={`h-2 rounded-full transition-all duration-300 ${specialEvent.capacity_overview.available_capacity > 0 ? 'bg-gradient-to-r from-secondary-400 to-primary-500' : 'bg-gradient-to-r from-red-400 to-red-600'
+                                }`}
+                              style={{
+                                width: `${Math.max(0, Math.min(100, (specialEvent.capacity_overview.available_capacity / specialEvent.capacity_overview.total_capacity) * 100))}%`
                               }}
                             />
                           </div>
@@ -612,7 +634,7 @@ export default function EventsSection() {
                   >
                     {upcomingEvents.map((ev) => (
                       <div key={`upcoming-${ev.id}`} className="flex-shrink-0 w-full" style={{ width: `calc(100% / ${itemsPerSlide})` }}>
-                        <Link 
+                        <Link
                           href={`/events/${ev.slug}`}
                           className="block group"
                           aria-label={`View details for ${ev.title}`}
@@ -624,7 +646,7 @@ export default function EventsSection() {
                           >
                             {/* Shimmer Effect */}
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out z-10" />
-                            
+
                             {/* Image Container */}
                             <div className="relative h-64 overflow-hidden">
                               <OptimizedImage
@@ -636,17 +658,17 @@ export default function EventsSection() {
                                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                 fallbackSrc="/images/event-image.jpg"
                               />
-                              
+
                               {/* Overlay */}
                               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-                              
+
                               {/* Top Badges */}
                               <div className="absolute top-4 left-4 z-20 flex flex-col space-y-2">
                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStyleColor(ev.style || 'music')} animate-fade-in-down`}>
                                   {getStyleIcon(ev.style || 'music')}
                                   <span className="ml-1">{ev.style || 'Event'}</span>
                                 </span>
-                                
+
                                 {ev.venue && (
                                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/15 backdrop-blur-xl text-white shadow-lg border border-white/30 animate-fade-in-down">
                                     <FaMapPin className="h-3 w-3 mr-1" aria-hidden="true" />
@@ -660,7 +682,7 @@ export default function EventsSection() {
                                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/15 backdrop-blur-xl text-white shadow-lg border border-white/30 animate-fade-in-down max-w-[200px] truncate">
                                   {ev.title}
                                 </span>
-                                
+
                                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/15 backdrop-blur-xl text-white shadow-lg border border-white/30">
                                   {getEventPrice(ev)}
                                 </span>
@@ -687,7 +709,7 @@ export default function EventsSection() {
                                         )}
                                       </div>
                                     </div>
-                                    
+
                                     {/* Rating */}
                                     <div className="flex items-center">
                                       {renderStars(ev.average_rating || 0)}
@@ -696,7 +718,7 @@ export default function EventsSection() {
                                       </span>
                                     </div>
                                   </div>
-                                  
+
                                   {/* Event Details */}
                                   <div className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors duration-300">
                                     {ev.venue && (
@@ -721,23 +743,22 @@ export default function EventsSection() {
                                 </div>
                               </div>
                             </div>
-                            
+
                             {/* Capacity Information - Grid View (Hidden by default, shown on hover) */}
                             {ev.capacity_overview && ev.capacity_overview.total_capacity > 0 ? (
                               <div className={`opacity-0 group-hover:opacity-100 transition-all duration-300 space-y-3 mt-3 px-6 pb-6 ${isCapacityVisible(ev.id) ? 'opacity-100' : ''}`}>
                                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                                  {ev.capacity_overview.available_capacity > 0 ? 
-                                    `Available: ${ev.capacity_overview.available_capacity} / ${ev.capacity_overview.total_capacity}` : 
+                                  {ev.capacity_overview.available_capacity > 0 ?
+                                    `Available: ${ev.capacity_overview.available_capacity} / ${ev.capacity_overview.total_capacity}` :
                                     `Sold Out: 0 / ${ev.capacity_overview.total_capacity}`
                                   }
                                 </div>
                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2" role="progressbar" aria-valuenow={ev.capacity_overview.available_capacity} aria-valuemin={0} aria-valuemax={ev.capacity_overview.total_capacity}>
                                   <div
-                                    className={`h-2 rounded-full transition-all duration-300 ${
-                                      ev.capacity_overview.available_capacity > 0 ? 'bg-gradient-to-r from-secondary-500 to-primary-500' : 'bg-red-500'
-                                    }`}
-                                    style={{ 
-                                      width: `${Math.max(0, Math.min(100, (ev.capacity_overview.available_capacity / ev.capacity_overview.total_capacity) * 100))}%` 
+                                    className={`h-2 rounded-full transition-all duration-300 ${ev.capacity_overview.available_capacity > 0 ? 'bg-gradient-to-r from-secondary-500 to-primary-500' : 'bg-red-500'
+                                      }`}
+                                    style={{
+                                      width: `${Math.max(0, Math.min(100, (ev.capacity_overview.available_capacity / ev.capacity_overview.total_capacity) * 100))}%`
                                     }}
                                   />
                                 </div>
@@ -748,9 +769,9 @@ export default function EventsSection() {
                                   Venue Capacity: {ev.venue.total_capacity}
                                 </div>
                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2" role="progressbar" aria-valuenow={ev.venue.total_capacity} aria-valuemin={0} aria-valuemax={ev.venue.total_capacity}>
-                                  <div 
+                                  <div
                                     className="h-2 rounded-full transition-all duration-300 bg-blue-500"
-                                    style={{ 
+                                    style={{
                                       width: '100%'
                                     }}
                                   />
@@ -796,11 +817,10 @@ export default function EventsSection() {
                           role="tab"
                           aria-selected={currentSlide === index}
                           aria-label={`Go to slide ${index + 1}`}
-                          className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-125 focus:outline-none focus:ring-2 focus:ring-secondary-400 ${
-                            currentSlide === index
-                              ? 'bg-gradient-to-r from-secondary-500 to-primary-500 scale-125 shadow-lg shadow-secondary-500/50'
-                              : 'bg-gray-300/50 hover:bg-gray-400/50 backdrop-blur-sm'
-                          }`}
+                          className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-125 focus:outline-none focus:ring-2 focus:ring-secondary-400 ${currentSlide === index
+                            ? 'bg-gradient-to-r from-secondary-500 to-primary-500 scale-125 shadow-lg shadow-secondary-500/50'
+                            : 'bg-gray-300/50 hover:bg-gray-400/50 backdrop-blur-sm'
+                            }`}
                         />
                       ))}
                     </div>
@@ -812,11 +832,10 @@ export default function EventsSection() {
                       <button
                         onClick={prevSlide}
                         disabled={totalSlides <= 1}
-                        className={`hidden sm:flex absolute top-1/2 -translate-y-1/2 z-20 w-16 h-16 bg-white/20 dark:bg-gray-700/20 backdrop-blur-md hover:bg-white/30 dark:hover:bg-gray-700/30 text-white rounded-full shadow-lg items-center justify-center text-3xl border-2 border-white/30 dark:border-gray-600/30 transition-all duration-300 hover:scale-110 active:scale-95 hover:shadow-secondary-500/25 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50 disabled:cursor-not-allowed ${
-                          isRTL 
-                            ? 'right-0 translate-x-3' 
-                            : 'left-0 -translate-x-3'
-                        }`}
+                        className={`hidden sm:flex absolute top-1/2 -translate-y-1/2 z-20 w-16 h-16 bg-white/20 dark:bg-gray-700/20 backdrop-blur-md hover:bg-white/30 dark:hover:bg-gray-700/30 text-white rounded-full shadow-lg items-center justify-center text-3xl border-2 border-white/30 dark:border-gray-600/30 transition-all duration-300 hover:scale-110 active:scale-95 hover:shadow-secondary-500/25 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50 disabled:cursor-not-allowed ${isRTL
+                          ? 'right-0 translate-x-3'
+                          : 'left-0 -translate-x-3'
+                          }`}
                         aria-label={isRTL ? "Next slide" : "Previous slide"}
                       >
                         {isRTL ? <FaChevronRight /> : <FaChevronLeft />}
@@ -824,11 +843,10 @@ export default function EventsSection() {
                       <button
                         onClick={nextSlide}
                         disabled={totalSlides <= 1}
-                        className={`hidden sm:flex absolute top-1/2 -translate-y-1/2 z-20 w-16 h-16 bg-white/20 dark:bg-gray-700/20 backdrop-blur-md hover:bg-white/30 dark:hover:bg-gray-700/30 text-white rounded-full shadow-lg items-center justify-center text-3xl border-2 border-white/30 dark:border-gray-600/30 transition-all duration-300 hover:scale-110 active:scale-95 hover:shadow-secondary-500/25 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50 disabled:cursor-not-allowed ${
-                          isRTL 
-                            ? 'left-0 -translate-x-3' 
-                            : 'right-0 translate-x-3'
-                        }`}
+                        className={`hidden sm:flex absolute top-1/2 -translate-y-1/2 z-20 w-16 h-16 bg-white/20 dark:bg-gray-700/20 backdrop-blur-md hover:bg-white/30 dark:hover:bg-gray-700/30 text-white rounded-full shadow-lg items-center justify-center text-3xl border-2 border-white/30 dark:border-gray-600/30 transition-all duration-300 hover:scale-110 active:scale-95 hover:shadow-secondary-500/25 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50 disabled:cursor-not-allowed ${isRTL
+                          ? 'left-0 -translate-x-3'
+                          : 'right-0 translate-x-3'
+                          }`}
                         aria-label={isRTL ? "Previous slide" : "Next slide"}
                       >
                         {isRTL ? <FaChevronLeft /> : <FaChevronRight />}
@@ -854,7 +872,7 @@ export default function EventsSection() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {featuredEvents.slice(0, 4).map((ev) => (
                     <div key={`featured-${ev.id}`} className="group">
-                      <Link 
+                      <Link
                         href={`/events/${ev.slug}`}
                         className="block"
                         aria-label={`View details for ${ev.title}`}
@@ -862,7 +880,7 @@ export default function EventsSection() {
                         <article className="group relative bg-white/20 dark:bg-gray-800/20 backdrop-blur-md rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-700 overflow-hidden border border-white/30 dark:border-gray-700/30 hover:scale-105 hover:shadow-secondary-500/25 cursor-pointer">
                           {/* Shimmer Effect */}
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out z-10" />
-                          
+
                           {/* Image Container */}
                           <div className="relative h-48 overflow-hidden">
                             <OptimizedImage
@@ -874,7 +892,7 @@ export default function EventsSection() {
                               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 25vw, 20vw"
                               fallbackSrc="/images/event-image.jpg"
                             />
-                            
+
                             {/* Featured Badge */}
                             <div className="absolute top-3 left-3 z-20">
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg border border-yellow-300/50">
@@ -920,7 +938,7 @@ export default function EventsSection() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {popularEvents.slice(0, 3).map((ev) => (
                     <div key={`popular-${ev.id}`} className="group">
-                      <Link 
+                      <Link
                         href={`/events/${ev.slug}`}
                         className="block"
                         aria-label={`View details for ${ev.title}`}
@@ -928,7 +946,7 @@ export default function EventsSection() {
                         <article className="group relative bg-white/20 dark:bg-gray-800/20 backdrop-blur-md rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-700 overflow-hidden border border-white/30 dark:border-gray-700/30 hover:scale-105 hover:shadow-secondary-500/25 cursor-pointer">
                           {/* Shimmer Effect */}
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out z-10" />
-                          
+
                           {/* Image Container */}
                           <div className="relative h-56 overflow-hidden">
                             <OptimizedImage
@@ -940,7 +958,7 @@ export default function EventsSection() {
                               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                               fallbackSrc="/images/event-image.jpg"
                             />
-                            
+
                             {/* Popular Badge */}
                             <div className="absolute top-3 left-3 z-20">
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-red-400 to-pink-500 text-white shadow-lg border border-red-300/50">
@@ -985,7 +1003,7 @@ export default function EventsSection() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {pastEvents.slice(0, 6).map((ev) => (
                     <div key={`past-${ev.id}`} className="filter grayscale hover:grayscale-0 transition-all">
-                      <Link 
+                      <Link
                         href={`/events/${ev.slug}`}
                         className="block group"
                         aria-label={`View details for ${ev.title}`}
@@ -997,7 +1015,7 @@ export default function EventsSection() {
                         >
                           {/* Shimmer Effect */}
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out z-10" />
-                          
+
                           {/* Image Container */}
                           <div className="relative h-64 overflow-hidden">
                             <OptimizedImage
@@ -1009,17 +1027,17 @@ export default function EventsSection() {
                               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                               fallbackSrc="/images/event-image.jpg"
                             />
-                            
+
                             {/* Overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-                            
+
                             {/* Top Badges */}
                             <div className="absolute top-4 left-4 z-20 flex flex-col space-y-2">
                               <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStyleColor(ev.style || 'music')} animate-fade-in-down`}>
                                 {getStyleIcon(ev.style || 'music')}
                                 <span className="ml-1">{ev.style || 'Event'}</span>
                               </span>
-                              
+
                               {ev.venue && (
                                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/15 backdrop-blur-xl text-white shadow-lg border border-white/30 animate-fade-in-down">
                                   <FaMapPin className="h-3 w-3 mr-1" aria-hidden="true" />
@@ -1033,7 +1051,7 @@ export default function EventsSection() {
                               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/15 backdrop-blur-xl text-white shadow-lg border border-white/30 animate-fade-in-down max-w-[200px] truncate">
                                 {ev.title}
                               </span>
-                              
+
                               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/15 backdrop-blur-xl text-white shadow-lg border border-white/30">
                                 {getEventPrice(ev)}
                               </span>
@@ -1060,7 +1078,7 @@ export default function EventsSection() {
                                       )}
                                     </div>
                                   </div>
-                                  
+
                                   {/* Rating */}
                                   <div className="flex items-center">
                                     {renderStars(ev.average_rating || 0)}
@@ -1069,7 +1087,7 @@ export default function EventsSection() {
                                     </span>
                                   </div>
                                 </div>
-                                
+
                                 {/* Event Details */}
                                 <div className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors duration-300">
                                   {ev.venue && (
@@ -1094,23 +1112,22 @@ export default function EventsSection() {
                               </div>
                             </div>
                           </div>
-                          
+
                           {/* Capacity Information - Grid View (Hidden by default, shown on hover) */}
                           {ev.capacity_overview && ev.capacity_overview.total_capacity > 0 ? (
                             <div className={`opacity-0 group-hover:opacity-100 transition-all duration-300 space-y-3 mt-3 px-6 pb-6 ${isCapacityVisible(ev.id) ? 'opacity-100' : ''}`}>
                               <div className="text-xs text-gray-500 dark:text-gray-400">
-                                {ev.capacity_overview.available_capacity > 0 ? 
-                                  `Available: ${ev.capacity_overview.available_capacity} / ${ev.capacity_overview.total_capacity}` : 
+                                {ev.capacity_overview.available_capacity > 0 ?
+                                  `Available: ${ev.capacity_overview.available_capacity} / ${ev.capacity_overview.total_capacity}` :
                                   `Sold Out: 0 / ${ev.capacity_overview.total_capacity}`
                                 }
                               </div>
                               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2" role="progressbar" aria-valuenow={ev.capacity_overview.available_capacity} aria-valuemin={0} aria-valuemax={ev.capacity_overview.total_capacity}>
-                                <div 
-                                  className={`h-2 rounded-full transition-all duration-300 ${
-                                    ev.capacity_overview.available_capacity > 0 ? 'bg-green-500' : 'bg-red-500'
-                                  }`}
-                                  style={{ 
-                                    width: `${Math.max(0, Math.min(100, (ev.capacity_overview.available_capacity / ev.capacity_overview.total_capacity) * 100))}%` 
+                                <div
+                                  className={`h-2 rounded-full transition-all duration-300 ${ev.capacity_overview.available_capacity > 0 ? 'bg-green-500' : 'bg-red-500'
+                                    }`}
+                                  style={{
+                                    width: `${Math.max(0, Math.min(100, (ev.capacity_overview.available_capacity / ev.capacity_overview.total_capacity) * 100))}%`
                                   }}
                                 />
                               </div>
@@ -1123,7 +1140,7 @@ export default function EventsSection() {
                               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2" role="progressbar" aria-valuenow={ev.venue.total_capacity} aria-valuemin={0} aria-valuemax={ev.venue.total_capacity}>
                                 <div
                                   className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-secondary-500 to-primary-500"
-                                  style={{ 
+                                  style={{
                                     width: '100%'
                                   }}
                                 />
@@ -1140,17 +1157,17 @@ export default function EventsSection() {
           </div>
         )}
 
-                          <div className="mt-8 text-center">
-                            <Button
-                              variant="default"
-                              size="lg"
-                              onClick={() => router.push('/events')}
-                              className="bg-gradient-to-r from-secondary-500 to-primary-500 hover:from-secondary-600 hover:to-primary-600 text-white px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300"
-                            >
-                              <FaStar className="w-5 h-5 mr-2" />
-                              {tHome('viewAllEvents') || 'Explore All Events'}
-                            </Button>
-                          </div>
+        <div className="mt-8 text-center">
+          <Button
+            variant="default"
+            size="lg"
+            onClick={() => router.push('/events')}
+            className="bg-gradient-to-r from-secondary-500 to-primary-500 hover:from-secondary-600 hover:to-primary-600 text-white px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300"
+          >
+            <FaStar className="w-5 h-5 mr-2" />
+            {tHome('viewAllEvents') || 'Explore All Events'}
+          </Button>
+        </div>
       </div>
     </section>
   )

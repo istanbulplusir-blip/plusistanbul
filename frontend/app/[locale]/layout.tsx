@@ -10,6 +10,7 @@ import { ToastProvider } from '../../components/Toast';
 import { UnifiedCurrencyProvider } from '../../lib/contexts/UnifiedCurrencyContext';
 import { UnifiedLanguageProvider } from '../../lib/contexts/UnifiedLanguageContext';
 import AppWrapper from '../../components/layout/AppWrapper';
+import LanguageMigration from '../../components/LanguageMigration';
 
 
 interface LayoutProps {
@@ -56,6 +57,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                 <UnifiedLanguageProvider>
                   <UnifiedCartProvider>
                     <ToastProvider>
+                      <LanguageMigration />
                       <AppWrapper>
                         {children}
                       </AppWrapper>

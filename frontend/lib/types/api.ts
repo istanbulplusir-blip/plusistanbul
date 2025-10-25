@@ -116,10 +116,10 @@ export interface TourSchedule extends BaseModel {
   available_capacity: number;
   is_full: boolean;
   cutoff_datetime: string;
-  variant_capacities: Record<string, { 
-    total: number; 
-    booked: number; 
-    available: number; 
+  variant_capacities: Record<string, {
+    total: number;
+    booked: number;
+    available: number;
   }>;
 }
 
@@ -194,6 +194,7 @@ export interface Event extends BaseModel {
   rules: string;
   required_items: string;
   image: string;
+  image_url?: string;
   gallery_images: {
     id: string;
     image: string;
@@ -223,7 +224,7 @@ export interface Event extends BaseModel {
   is_popular?: boolean;
   min_price?: number;
   max_price?: number;
-  
+
   // Enhanced fields for new frontend
   available_performances?: EventPerformance[];
   pricing_summary: Record<string, {
@@ -246,7 +247,7 @@ export interface Event extends BaseModel {
     venue_capacity: number;
     venue_facilities: string[];
   };
-  
+
   // New enhanced fields
   performance_calendar: EventPerformanceCalendar[];
   seat_map_info: {
@@ -293,7 +294,7 @@ export interface EventPerformance extends BaseModel {
   ticket_capacities: Record<string, number>;
   sections: EventSection[];
   cutoff_datetime: string;
-  
+
   // Enhanced fields
   pricing_matrix: Record<string, Record<string, {
     ticket_type_name: string;
@@ -303,7 +304,7 @@ export interface EventPerformance extends BaseModel {
     available_capacity: number;
     benefits: string[];
   }>>;
-  
+
   seat_availability: Record<string, {
     total_capacity: number;
     available_capacity: number;
@@ -312,7 +313,7 @@ export interface EventPerformance extends BaseModel {
     is_wheelchair_accessible: boolean;
     is_premium: boolean;
   }>;
-  
+
   // Legacy fields for compatibility
   available_seats?: Record<string, Array<{
     id: string;
@@ -324,7 +325,7 @@ export interface EventPerformance extends BaseModel {
     is_wheelchair_accessible: boolean;
     is_premium: boolean;
   }>>;
-  
+
   sections_summary?: Record<string, Record<string, {
     section_name: string;
     total_seats: number;
@@ -332,7 +333,7 @@ export interface EventPerformance extends BaseModel {
     max_price: number;
     has_premium: boolean;
   }>>;
-  
+
   ticket_availability?: Record<string, {
     ticket_type_name: string;
     available_count: number;
@@ -458,7 +459,7 @@ export interface EventPricingBreakdown {
   }>;
   taxes_total: number;
   final_price: number;
-  
+
   // Transfer-specific fields
   outbound_surcharge?: number;
   outbound_surcharge_percentage?: number;
@@ -981,7 +982,7 @@ export interface CartSummaryResponse {
   total_price: number;
   currency: string;
   items: CartItemResponse[];
-} 
+}
 
 export interface PerformanceSeatsResponse {
   performance_id: string;
@@ -1042,14 +1043,14 @@ export interface ApiSeat {
 export interface MappedSectionTicketType {
   id: string;
   section: { id: string; name: string };
-  ticket_type: { 
-    id: string; 
-    name: string; 
-    description: string; 
+  ticket_type: {
+    id: string;
+    name: string;
+    description: string;
     price_modifier: number;
     capacity: number;
     is_active: boolean;
-    ticket_type: string; 
+    ticket_type: string;
     benefits: string[];
     created_at: string;
     updated_at: string;
@@ -1081,7 +1082,7 @@ export interface MappedEventSection {
   ticket_types: MappedSectionTicketType[];
   created_at: string;
   updated_at: string;
-} 
+}
 
 // Error handling types and utilities
 export interface ApiError {
@@ -1100,23 +1101,23 @@ export interface ApiResponse<T> {
 
 // Type guards for better error handling
 export const isApiError = (error: unknown): error is ApiError => {
-  return Boolean(error && 
-         typeof error === 'object' && 
-         'message' in error && 
-         typeof (error as Record<string, unknown>).message === 'string');
+  return Boolean(error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof (error as Record<string, unknown>).message === 'string');
 };
 
-export const isAxiosError = (error: unknown): error is { 
-  response?: { 
-    status: number; 
-    data?: unknown; 
-    statusText?: string; 
-  }; 
-  message: string; 
-  code?: string; 
+export const isAxiosError = (error: unknown): error is {
+  response?: {
+    status: number;
+    data?: unknown;
+    statusText?: string;
+  };
+  message: string;
+  code?: string;
 } => {
-  return Boolean(error && 
-         typeof error === 'object' && 
-         'response' in error && 
-         'message' in error);
+  return Boolean(error &&
+    typeof error === 'object' &&
+    'response' in error &&
+    'message' in error);
 }; 

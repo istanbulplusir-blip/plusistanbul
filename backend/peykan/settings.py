@@ -19,7 +19,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-produc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='peykantravelistanbul.com,www.peykantravelistanbul.com,localhost,127.0.0.1,testserver', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='peykantravelistanbul.com,www.peykantravelistanbul.com,localhost,127.0.0.1,backend,peykan_backend,testserver', cast=Csv())
 
 # Application definition
 DJANGO_APPS = [
@@ -81,10 +81,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Custom user security middleware
-    'users.middleware.UserActivityMiddleware',
-    'users.middleware.SecurityMiddleware',
-    'users.middleware.SessionSecurityMiddleware',
+    # Custom user security middleware - TEMPORARILY DISABLED DUE TO RATE LIMITING ISSUES
+    # 'users.middleware.UserActivityMiddleware',
+    # 'users.middleware.SecurityMiddleware',
+    # 'users.middleware.SessionSecurityMiddleware',
 ]
 
 if DEBUG:
@@ -196,14 +196,14 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = config('STATIC_URL', default='/static/')
-STATIC_ROOT = BASE_DIR / config('STATIC_ROOT', default='staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, config('STATIC_ROOT', default='staticfiles'))
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
 # Media files
 MEDIA_URL = config('MEDIA_URL', default='/media/')
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Image processing settings
 IMAGE_MAX_SIZE = (1920, 1080)  # Maximum image dimensions
@@ -249,7 +249,7 @@ GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='')
 # Restrict to explicit origins to avoid browser blocking and Axios ECONNABORTED.
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
-    default='https://peykantravelistanbul.com,https://www.peykantravelistanbul.com,http://localhost:3000,http://127.0.0.1:3000',
+    default='https://peykantravelistanbul.com,https://www.peykantravelistanbul.com,http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000',
     cast=Csv()
 )
 CORS_ALLOW_CREDENTIALS = True
@@ -288,7 +288,7 @@ CORS_MEDIA_HEADERS = [
 # CSRF trusted origins for cross-site requests from the frontend dev server
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
-    default='http://localhost:3000,http://127.0.0.1:3000',
+    default='https://peykantravelistanbul.com,https://www.peykantravelistanbul.com,http://localhost:3000,http://127.0.0.1:3000',
     cast=Csv()
 )
 
@@ -358,17 +358,32 @@ SIMPLE_JWT = {
 }
 
 # Redis Cache Settings
-# Use local memory cache in development to avoid DB cache table requirement
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'local-cache',
+# Use Redis in production, local memory cache in development
+if DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'local-cache',
+        }
     }
-}
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': config('REDIS_URL', default='redis://redis:6379/1'),
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'CONNECTION_POOL_KWARGS': {
+                    'max_connections': 50,
+                    'retry_on_timeout': True,
+                }
+            }
+        }
+    }
 
 # Celery Configuration
-CELERY_BROKER_URL = config('REDIS_URL', default='redis://localhost:6379/1')
-CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://localhost:6379/1')
+CELERY_BROKER_URL = config('CELERY_BROKER_URL', default=config('REDIS_URL', default='redis://redis:6379/1'))
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default=config('REDIS_URL', default='redis://redis:6379/1'))
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -494,16 +509,34 @@ FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
 PIL_JPEG_QUALITY = IMAGE_QUALITY
 PIL_JPEG_OPTIMIZE = True
 
-# Security Settings (Production)
+# Security Settings - ALWAYS ENABLED (not just in production)
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+# Session Security - ALWAYS ENABLED
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# CSRF Security - ALWAYS ENABLED
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read for SPA
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Production-specific settings
 if not DEBUG:
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_PRELOAD = True
     SECURE_REDIRECT_EXEMPT = []
-    SECURE_SSL_REDIRECT = False
-    SECURE_PROXY_SSL_HEADER = None
+    SECURE_SSL_REDIRECT = False  # Nginx handles SSL termination
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+else:
+    # Development settings
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
 
 # Logging Configuration
 # Ensure logs directory exists

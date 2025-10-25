@@ -13,7 +13,7 @@ interface DateTimeSelectionProps {
 
 export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionProps) {
   const t = useTranslations('transfers');
-  
+
   // Get booking state from store
   const {
     trip_type,
@@ -32,11 +32,11 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
   const [localOutboundTime, setLocalOutboundTime] = useState(outbound_time || '');
   const [localReturnDate, setLocalReturnDate] = useState(return_date || '');
   const [localReturnTime, setLocalReturnTime] = useState(return_time || '');
-  
+
   // Browser compatibility state
   const [isMobile, setIsMobile] = useState(false);
   const [useFallbackDatePicker, setUseFallbackDatePicker] = useState(false);
-  
+
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
     outbound?: string;
@@ -48,13 +48,13 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
     const checkMobileAndDateSupport = () => {
       const isMobileDevice = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       setIsMobile(isMobileDevice);
-      
+
       // Test if native date picker works properly
       const input = document.createElement('input');
       input.type = 'date';
       input.value = 'not-a-date';
       const supportsDate = input.value !== 'not-a-date';
-      
+
       // Use fallback for problematic browsers or if native doesn't work
       const isProblematicBrowser = /Safari/i.test(navigator.userAgent) && /iPhone|iPad|iPod/i.test(navigator.userAgent);
       setUseFallbackDatePicker(!supportsDate || (isMobileDevice && isProblematicBrowser));
@@ -78,12 +78,12 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
     setLocalOutboundDate(date);
     setLocalOutboundTime(time);
     setDateTime(date, time, false);
-    
+
     // Clear return validation if outbound changes
     if (trip_type === 'round_trip') {
       setValidationErrors(prev => ({ ...prev, return: undefined }));
     }
-    
+
     // Validate immediately
     validateOutboundDateTime(date, time);
   };
@@ -93,7 +93,7 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
     setLocalReturnDate(date);
     setLocalReturnTime(time);
     setDateTime(date, time, true);
-    
+
     // Validate immediately
     validateReturnDateTime(date, time);
   };
@@ -125,34 +125,34 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
     // Get user's local timezone
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const now = new Date();
-    
+
     // Convert to user's timezone
     const userNow = new Date(now.toLocaleString("en-US", { timeZone: userTimezone }));
     const today = userNow.toISOString().split('T')[0];
-    
+
     if (date < today) {
       return t('dateCannotBeInPast');
     }
-    
+
     if (date === today) {
       // Add 2-hour buffer for today
       const bufferTime = new Date(userNow.getTime() + 2 * 60 * 60 * 1000);
       const minTime = bufferTime.toTimeString().slice(0, 5);
-      
+
       if (time < minTime) {
         return t('timeTooEarlyToday', { minTime });
       }
     }
-    
+
     // Check business hours (configurable from backend)
     const hour = parseInt(time.split(':')[0]);
     const businessStart = route_data?.business_hours_start || 6;
     const businessEnd = route_data?.business_hours_end || 23;
-    
+
     if (hour < businessStart || hour >= businessEnd) {
       return t('timeOutsideBusinessHours', { start: businessStart, end: businessEnd });
     }
-    
+
     return undefined;
   };
 
@@ -161,61 +161,61 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
     if (!localOutboundDate || !localOutboundTime) {
       return t('selectOutboundFirst');
     }
-    
+
     // Get user's local timezone
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const now = new Date();
     const userNow = new Date(now.toLocaleString("en-US", { timeZone: userTimezone }));
     const today = userNow.toISOString().split('T')[0];
-    
+
     // CRITICAL: Return date cannot be before outbound date
     if (date < localOutboundDate) {
       return t('returnDateCannotBeBeforeOutbound');
     }
-    
+
     if (date === localOutboundDate) {
       // Same day return: must be at least 2 hours after outbound
       const outboundHour = parseInt(localOutboundTime.split(':')[0]);
       const outboundMinute = parseInt(localOutboundTime.split(':')[1]);
       const returnHour = parseInt(time.split(':')[0]);
       const returnMinute = parseInt(time.split(':')[1]);
-      
+
       const outboundMinutes = outboundHour * 60 + outboundMinute;
       const returnMinutes = returnHour * 60 + returnMinute;
-      
+
       if (returnMinutes - outboundMinutes < 120) { // 2 hours = 120 minutes
         return t('returnTimeTooCloseToOutbound');
       }
     }
-    
+
     // Max return date: 30 days after outbound
     const maxReturnDate = new Date(localOutboundDate);
     maxReturnDate.setDate(maxReturnDate.getDate() + 30);
     const maxReturnDateStr = maxReturnDate.toISOString().split('T')[0];
-    
+
     if (date > maxReturnDateStr) {
       return t('returnDateTooFar');
     }
-    
+
     // Check business hours
     const hour = parseInt(time.split(':')[0]);
     const businessStart = route_data?.business_hours_start || 6;
     const businessEnd = route_data?.business_hours_end || 23;
-    
+
     if (hour < businessStart || hour >= businessEnd) {
       return t('timeOutsideBusinessHours', { start: businessStart, end: businessEnd });
     }
-    
+
     // If return date is today, check 2-hour buffer
     if (date === today) {
       const bufferTime = new Date(userNow.getTime() + 2 * 60 * 60 * 1000);
       const minTime = bufferTime.toTimeString().slice(0, 5);
-      
+
       if (time < minTime) {
         return t('timeTooEarlyToday', { minTime });
       }
     }
-    
+
     return undefined;
   };
 
@@ -223,7 +223,7 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
   const handleNext = () => {
     // Clear previous validation errors
     setValidationErrors({});
-    
+
     // Validate outbound date/time
     if (localOutboundDate && localOutboundTime) {
       const outboundError = getOutboundValidationError(localOutboundDate, localOutboundTime);
@@ -232,21 +232,21 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
         return;
       }
     }
-    
+
     // Validate return date/time for round trip
     if (trip_type === 'round_trip') {
       if (!localReturnDate || !localReturnTime) {
         setValidationErrors(prev => ({ ...prev, return: t('returnDateAndTimeRequired') }));
         return;
       }
-      
+
       const returnError = getReturnValidationError(localReturnDate, localReturnTime);
       if (returnError) {
         setValidationErrors(prev => ({ ...prev, return: returnError }));
         return;
       }
     }
-    
+
     // If all validation passes, proceed to next step
     if (isStepValid('datetime')) {
       onNext();
@@ -257,31 +257,31 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
   const isValid = (() => {
     // Check for validation errors
     if (Object.values(validationErrors).some(error => error)) return false;
-    
+
     // Basic validation: outbound date and time must be selected
     if (!localOutboundDate || !localOutboundTime) return false;
-    
+
     // Additional validation for round trip return fields
     if (trip_type === 'round_trip') {
       if (!localReturnDate || !localReturnTime) return false;
-      
+
       // Ensure return date is not before outbound date
       if (localReturnDate < localOutboundDate) return false;
-      
+
       // If same day, ensure return time is at least 2 hours after outbound
       if (localReturnDate === localOutboundDate) {
         const outboundHour = parseInt(localOutboundTime.split(':')[0]);
         const outboundMinute = parseInt(localOutboundTime.split(':')[1]);
         const returnHour = parseInt(localReturnTime.split(':')[0]);
         const returnMinute = parseInt(localReturnTime.split(':')[1]);
-        
+
         const outboundMinutes = outboundHour * 60 + outboundMinute;
         const returnMinutes = returnHour * 60 + returnMinute;
-        
+
         if (returnMinutes - outboundMinutes < 120) return false; // 2 hours = 120 minutes
       }
     }
-    
+
     return true;
   })();
 
@@ -307,7 +307,7 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
   // Get maximum return date (30 days after outbound)
   const getMaxReturnDate = () => {
     if (!localOutboundDate) return '';
-    
+
     const maxDate = new Date(localOutboundDate);
     maxDate.setDate(maxDate.getDate() + 30);
     const year = maxDate.getFullYear();
@@ -319,24 +319,24 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
   // Helper: Generate time slots with business hours consideration
   const generateTimeSlots = () => {
     const slots: { value: string; label: string; surcharge?: { label: string; percent: number; color: string } }[] = [];
-    
+
     const businessStart = route_data?.business_hours_start || 6;
     const businessEnd = route_data?.business_hours_end || 23;
-    
+
     for (let h = businessStart; h < businessEnd; h++) {
       for (let m = 0; m < 60; m += 30) {
         const value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
         let surcharge = undefined as undefined | { label: string; percent: number; color: string };
-        
+
         const peakPct = Number(route_data?.peak_hour_surcharge ?? 10);
         const midnightPct = Number(route_data?.midnight_surcharge ?? 5);
-        
+
         if ((h >= 7 && h <= 9) || (h >= 17 && h <= 19)) {
           surcharge = { label: t('peakHour'), percent: peakPct, color: 'bg-orange-100 text-orange-700 border-orange-300' };
         } else if ((h >= 22 && h <= 23) || (h >= 0 && h <= 6)) {
           surcharge = { label: t('midnight'), percent: midnightPct, color: 'bg-purple-100 text-purple-700 border-purple-300' };
         }
-        
+
         slots.push({ value, label: value, surcharge });
       }
     }
@@ -346,33 +346,33 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
   // Helper: Is time slot allowed (for today or return logic)
   const isTimeSlotAllowed = (date: string, slot: string, isReturn = false) => {
     if (!date) return false;
-    
+
     // Get user's local timezone
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const now = new Date();
     const userNow = new Date(now.toLocaleString("en-US", { timeZone: userTimezone }));
     const today = userNow.toISOString().split('T')[0];
-    
+
     // Check if date is today
     if (date === today) {
       const bufferTime = new Date(userNow.getTime() + 2 * 60 * 60 * 1000);
       const minTime = bufferTime.toTimeString().slice(0, 5);
       if (slot < minTime) return false;
     }
-    
+
     // For return time validation (must be at least 2h after outbound time when same day)
     if (isReturn && localOutboundDate && date === localOutboundDate && localOutboundTime) {
       const outboundHour = parseInt(localOutboundTime.split(':')[0]);
       const outboundMinute = parseInt(localOutboundTime.split(':')[1]);
       const returnHour = parseInt(slot.split(':')[0]);
       const returnMinute = parseInt(slot.split(':')[1]);
-      
+
       const outboundMinutes = outboundHour * 60 + outboundMinute;
       const returnMinutes = returnHour * 60 + returnMinute;
-      
+
       if (returnMinutes - outboundMinutes < 120) return false;
     }
-    
+
     return true;
   };
 
@@ -416,10 +416,10 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
           max={maxDate}
           className="w-full p-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
           style={{
-            // Ensure date picker is visible on all mobile browsers
-            WebkitAppearance: 'none',
+            // iOS Safari specific fixes for date picker
+            WebkitAppearance: isMobile ? 'menulist-button' : 'none',
             MozAppearance: 'textfield',
-            appearance: 'none',
+            appearance: isMobile ? 'menulist-button' : 'none',
             // Force date picker to show on mobile
             position: 'relative',
             zIndex: 1,
@@ -427,32 +427,101 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
             fontSize: isMobile ? '16px' : '14px', // Prevent zoom on iOS
             minHeight: '48px', // Ensure touch target is large enough
             touchAction: 'manipulation', // Improve touch responsiveness
+            // iOS Safari specific styles
+            ...(isMobile && {
+              background: 'white',
+              border: '1px solid #d1d5db',
+              borderRadius: '0.5rem',
+              padding: '12px 40px 12px 12px',
+              backgroundImage: 'none',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 12px center',
+              backgroundSize: '16px',
+            })
           }}
           // Add mobile-specific attributes
           inputMode="none"
           autoComplete="off"
-          // Force mobile browsers to show native date picker
+          // Enhanced iOS Safari support
           onFocus={(e) => {
             // For iOS Safari and other problematic browsers
             if (isMobile) {
               try {
                 const input = e.target as HTMLInputElement;
-                (input as HTMLInputElement & { showPicker?: () => void }).showPicker?.();
-              } catch {
-                console.log('showPicker not supported on focus');
+                // Multiple fallback strategies for iOS Safari
+                if (typeof (input as any).showPicker === 'function') {
+                  (input as any).showPicker();
+                } else {
+                  // Force focus and trigger events
+                  input.focus();
+                  input.click();
+
+                  // Dispatch touch events for iOS
+                  const touchStart = new TouchEvent('touchstart', { bubbles: true, cancelable: true });
+                  const touchEnd = new TouchEvent('touchend', { bubbles: true, cancelable: true });
+                  input.dispatchEvent(touchStart);
+                  input.dispatchEvent(touchEnd);
+                }
+              } catch (error) {
+                console.log('Date picker focus fallback:', error);
               }
             }
           }}
-          // Fallback for browsers that don't support showPicker
+          // Enhanced click handler for iOS Safari
           onClick={(e) => {
             if (isMobile) {
+              e.preventDefault();
+              e.stopPropagation();
+
               try {
                 const input = e.target as HTMLInputElement;
-                (input as HTMLInputElement & { showPicker?: () => void }).showPicker?.();
-              } catch {
-                // Fallback: try to trigger the picker manually
-                console.log('Date picker fallback triggered');
-                // Force focus and click for stubborn browsers
+
+                // Try multiple methods to open date picker
+                if (typeof (input as any).showPicker === 'function') {
+                  (input as any).showPicker();
+                } else {
+                  // Alternative methods for iOS Safari
+                  input.focus();
+
+                  // Create and dispatch events
+                  const clickEvent = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                  });
+                  input.dispatchEvent(clickEvent);
+
+                  // iOS specific touch events
+                  const touchStart = new TouchEvent('touchstart', {
+                    bubbles: true,
+                    cancelable: true,
+                    touches: [{
+                      identifier: 0,
+                      target: input,
+                      clientX: 0,
+                      clientY: 0,
+                      pageX: 0,
+                      pageY: 0,
+                      screenX: 0,
+                      screenY: 0,
+                      radiusX: 0,
+                      radiusY: 0,
+                      rotationAngle: 0,
+                      force: 1
+                    }] as any
+                  });
+
+                  const touchEnd = new TouchEvent('touchend', {
+                    bubbles: true,
+                    cancelable: true
+                  });
+
+                  input.dispatchEvent(touchStart);
+                  setTimeout(() => input.dispatchEvent(touchEnd), 50);
+                }
+              } catch (error) {
+                console.log('Date picker click fallback:', error);
+                // Last resort: try to focus after a delay
                 setTimeout(() => {
                   const input = e.target as HTMLInputElement;
                   input.focus();
@@ -460,8 +529,29 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
               }
             }
           }}
+          // Add touch event handlers for iOS
+          onTouchStart={(e) => {
+            if (isMobile) {
+              // Prevent default to avoid conflicts
+              e.preventDefault();
+              const input = e.target as HTMLInputElement;
+
+              setTimeout(() => {
+                try {
+                  if (typeof (input as any).showPicker === 'function') {
+                    (input as any).showPicker();
+                  } else {
+                    input.focus();
+                    input.click();
+                  }
+                } catch (error) {
+                  console.log('Touch start fallback:', error);
+                }
+              }, 50);
+            }
+          }}
         />
-        
+
         {/* Custom date picker button for mobile fallback */}
         {isMobile && (
           <button
@@ -476,11 +566,11 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
                   // Multiple fallback strategies
                   input.focus();
                   input.click();
-                  
+
                   // Try dispatching events
                   const clickEvent = new MouseEvent('click', { bubbles: true });
                   input.dispatchEvent(clickEvent);
-                  
+
                   // Last resort: try to open with touch events
                   const touchStart = new TouchEvent('touchstart', { bubbles: true });
                   const touchEnd = new TouchEvent('touchend', { bubbles: true });
@@ -493,14 +583,14 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
             aria-label="Open date picker"
           />
         )}
-        
+
         {/* Display formatted date for better UX */}
         {value && (
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400 pointer-events-none">
             {formatDateForDisplay(value)}
           </div>
         )}
-        
+
         {/* Alternative date picker for very problematic browsers */}
         {useFallbackDatePicker && (
           <div className="absolute inset-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-between px-3 cursor-pointer"
@@ -525,7 +615,7 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
   // Render time dropdown
   const renderTimeDropdown = (date: string, value: string, onChange: (time: string) => void, isReturn = false) => {
     const timeSlots = generateTimeSlots().filter(slot => isTimeSlotAllowed(date, slot.value, isReturn));
-    
+
     const options = timeSlots.map(slot => ({
       value: slot.value,
       label: (
@@ -539,9 +629,9 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
         </div>
       )
     }));
-    
+
     const selectedOption = options.find(opt => opt.value === value);
-    
+
     return (
       <Select
         value={selectedOption}
@@ -563,9 +653,9 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
               borderColor: state.isFocused ? '#3b82f6' : '#6b7280'
             }
           }),
-          option: (base, state) => ({ 
-            ...base, 
-            fontSize: '1rem', 
+          option: (base, state) => ({
+            ...base,
+            fontSize: '1rem',
             padding: '0.5rem 1rem',
             backgroundColor: state.isSelected ? '#3b82f6' : state.isFocused ? '#f3f4f6' : 'transparent',
             color: state.isSelected ? 'white' : '#374151',
@@ -652,7 +742,7 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           {t('tripType')}
         </h3>
-        
+
         {/* Surcharge Information */}
         {route_data && (
           <div className="mb-4 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
@@ -717,7 +807,7 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           {t('outboundDate')} & {t('outboundTime')}
         </h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -752,7 +842,7 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
             {t('returnDate')} & {t('returnTime')}
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -784,7 +874,7 @@ export default function DateTimeSelection({ onNext, onBack }: DateTimeSelectionP
               )}
             </div>
           </div>
-          
+
           {/* Show error if return fields are empty for round trip */}
           {trip_type === 'round_trip' && (!localReturnDate || !localReturnTime) && (
             <p className="mt-2 text-sm text-red-600 dark:text-red-400">

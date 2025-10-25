@@ -27,7 +27,11 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
     qualities: [25, 50, 75, 85, 90, 100], // Add quality options for Next.js 15
-    
+
+    // Custom loader for media files
+    loader: process.env.NODE_ENV === 'production' ? 'custom' : 'default',
+    loaderFile: process.env.NODE_ENV === 'production' ? './lib/imageLoader.js' : undefined,
+
     remotePatterns: [
       {
         protocol: 'https',
@@ -73,20 +77,25 @@ const nextConfig = {
         pathname: '/media/**',
       },
     ],
-    
+
     // Image optimization settings
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  
+
   async rewrites() {
-    // Use environment variable to determine API URL
-    const apiUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://peykantravelistanbul.com'  // دامنه اصلی
-      : 'http://localhost:8000'; // Local development
-    
-    console.log('Next.js API URL:', apiUrl);
-    
+    // In production, Nginx handles all API routing directly
+    // No rewrites needed - Frontend calls https://peykantravelistanbul.com/api/v1/*
+    // and Nginx proxies to Django backend
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Production mode: No rewrites, Nginx handles API routing');
+      return [];
+    }
+
+    // Development mode: Proxy API requests to local Django backend
+    const apiUrl = 'http://localhost:8000';
+    console.log('Development mode: API URL:', apiUrl);
+
     return [
       // Specific API routes first (more specific routes should come first)
       {
@@ -142,7 +151,7 @@ const nextConfig = {
       },
     ];
   },
-  
+
   // Enable trailing slash for API routes to match Django expectations
   trailingSlash: true,
 };

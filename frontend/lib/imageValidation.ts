@@ -71,9 +71,9 @@ export function getValidatedImageUrl(
 
   // Handle media paths from backend
   if (imagePath.startsWith('media/') || imagePath.startsWith('/media/')) {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
+    // Use relative path for media files - Next.js rewrites will handle proxying
     const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-    return `${backendUrl}${cleanPath}`;
+    return cleanPath;
   }
 
   // If it's a placeholder, validate it exists
@@ -95,7 +95,7 @@ export function getValidatedImageUrl(
  * @returns True if the image is known to be problematic
  */
 function isProblematicBackendImage(imageUrl: string): boolean {
-  return PROBLEMATIC_BACKEND_IMAGES.some(problematic => 
+  return PROBLEMATIC_BACKEND_IMAGES.some(problematic =>
     imageUrl.includes(problematic)
   );
 }
@@ -139,16 +139,20 @@ export function processImageUrl(
     return src;
   }
 
-  // For media files from backend, use direct URL
+  // For media files from backend, use relative path - Next.js rewrites will handle proxying
   if (src.startsWith('media/') || src.startsWith('/media/')) {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
     const cleanPath = src.startsWith('/') ? src : `/${src}`;
-    return `${backendUrl}${cleanPath}`;
+    return cleanPath;
   }
 
-  // If it's already a full backend URL, return as is
+  // If it's a localhost URL, extract the path and use relative URL
   if (src.startsWith('http://localhost:8000/') || src.startsWith('http://127.0.0.1:8000/')) {
-    return src;
+    try {
+      const url = new URL(src);
+      return url.pathname; // Return only the path part
+    } catch {
+      return src;
+    }
   }
 
   return src;

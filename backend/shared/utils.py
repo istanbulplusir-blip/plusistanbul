@@ -34,19 +34,35 @@ def get_image_url(image_field, request=None):
     else:
         file_path = str(image_field)
     
-    # If we have a request, build absolute URL
-    if request:
-        return request.build_absolute_uri(file_path)
-    
-    # Otherwise, build URL from settings
+    # Build URL from settings - always use production domain for consistency
+    # This ensures that images work correctly even when API is called from localhost (SSR)
     if settings.DEBUG:
         # In development, use localhost
-        base_url = f"http://localhost:8000"
+        base_url = "http://localhost:8000"
     else:
-        # In production, use domain
-        base_url = f"https://{settings.ALLOWED_HOSTS[0] if settings.ALLOWED_HOSTS else 'peykantravelistanbul.com'}"
+        # In production, always use the main production domain
+        # Filter out localhost and backend from ALLOWED_HOSTS
+        production_hosts = [h for h in settings.ALLOWED_HOSTS if h not in ['localhost', '127.0.0.1', 'backend']]
+        domain = production_hosts[0] if production_hosts else 'peykantravelistanbul.com'
+        # Remove any protocol prefix from domain if present
+        domain = domain.replace('http://', '').replace('https://', '').strip('/')
+        base_url = f"https://{domain}"
     
-    return f"{base_url}{file_path}"
+    # Ensure file_path starts with /
+    if not file_path.startswith('/'):
+        file_path = f"/{file_path}"
+    
+    # Combine base_url and file_path properly
+    # Make sure we don't have double slashes except after protocol
+    full_url = f"{base_url}{file_path}"
+    # Fix any double slashes except after protocol
+    full_url = (full_url
+                .replace('https://', 'HTTPS_TEMP')
+                .replace('http://', 'HTTP_TEMP')
+                .replace('//', '/')
+                .replace('HTTPS_TEMP', 'https://')
+                .replace('HTTP_TEMP', 'http://'))
+    return full_url
 
 
 def generate_unique_filename(original_filename, upload_to='uploads/'):

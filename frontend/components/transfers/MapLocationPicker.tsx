@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { MapPin, Search, X, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { TransferLocation } from '@/lib/types/api';
+import { initializeLeafletForMobile, getMobileMapOptions } from '@/lib/utils/leafletConfig';
 
 // Dynamic imports for SSR compatibility
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => ({ default: mod.MapContainer })), {
@@ -29,7 +30,7 @@ const Popup = dynamic(() => import('react-leaflet').then(mod => ({ default: mod.
 });
 
 // useMapEvents is a hook, not a component, so we don't need dynamic import for it
-import { useMapEvents } from 'react-leaflet';
+import { useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
 // Fix for default markers in React Leaflet
@@ -43,14 +44,104 @@ L.Icon.Default.mergeOptions({
 
 // Custom component for map events using useMapEvents hook
 function MapEventsComponent({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
-  useMapEvents({
+  const map = useMapEvents({
     click: (e) => {
+      const { lat, lng } = e.latlng;
+      onMapClick(lat, lng);
+    },
+    // Improve tap detection on iOS
+    preclick: (e) => {
       const { lat, lng } = e.latlng;
       onMapClick(lat, lng);
     }
   });
-  
+
+  // Disable double-click zoom on iOS and improve touch handling
+  React.useEffect(() => {
+    if (map) {
+      map.doubleClickZoom.disable();
+
+      // Enable tap for iOS with better configuration
+      if ('tap' in map && typeof (map as any).tap?.enable === 'function') {
+        (map as any).tap.enable();
+        // Increase tap tolerance for iOS
+        if ((map as any).tap) {
+          (map as any).tap.options.tapTolerance = 20;
+        }
+      }
+
+      // Force enable touch events for iOS Safari
+      if (map.touchZoom) {
+        map.touchZoom.enable();
+      }
+      if (map.dragging) {
+        map.dragging.enable();
+      }
+
+      // Add specific iOS Safari fixes
+      const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
+      if (isIOSSafari) {
+        // Force touch events to work
+        const container = map.getContainer();
+        if (container) {
+          container.style.touchAction = 'pan-y pinch-zoom';
+          (container.style as any).webkitTouchCallout = 'none';
+          (container.style as any).webkitUserSelect = 'none';
+
+          // Add passive event listeners for better iOS performance
+          container.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+          }, { passive: false });
+
+          container.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+          }, { passive: false });
+        }
+      }
+    }
+  }, [map]);
+
   return null; // This component doesn't render anything
+}
+
+// Custom zoom control component for better mobile experience
+function CustomZoomControl() {
+  const map = useMap();
+
+  const handleZoomIn = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    map.zoomIn();
+  };
+
+  const handleZoomOut = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    map.zoomOut();
+  };
+
+  return (
+    <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-1">
+      <button
+        onClick={handleZoomIn}
+        onTouchEnd={handleZoomIn}
+        className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-md transition-colors touch-manipulation"
+        style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+        aria-label="Zoom in"
+      >
+        <span className="text-xl font-bold text-gray-700 dark:text-gray-300">+</span>
+      </button>
+      <button
+        onClick={handleZoomOut}
+        onTouchEnd={handleZoomOut}
+        className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-md transition-colors touch-manipulation"
+        style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+        aria-label="Zoom out"
+      >
+        <span className="text-xl font-bold text-gray-700 dark:text-gray-300">−</span>
+      </button>
+    </div>
+  );
 }
 
 interface MapLocationPickerProps {
@@ -81,6 +172,11 @@ export default function MapLocationPicker({
   const defaultCenter: [number, number] = [41.0082, 28.9784]; // Istanbul
   const [mapCenter, setMapCenter] = useState<[number, number]>(defaultCenter);
   const [zoom, setZoom] = useState(10);
+
+  // Initialize Leaflet for mobile on component mount
+  useEffect(() => {
+    initializeLeafletForMobile();
+  }, []);
 
   // Fetch locations
   useEffect(() => {
@@ -152,14 +248,14 @@ export default function MapLocationPicker({
   }, [searchTerm]);
 
   // Filter locations based on search
-  const filteredLocations = searchTerm.trim() 
+  const filteredLocations = searchTerm.trim()
     ? [...searchResults.database_locations, ...searchResults.external_locations]
     : locations.filter(location =>
-        location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        location.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        location.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        location.country.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      location.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      location.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      location.country.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   const handleLocationSelect = useCallback((location: TransferLocation) => {
     onLocationSelect(location);
@@ -182,13 +278,13 @@ export default function MapLocationPicker({
 
       if (validationResponse.ok) {
         const validationData = await validationResponse.json();
-        
+
         if (!validationData.is_valid) {
           // نمایش پیام خطا به کاربر
           alert(`${validationData.message}\n\n${validationData.suggestion}`);
           return;
         }
-        
+
         // اگر مکان معتبر است، ادامه فرآیند
         if (validationData.warning) {
           const proceed = confirm(`${validationData.message}\n\n${validationData.warning}\n\n${t('continueConfirmation')}`);
@@ -208,7 +304,7 @@ export default function MapLocationPicker({
 
       if (response.ok) {
         const data = await response.json();
-        
+
         // ایجاد مکان جدید از اطلاعات دریافتی
         const newLocation: TransferLocation = {
           id: `temp-${Date.now()}`, // ID موقت
@@ -227,19 +323,19 @@ export default function MapLocationPicker({
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
-        
+
         // اضافه کردن به لیست مکان‌ها
         setLocations(prev => {
           // بررسی عدم تکرار
-          const exists = prev.some(loc => 
-            Math.abs(loc.coordinates.lat - lat) < 0.001 && 
+          const exists = prev.some(loc =>
+            Math.abs(loc.coordinates.lat - lat) < 0.001 &&
             Math.abs(loc.coordinates.lng - lng) < 0.001
           );
-          
+
           if (exists) return prev;
           return [newLocation, ...prev];
         });
-        
+
         // انتخاب خودکار مکان جدید
         handleLocationSelect(newLocation);
       } else {
@@ -262,7 +358,7 @@ export default function MapLocationPicker({
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
-        
+
         setLocations(prev => [simpleLocation, ...prev]);
         handleLocationSelect(simpleLocation);
       }
@@ -286,7 +382,7 @@ export default function MapLocationPicker({
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
-      
+
       setLocations(prev => [simpleLocation, ...prev]);
       handleLocationSelect(simpleLocation);
     }
@@ -374,16 +470,26 @@ export default function MapLocationPicker({
                   <MapContainer
                     center={mapCenter}
                     zoom={zoom}
-                    style={{ height: '100%', width: '100%' }}
+                    style={{
+                      height: '100%',
+                      width: '100%',
+                      touchAction: 'pan-y pinch-zoom',
+                      WebkitTouchCallout: 'none',
+                      WebkitUserSelect: 'none',
+                      userSelect: 'none'
+                    }}
                     whenReady={() => setMapLoading(false)}
+                    // iOS Safari specific options
+                    {...(getMobileMapOptions())}
                   >
                     <TileLayer
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    
+
+                    <CustomZoomControl />
                     <MapEventsComponent onMapClick={handleMapClick} />
-                    
+
                     {!mapLoading && filteredLocations.map((location) => (
                       <Marker
                         key={location.id}
@@ -436,66 +542,66 @@ export default function MapLocationPicker({
                           <h5 className="text-xs font-medium text-blue-800 dark:text-blue-300">{t('databaseLocations')}</h5>
                         </div>
                       )}
-                      {searchTerm 
+                      {searchTerm
                         ? searchResults.database_locations.map((location) => (
-                            <button
-                              key={location.id}
-                              type="button"
-                              onClick={() => handleLocationSelect(location)}
-                              className="w-full p-3 text-right hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 border-b border-gray-100 dark:border-gray-600"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                  <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">{location.name}</h4>
-                                  <p className="text-xs text-gray-600 dark:text-gray-400">{location.city}, {location.country}</p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-500 truncate">{location.address}</p>
-                                </div>
-                                <div className="flex flex-col items-end gap-1">
-                                  {location.is_popular && (
-                                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                      {t('popular')}
-                                    </span>
-                                  )}
-                                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                                    {t('available')}
-                                  </span>
-                                </div>
+                          <button
+                            key={location.id}
+                            type="button"
+                            onClick={() => handleLocationSelect(location)}
+                            className="w-full p-3 text-right hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 border-b border-gray-100 dark:border-gray-600"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">{location.name}</h4>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">{location.city}, {location.country}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-500 truncate">{location.address}</p>
                               </div>
-                            </button>
-                          ))
+                              <div className="flex flex-col items-end gap-1">
+                                {location.is_popular && (
+                                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                    {t('popular')}
+                                  </span>
+                                )}
+                                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                                  {t('available')}
+                                </span>
+                              </div>
+                            </div>
+                          </button>
+                        ))
                         : locations.filter(location =>
-                            location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            location.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            location.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            location.country.toLowerCase().includes(searchTerm.toLowerCase())
-                          ).map((location) => (
-                            <button
-                              key={location.id}
-                              type="button"
-                              onClick={() => handleLocationSelect(location)}
-                              className="w-full p-3 text-right hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 border-b border-gray-100 dark:border-gray-600"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                  <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">{location.name}</h4>
-                                  <p className="text-xs text-gray-600 dark:text-gray-400">{location.city}, {location.country}</p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-500 truncate">{location.address}</p>
-                                </div>
-                                <div className="flex flex-col items-end gap-1">
-                                  {location.is_popular && (
-                                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                      محبوب
-                                    </span>
-                                  )}
-                                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                                    {location.location_type || 'مکان'}
-                                  </span>
-                                </div>
+                          location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          location.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          location.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          location.country.toLowerCase().includes(searchTerm.toLowerCase())
+                        ).map((location) => (
+                          <button
+                            key={location.id}
+                            type="button"
+                            onClick={() => handleLocationSelect(location)}
+                            className="w-full p-3 text-right hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 border-b border-gray-100 dark:border-gray-600"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">{location.name}</h4>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">{location.city}, {location.country}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-500 truncate">{location.address}</p>
                               </div>
-                            </button>
-                          ))
+                              <div className="flex flex-col items-end gap-1">
+                                {location.is_popular && (
+                                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                    محبوب
+                                  </span>
+                                )}
+                                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                                  {location.location_type || 'مکان'}
+                                </span>
+                              </div>
+                            </div>
+                          </button>
+                        ))
                       }
-                      
+
                       {/* External Locations */}
                       {searchTerm && searchResults.external_locations.length > 0 && (
                         <>
@@ -542,13 +648,13 @@ export default function MapLocationPicker({
             <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
               <div className="flex justify-between items-center">
                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {searchTerm 
+                  {searchTerm
                     ? `${searchResults.database_locations.length} ${t('databaseCount')} ${searchResults.external_locations.length} ${t('externalCount')}`
                     : `${filteredLocations.length} ${t('locationCount')}`
                   }
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-500">
-                  {searchTerm 
+                  {searchTerm
                     ? t('databaseLocationsPriority')
                     : t('clickMapOrSelect')
                   }
