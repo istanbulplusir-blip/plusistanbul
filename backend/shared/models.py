@@ -5,9 +5,17 @@ Shared models for Peykan Tourism Platform.
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from django.core.validators import EmailValidator
+from django.core.validators import EmailValidator, FileExtensionValidator
+from django.core.exceptions import ValidationError
 from core.models import BaseModel, BaseTranslatableModel
 from parler.models import TranslatedFields
+
+
+def validate_file_size(file):
+    """Validate file size - max 50MB"""
+    max_size_mb = 50
+    if file.size > max_size_mb * 1024 * 1024:
+        raise ValidationError(f'File size cannot exceed {max_size_mb}MB')
 
 
 class StaticPage(BaseTranslatableModel):
@@ -1375,3 +1383,133 @@ class FAQSettings(BaseTranslatableModel):
 
     def __str__(self):
         return "FAQ Settings"
+
+
+class CatalogFile(BaseTranslatableModel):
+    """
+    Model for managing PDF catalog files.
+    Supports multiple catalog types, versioning, and analytics tracking.
+    """
+    
+    CATALOG_TYPES = [
+        ('tour', _('Tour Catalog')),
+        ('event', _('Event Catalog')),
+        ('general', _('General Catalog')),
+    ]
+    
+    # Translatable fields
+    translations = TranslatedFields(
+        title=models.CharField(max_length=200, verbose_name=_('Title')),
+        description=models.TextField(blank=True, verbose_name=_('Description')),
+    )
+    
+    # File
+    file = models.FileField(
+        upload_to='catalogs/',
+        verbose_name=_('PDF File'),
+        validators=[
+            FileExtensionValidator(allowed_extensions=['pdf']),
+            validate_file_size
+        ],
+        help_text=_('Upload PDF file (max 50MB)')
+    )
+    
+    # Metadata
+    catalog_type = models.CharField(
+        max_length=20,
+        choices=CATALOG_TYPES,
+        default='general',
+        verbose_name=_('Catalog Type')
+    )
+    
+    version = models.CharField(
+        max_length=50,
+        blank=True,
+        verbose_name=_('Version'),
+        help_text=_('e.g., 2025-1, v1.0, etc.')
+    )
+    
+    file_size = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_('File Size (bytes)'),
+        help_text=_('Automatically calculated on save')
+    )
+    
+    # Display settings
+    is_featured = models.BooleanField(
+        default=False,
+        verbose_name=_('Is Featured'),
+        help_text=_('Featured catalog will be shown as default')
+    )
+    
+    display_order = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_('Display Order')
+    )
+    
+    # Analytics
+    download_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_('Download Count')
+    )
+    
+    view_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_('View Count')
+    )
+    
+    # SEO
+    meta_description = models.TextField(
+        max_length=160,
+        blank=True,
+        verbose_name=_('Meta Description')
+    )
+    
+    class Meta:
+        verbose_name = _('Catalog File')
+        verbose_name_plural = _('Catalog Files')
+        ordering = ['-is_featured', 'display_order', '-created_at']
+        indexes = [
+            models.Index(fields=['catalog_type', 'is_active']),
+            models.Index(fields=['is_featured', 'is_active']),
+        ]
+    
+    def __str__(self):
+        return getattr(self, 'title', '') or f"Catalog {self.id}"
+    
+    def save(self, *args, **kwargs):
+        # Calculate file size on save
+        if self.file:
+            self.file_size = self.file.size
+        super().save(*args, **kwargs)
+    
+    def get_file_url(self, request=None):
+        """Get the full URL for the PDF file."""
+        if self.file:
+            if request:
+                return request.build_absolute_uri(self.file.url)
+            return self.file.url
+        return None
+    
+    def get_download_url(self, request=None):
+        """Get the download URL (same as file URL for direct downloads)."""
+        return self.get_file_url(request)
+    
+    def increment_download_count(self):
+        """Increment the download counter."""
+        self.download_count = models.F('download_count') + 1
+        self.save(update_fields=['download_count'])
+        self.refresh_from_db()
+    
+    def increment_view_count(self):
+        """Increment the view counter."""
+        self.view_count = models.F('view_count') + 1
+        self.save(update_fields=['view_count'])
+        self.refresh_from_db()
+    
+    @property
+    def file_size_mb(self):
+        """Get file size in megabytes."""
+        if self.file_size:
+            return round(self.file_size / (1024 * 1024), 2)
+        return 0

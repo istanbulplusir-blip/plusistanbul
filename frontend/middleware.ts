@@ -26,11 +26,11 @@ export default function middleware(request: NextRequest) {
     font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:;
     connect-src 'self' http://localhost:8000 https://peykantravelistanbul.com https://www.peykantravelistanbul.com https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com wss://peykantravelistanbul.com ws://localhost:3000;
     media-src 'self' blob: data: http://localhost:8000 https://peykantravelistanbul.com https://www.peykantravelistanbul.com;
-    frame-src 'self' https://accounts.google.com;
+    frame-src 'self' https://accounts.google.com https://peykantravelistanbul.com https://www.peykantravelistanbul.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
-    frame-ancestors 'none';
+    frame-ancestors 'self' https://peykantravelistanbul.com https://www.peykantravelistanbul.com;
   `.replace(/\s{2,}/g, ' ').trim();
 
   response.headers.set('Content-Security-Policy', cspHeader);

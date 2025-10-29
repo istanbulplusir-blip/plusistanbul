@@ -6,14 +6,14 @@ import { useTranslations, useLocale } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSwitcher from './LanguageSwitcher';
 import CurrencySelector from './CurrencySelector';
-import { 
-  User, 
-  ShoppingCart, 
-  LogOut, 
-  Package, 
-  Menu, 
-  X, 
-  Sun, 
+import {
+  User,
+  ShoppingCart,
+  LogOut,
+  Package,
+  Menu,
+  X,
+  Sun,
   Moon,
   Heart
 } from 'lucide-react';
@@ -34,22 +34,22 @@ export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { totalItems } = useCart();
-  
-  
+
+
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showQuickLogin, setShowQuickLogin] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartRotate, setCartRotate] = useState(false);
-  
+
   // Site settings state
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [settingsLoading, setSettingsLoading] = useState(true);
-  
+
   // Navigation menu state
   const [navigationMenu, setNavigationMenu] = useState<NavigationMenuItem[]>([]);
   const [menuLoading, setMenuLoading] = useState(true);
-  
+
   const prefix = `/${locale}`;
 
   // Fetch site settings and navigation menu
@@ -58,12 +58,12 @@ export default function Navbar() {
       try {
         setSettingsLoading(true);
         setMenuLoading(true);
-        
+
         const [settings, menu] = await Promise.all([
           getSiteSettings(),
           getNavigationMenu()
         ]);
-        
+
         setSiteSettings(settings);
         setNavigationMenu(menu);
       } catch (error) {
@@ -110,7 +110,7 @@ export default function Navbar() {
 
   // Previous totalItems to detect changes
   const [prevTotalItems, setPrevTotalItems] = useState(totalItems);
-  
+
   useEffect(() => {
     if (totalItems > prevTotalItems && totalItems > 0) {
       setCartRotate(true);
@@ -122,22 +122,23 @@ export default function Navbar() {
   }, [totalItems, prevTotalItems]);
 
   // Create navigation items from API or fallback to static
-  const navItems = navigationMenu.length > 0 
+  const navItems = navigationMenu.length > 0
     ? navigationMenu.map(item => ({
-        href: item.is_external ? item.url : `${prefix}${item.url}`,
-        label: item.label,
-        icon: item.icon,
-        isExternal: item.is_external,
-        targetBlank: item.target_blank
-      }))
+      href: item.is_external ? item.url : `${prefix}${item.url}`,
+      label: item.label,
+      icon: item.icon,
+      isExternal: item.is_external,
+      targetBlank: item.target_blank
+    }))
     : [
-        { href: `${prefix}/`, label: navT('home'), icon: null, isExternal: false, targetBlank: false },
-        { href: `${prefix}/tours`, label: navT('tours'), icon: null, isExternal: false, targetBlank: false },
-        { href: `${prefix}/events`, label: navT('events'), icon: null, isExternal: false, targetBlank: false },
-        { href: `${prefix}/transfers/booking`, label: navT('transfers'), icon: null, isExternal: false, targetBlank: false },
-        { href: `${prefix}/car-rentals`, label: navT('carRentals'), icon: null, isExternal: false, targetBlank: false },
-        { href: `${prefix}/contact`, label: navT('contact'), icon: null, isExternal: false, targetBlank: false },
-      ];
+      { href: `${prefix}/`, label: navT('home'), icon: null, isExternal: false, targetBlank: false },
+      { href: `${prefix}/tours`, label: navT('tours'), icon: null, isExternal: false, targetBlank: false },
+      { href: `${prefix}/events`, label: navT('events'), icon: null, isExternal: false, targetBlank: false },
+      { href: `${prefix}/transfers/booking`, label: navT('transfers'), icon: null, isExternal: false, targetBlank: false },
+      { href: `${prefix}/car-rentals`, label: navT('carRentals'), icon: null, isExternal: false, targetBlank: false },
+      { href: `${prefix}/catalog`, label: navT('catalog'), icon: null, isExternal: false, targetBlank: false },
+      { href: `${prefix}/contact`, label: navT('contact'), icon: null, isExternal: false, targetBlank: false },
+    ];
 
   const isActive = (href: string) => {
     if (href === `${prefix}/`) {
@@ -149,7 +150,7 @@ export default function Navbar() {
   // Show loading state while fetching data
   if (settingsLoading || menuLoading) {
     return (
-      <motion.nav 
+      <motion.nav
         className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md shadow-sm border-b border-gray-200/30 dark:border-gray-800/30"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -177,12 +178,11 @@ export default function Navbar() {
 
   return (
     <DropdownProvider>
-      <motion.nav 
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          isScrolled 
-            ? 'bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl shadow-lg border-b border-gray-200/50 dark:border-gray-800/50' 
+      <motion.nav
+        className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled
+            ? 'bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl shadow-lg border-b border-gray-200/50 dark:border-gray-800/50'
             : 'bg-white/95 dark:bg-gray-950/95 backdrop-blur-md shadow-sm border-b border-gray-200/30 dark:border-gray-800/30'
-        }`}
+          }`}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
@@ -190,13 +190,13 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <motion.div 
+            <motion.div
               className="flex items-center gap-3"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <div className="flex items-center gap-3">
-                <motion.div 
+                <motion.div
                   className="relative w-18 h-18 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shadow-lg hover:shadow-glow transition-all duration-300 group overflow-hidden"
                   whileHover={{ rotate: 5, scale: 1.1 }}
                   animate={{ y: [0, -2, 0] }}
@@ -233,15 +233,14 @@ export default function Navbar() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
-                  <Link 
+                  <Link
                     href={item.href}
                     target={item.targetBlank ? '_blank' : undefined}
                     rel={item.isExternal ? 'noopener noreferrer' : undefined}
-                    className={`relative px-3 md:px-4 py-2 rounded-xl font-medium transition-all duration-300 group text-sm md:text-base ${
-                      isActive(item.href)
+                    className={`relative px-3 md:px-4 py-2 rounded-xl font-medium transition-all duration-300 group text-sm md:text-base ${isActive(item.href)
                         ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
                         : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                    }`}
+                      }`}
                     style={{ position: 'relative' }}
                   >
                     {item.label}
@@ -260,78 +259,78 @@ export default function Navbar() {
               ))}
             </div>
 
-                                      {/* Desktop Right Side */}
-             <div className="hidden md:flex items-center gap-2">
-               {/* Dark Mode Toggle */}
-               <motion.button 
-                 className="h-11 px-3 md:px-4 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:shadow-md flex items-center justify-center"
-                 onClick={toggleTheme}
-                 title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-                 whileHover={{ scale: 1.05, rotate: 180 }}
-                 whileTap={{ scale: 0.95 }}
-                 transition={{ duration: 0.3 }}
-                 initial={{ opacity: 0, scale: 0.8 }}
-                 animate={{ opacity: 1, scale: 1 }}
-               >
-                 {theme === 'light' ? (
-                   <Moon className="w-5 h-5" />
-                 ) : (
-                   <Sun className="w-5 h-5" />
-                 )}
-               </motion.button>
+            {/* Desktop Right Side */}
+            <div className="hidden md:flex items-center gap-2">
+              {/* Dark Mode Toggle */}
+              <motion.button
+                className="h-11 px-3 md:px-4 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:shadow-md flex items-center justify-center"
+                onClick={toggleTheme}
+                title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+                whileHover={{ scale: 1.05, rotate: 180 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                {theme === 'light' ? (
+                  <Moon className="w-5 h-5" />
+                ) : (
+                  <Sun className="w-5 h-5" />
+                )}
+              </motion.button>
 
-               {/* Currency Selector */}
-               <motion.div
-                 initial={{ opacity: 0, scale: 0.8 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 transition={{ duration: 0.3, delay: 0.2 }}
-               >
-                 <CurrencySelector />
-               </motion.div>
+              {/* Currency Selector */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+              >
+                <CurrencySelector />
+              </motion.div>
 
-               <motion.div
-                 initial={{ opacity: 0, scale: 0.8 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 transition={{ duration: 0.3, delay: 0.3 }}
-               >
-                 <LanguageSwitcher />
-               </motion.div>
-              
-                             {/* Cart */}
-               <motion.div
-                 initial={{ opacity: 0, scale: 0.8 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 transition={{ duration: 0.3, delay: 0.4 }}
-               >
-                 <Link 
-                   href={`${prefix}/cart`}
-                   className="relative group"
-                 >
-                   <motion.button
-                     className="relative h-11 px-3 md:px-4 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:shadow-md flex items-center justify-center focus:outline-none focus:ring-0"
-                     whileHover={{ scale: 1.05, rotate: 180 }}
-                     whileTap={{ scale: 0.95 }}
-                     animate={{ rotate: cartRotate ? 360 : 0 }}
-                     transition={{ duration: 0.3 }}
-                   >
-                     <ShoppingCart className="w-5 h-5" />
-                     {totalItems > 0 && (
-                       <motion.span 
-                         className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg"
-                         initial={{ scale: 0 }}
-                         animate={{ scale: 1 }}
-                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                       >
-                         {totalItems}
-                       </motion.span>
-                     )}
-                   </motion.button>
-                 </Link>
-               </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.3 }}
+              >
+                <LanguageSwitcher />
+              </motion.div>
+
+              {/* Cart */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.4 }}
+              >
+                <Link
+                  href={`${prefix}/cart`}
+                  className="relative group"
+                >
+                  <motion.button
+                    className="relative h-11 px-3 md:px-4 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:shadow-md flex items-center justify-center focus:outline-none focus:ring-0"
+                    whileHover={{ scale: 1.05, rotate: 180 }}
+                    whileTap={{ scale: 0.95 }}
+                    animate={{ rotate: cartRotate ? 360 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    {totalItems > 0 && (
+                      <motion.span
+                        className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      >
+                        {totalItems}
+                      </motion.span>
+                    )}
+                  </motion.button>
+                </Link>
+              </motion.div>
 
               {/* Authentication */}
               {isAuthenticated && user ? (
-                <motion.div 
+                <motion.div
                   className="relative"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -373,7 +372,7 @@ export default function Navbar() {
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                         </div>
-                        
+
                         <div className="py-2">
                           <Link
                             href={`${prefix}/profile`}
@@ -383,7 +382,7 @@ export default function Navbar() {
                             <User className="w-4 h-4" />
                             {t('profile')}
                           </Link>
-                          
+
                           <Link
                             href={`${prefix}/orders`}
                             className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-200 rounded-lg mx-2"
@@ -393,7 +392,7 @@ export default function Navbar() {
                             {t('orders')}
                           </Link>
                         </div>
-                        
+
                         <div className="border-t border-gray-100 dark:border-gray-700 mt-2 pt-2">
                           <button
                             onClick={handleLogout}
@@ -408,27 +407,27 @@ export default function Navbar() {
                   </AnimatePresence>
                 </motion.div>
               ) : (
-                <motion.div 
+                <motion.div
                   className="flex items-center gap-3"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3, delay: 0.5 }}
                 >
-                                     <button 
-                     onClick={() => setShowQuickLogin(true)}
-                     className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 font-medium h-11 px-3 md:px-4 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 flex items-center justify-center text-sm md:text-base"
-                   >
-                     {t('login')}
-                   </button>
-                  <Link 
+                  <button
+                    onClick={() => setShowQuickLogin(true)}
+                    className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 font-medium h-11 px-3 md:px-4 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 flex items-center justify-center text-sm md:text-base"
+                  >
+                    {t('login')}
+                  </button>
+                  <Link
                     href={`${prefix}/register`}
                     className="group"
                   >
-                                         <motion.div
-                       className="bg-gradient-to-r from-accent-500 to-primary-500 hover:from-accent-600 hover:to-primary-600 text-white h-11 px-4 md:px-6 rounded-xl transition-all duration-300 font-medium shadow-lg hover:shadow-glow flex items-center justify-center text-sm md:text-base"
-                       whileHover={{ scale: 1.05, y: -2 }}
-                       whileTap={{ scale: 0.95 }}
-                     >
+                    <motion.div
+                      className="bg-gradient-to-r from-accent-500 to-primary-500 hover:from-accent-600 hover:to-primary-600 text-white h-11 px-4 md:px-6 rounded-xl transition-all duration-300 font-medium shadow-lg hover:shadow-glow flex items-center justify-center text-sm md:text-base"
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
                       {t('register')}
                     </motion.div>
                   </Link>
@@ -436,13 +435,13 @@ export default function Navbar() {
               )}
             </div>
 
-                         {/* Mobile Menu Button */}
-             <motion.button 
-               onClick={() => setShowMobileMenu(!showMobileMenu)}
-               className="md:hidden h-11 px-4 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 flex items-center justify-center"
-               whileHover={{ scale: 1.05 }}
-               whileTap={{ scale: 0.95 }}
-             >
+            {/* Mobile Menu Button */}
+            <motion.button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="md:hidden h-11 px-4 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 flex items-center justify-center"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               {showMobileMenu ? (
                 <X className="w-6 h-6" />
               ) : (
@@ -455,7 +454,7 @@ export default function Navbar() {
         {/* Mobile Menu */}
         <AnimatePresence>
           {showMobileMenu && (
-            <motion.div 
+            <motion.div
               className="md:hidden border-t border-gray-200/50 dark:border-gray-800/50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl fixed left-0 right-0 z-40 max-h-[calc(100vh-80px)] overflow-y-auto"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -464,7 +463,7 @@ export default function Navbar() {
             >
               <div className="px-4 py-4 space-y-3">
                 {/* Mobile Settings - Moved to top for better accessibility */}
-                <motion.div 
+                <motion.div
                   className="pb-3 border-b border-gray-200/50 dark:border-gray-800/50"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -473,7 +472,7 @@ export default function Navbar() {
                   <div className="flex items-center justify-between">
                     <span className="text-gray-700 dark:text-gray-300 font-medium text-sm">{t('settings')}</span>
                     <div className="flex items-center gap-1">
-                      <button 
+                      <button
                         className="p-2 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20"
                         onClick={toggleTheme}
                         title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
@@ -503,15 +502,14 @@ export default function Navbar() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
-                      <Link 
+                      <Link
                         href={item.href}
                         target={item.targetBlank ? '_blank' : undefined}
                         rel={item.isExternal ? 'noopener noreferrer' : undefined}
-                        className={`block text-base font-medium transition-all duration-300 p-2.5 rounded-lg ${
-                          isActive(item.href)
-                            ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' 
+                        className={`block text-base font-medium transition-all duration-300 p-2.5 rounded-lg ${isActive(item.href)
+                            ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
                             : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                        }`}
+                          }`}
                         onClick={() => setShowMobileMenu(false)}
                       >
                         {item.label}
@@ -521,7 +519,7 @@ export default function Navbar() {
                 </div>
 
                 {/* Mobile Cart */}
-                <motion.div 
+                <motion.div
                   className="pt-3 border-t border-gray-200/50 dark:border-gray-800/50"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -533,7 +531,7 @@ export default function Navbar() {
                     whileHover={{ scale: 1.05, rotate: 180 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Link 
+                    <Link
                       href={`${prefix}/cart`}
                       className="flex items-center justify-between text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:shadow-md px-4 py-4 focus:outline-none focus:ring-0"
                       onClick={() => setShowMobileMenu(false)}
@@ -552,7 +550,7 @@ export default function Navbar() {
                 </motion.div>
 
                 {/* Mobile Authentication */}
-                <motion.div 
+                <motion.div
                   className="pt-3 border-t border-gray-200/50 dark:border-gray-800/50"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -572,7 +570,7 @@ export default function Navbar() {
                           <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
                         </div>
                       </div>
-                      
+
                       {/* User Menu Links */}
                       <Link
                         href={`${prefix}/profile`}
@@ -582,7 +580,7 @@ export default function Navbar() {
                         <User className="w-5 h-5" />
                         <span className="font-medium">{t('profile')}</span>
                       </Link>
-                      
+
                       <Link
                         href={`${prefix}/orders`}
                         className="flex items-center gap-3 p-2.5 text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all duration-300"
@@ -591,7 +589,7 @@ export default function Navbar() {
                         <Package className="w-5 h-5" />
                         <span className="font-medium">{t('orders')}</span>
                       </Link>
-                      
+
                       <Link
                         href={`${prefix}/wishlist`}
                         className="flex items-center gap-3 p-2.5 text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all duration-300"
@@ -600,7 +598,7 @@ export default function Navbar() {
                         <Heart className="w-5 h-5" />
                         <span className="font-medium">{t('wishlist')}</span>
                       </Link>
-                      
+
                       <button
                         onClick={() => {
                           handleLogout();
@@ -614,15 +612,15 @@ export default function Navbar() {
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <Link 
-                        href={`${prefix}/login`} 
+                      <Link
+                        href={`${prefix}/login`}
                         className="block text-center bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-3 rounded-lg transition-all duration-300 font-medium"
                         onClick={() => setShowMobileMenu(false)}
                       >
                         {t('login')}
                       </Link>
-                      <Link 
-                        href={`${prefix}/register`} 
+                      <Link
+                        href={`${prefix}/register`}
                         className="block text-center bg-gradient-to-r from-accent-500 to-primary-500 hover:from-accent-600 hover:to-primary-600 text-white px-4 py-3 rounded-lg transition-all duration-300 font-medium shadow-lg"
                         onClick={() => setShowMobileMenu(false)}
                       >

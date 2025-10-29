@@ -69,6 +69,10 @@ class UserCreateSerializer(serializers.ModelSerializer):
         profile_data = validated_data.pop('profile', None)
         validated_data.pop('password_confirm', None)
         
+        # Set role to 'customer' if not provided
+        if 'role' not in validated_data or validated_data.get('role') == 'guest':
+            validated_data['role'] = 'customer'
+        
         user = User.objects.create_user(**validated_data)
         
         if profile_data:

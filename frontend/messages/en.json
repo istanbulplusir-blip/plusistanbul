@@ -23,6 +23,7 @@
     "events": "Events",
     "transfers": "Transfers",
     "carRentals": "Car Rentals",
+    "catalog": "Catalog",
     "about": "About",
     "contact": "Contact",
     "login": "Login",
@@ -654,6 +655,20 @@
       "transfer": "Transfer",
       "general": "General"
     }
+  },
+  "catalog": {
+    "title": "Tour Catalog",
+    "description": "View and download our complete tour catalog",
+    "meta": {
+      "title": "Tour Catalog - Peykan Tourism",
+      "description": "View and download the complete catalog of Peykan Tourism tours and services"
+    },
+    "loading": "Loading catalog...",
+    "error": "Error loading catalog. Please try again.",
+    "download": "Download Catalog",
+    "preview": "Catalog Preview",
+    "version": "Version",
+    "fileSize": "File Size"
   },
   "CarRentals": {
     "title": "Car Rentals",

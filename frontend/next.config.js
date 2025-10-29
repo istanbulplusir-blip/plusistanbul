@@ -98,9 +98,10 @@ const nextConfig = {
 
     return [
       // Specific API routes first (more specific routes should come first)
+      // Always forward to backend with trailing slash since Django REST Framework requires it
       {
         source: '/api/v1/shared/contact-info',
-        destination: `${apiUrl}/api/v1/shared/contact-info`,
+        destination: `${apiUrl}/api/v1/shared/contact-info/`,
       },
       {
         source: '/api/v1/shared/contact-info/',
@@ -108,7 +109,7 @@ const nextConfig = {
       },
       {
         source: '/api/v1/shared/support-faqs',
-        destination: `${apiUrl}/api/v1/shared/support-faqs`,
+        destination: `${apiUrl}/api/v1/shared/support-faqs/`,
       },
       {
         source: '/api/v1/shared/support-faqs/',
@@ -116,7 +117,7 @@ const nextConfig = {
       },
       {
         source: '/api/v1/shared/whatsapp-info',
-        destination: `${apiUrl}/api/v1/shared/whatsapp-info`,
+        destination: `${apiUrl}/api/v1/shared/whatsapp-info/`,
       },
       {
         source: '/api/v1/shared/whatsapp-info/',

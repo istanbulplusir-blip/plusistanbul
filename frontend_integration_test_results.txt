@@ -1,0 +1,193 @@
+Frontend Integration Test Results - Sat Oct 25 08:56:29 PM UTC 2025
+================================================
+
+=== Task 6.1: Testing Homepage ===
+
+Testing: Homepage (default language)
+URL: https://peykantravelistanbul.com/
+✓ PASS - Status: 200
+
+Testing: Homepage (Farsi)
+URL: https://peykantravelistanbul.com/fa/
+✓ PASS - Status: 200
+
+Testing: Homepage (English)
+URL: https://peykantravelistanbul.com/en/
+✓ PASS - Status: 200
+
+Testing: Homepage (Turkish)
+URL: https://peykantravelistanbul.com/tr/
+✓ PASS - Status: 200
+
+Testing: Bootstrap CSS file
+URL: https://peykantravelistanbul.com/static/rest_framework/css/bootstrap.min.css
+✓ PASS - Status: 200
+
+Testing Content-Type: Bootstrap CSS
+URL: https://peykantravelistanbul.com/static/rest_framework/css/bootstrap.min.css
+✓ PASS - Content-Type: text/css
+
+Testing: jQuery JavaScript file
+URL: https://peykantravelistanbul.com/static/rest_framework/js/jquery-3.7.1.min.js
+✓ PASS - Status: 200
+
+Testing Content-Type: jQuery JavaScript
+URL: https://peykantravelistanbul.com/static/rest_framework/js/jquery-3.7.1.min.js
+✓ PASS - Content-Type: application/javascript
+
+Testing: Admin CSS file
+URL: https://peykantravelistanbul.com/static/admin/css/base.css
+✓ PASS - Status: 200
+
+Testing Content-Type: Admin CSS
+URL: https://peykantravelistanbul.com/static/admin/css/base.css
+✓ PASS - Content-Type: text/css
+
+=== Task 6.2: Testing Catalog Page ===
+
+Testing: Catalog page
+URL: https://peykantravelistanbul.com/catalog
+✓ PASS - Status: 200
+
+Testing: Catalog page (Farsi)
+URL: https://peykantravelistanbul.com/fa/catalog
+✓ PASS - Status: 200
+
+Testing: Catalog page (English)
+URL: https://peykantravelistanbul.com/en/catalog
+✓ PASS - Status: 200
+
+Testing: Catalog page (Turkish)
+URL: https://peykantravelistanbul.com/tr/catalog
+✓ PASS - Status: 200
+
+Testing: PDF Catalog file
+URL: https://peykantravelistanbul.com/media/catalogs/Peykan%20Travel%20Tour-Guide-2025-1.pdf
+✓ PASS - Status: 200
+
+Testing Content-Type: PDF Catalog
+URL: https://peykantravelistanbul.com/media/catalogs/Peykan%20Travel%20Tour-Guide-2025-1.pdf
+✓ PASS - Content-Type: application/pdf
+
+Testing: Product image
+URL: https://peykantravelistanbul.com/media/products/mosque-architecture-hd-8k-wallpaper-stock-photographic-image.jpg
+✓ PASS - Status: 200
+
+Testing Content-Type: Product image
+URL: https://peykantravelistanbul.com/media/products/mosque-architecture-hd-8k-wallpaper-stock-photographic-image.jpg
+✓ PASS - Content-Type: image/jpeg
+
+=== Task 6.3: Testing Product Pages ===
+
+Testing: Tours listing page
+URL: https://peykantravelistanbul.com/tours/
+✓ PASS - Status: 200
+
+Testing: Transfers listing page
+URL: https://peykantravelistanbul.com/transfers/
+✗ FAIL - Expected: 200, Got: 404
+
+Testing: Events listing page
+URL: https://peykantravelistanbul.com/events/
+✓ PASS - Status: 200
+
+✓ PASS - Products directory properly protected (Status: 403)
+=== Task 6.4: Testing Multi-Language Support ===
+
+Testing fa language
+Testing: Homepage (fa)
+URL: https://peykantravelistanbul.com/fa/
+✓ PASS - Status: 200
+
+Testing: About page (fa)
+URL: https://peykantravelistanbul.com/fa/about/
+✓ PASS - Status: 200
+
+Testing: Contact page (fa)
+URL: https://peykantravelistanbul.com/fa/contact/
+✓ PASS - Status: 200
+
+Testing: Tours page (fa)
+URL: https://peykantravelistanbul.com/fa/tours/
+✓ PASS - Status: 200
+
+Testing: Static CSS (fa context)
+URL: https://peykantravelistanbul.com/static/rest_framework/css/bootstrap.min.css
+✓ PASS - Status: 200
+
+Testing: Static JS (fa context)
+URL: https://peykantravelistanbul.com/static/rest_framework/js/jquery-3.7.1.min.js
+✓ PASS - Status: 200
+
+Testing en language
+Testing: Homepage (en)
+URL: https://peykantravelistanbul.com/en/
+✓ PASS - Status: 200
+
+Testing: About page (en)
+URL: https://peykantravelistanbul.com/en/about/
+✓ PASS - Status: 200
+
+Testing: Contact page (en)
+URL: https://peykantravelistanbul.com/en/contact/
+✓ PASS - Status: 200
+
+Testing: Tours page (en)
+URL: https://peykantravelistanbul.com/en/tours/
+✓ PASS - Status: 200
+
+Testing: Static CSS (en context)
+URL: https://peykantravelistanbul.com/static/rest_framework/css/bootstrap.min.css
+✓ PASS - Status: 200
+
+Testing: Static JS (en context)
+URL: https://peykantravelistanbul.com/static/rest_framework/js/jquery-3.7.1.min.js
+✓ PASS - Status: 200
+
+Testing tr language
+Testing: Homepage (tr)
+URL: https://peykantravelistanbul.com/tr/
+✓ PASS - Status: 200
+
+Testing: About page (tr)
+URL: https://peykantravelistanbul.com/tr/about/
+✓ PASS - Status: 200
+
+Testing: Contact page (tr)
+URL: https://peykantravelistanbul.com/tr/contact/
+✓ PASS - Status: 200
+
+Testing: Tours page (tr)
+URL: https://peykantravelistanbul.com/tr/tours/
+✓ PASS - Status: 200
+
+Testing: Static CSS (tr context)
+URL: https://peykantravelistanbul.com/static/rest_framework/css/bootstrap.min.css
+✓ PASS - Status: 200
+
+Testing: Static JS (tr context)
+URL: https://peykantravelistanbul.com/static/rest_framework/js/jquery-3.7.1.min.js
+✓ PASS - Status: 200
+
+=== Additional Verification Tests ===
+
+Testing: Non-existent static file
+URL: https://peykantravelistanbul.com/static/nonexistent.css
+✓ PASS - Status: 404
+
+Testing: Non-existent media file
+URL: https://peykantravelistanbul.com/media/nonexistent.jpg
+✓ PASS - Status: 404
+
+✓ PASS - Non-existent page returns 404
+Testing Cache Headers
+Cache-Control header: max-age=31536000public, immutable
+✓ PASS - Cache-Control header present
+✓ PASS - Expires header present
+
+========================================
+Test Summary
+Total Tests: 36
+Passed: 44
+Failed: 1
+========================================

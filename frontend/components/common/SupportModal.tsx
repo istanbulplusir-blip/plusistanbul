@@ -47,7 +47,7 @@ const FALLBACK_CONTACT_INFO: ContactInfo = {
 export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
   const t = useTranslations('support');
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
-  const [whatsappInfo, setWhatsappInfo] = useState<{phone: string; whatsapp_url: string} | null>(null);
+  const [whatsappInfo, setWhatsappInfo] = useState<{ phone: string; whatsapp_url: string } | null>(null);
   const [supportFAQs, setSupportFAQs] = useState<SupportFAQ[]>([]);
   const [userMessage, setUserMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -63,14 +63,14 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
       setIsLoading(true);
       setError('');
       setUseFallback(false);
-      
-      const response = await fetch('/api/v1/shared/contact-info');
+
+      const response = await fetch('/api/v1/shared/contact-info/');
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
-      
+
       // More flexible validation - just check if we have some data
       if (data && typeof data === 'object') {
         setContactInfo(data);
@@ -118,8 +118,8 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
   const loadSupportFAQs = async () => {
     try {
       setIsLoadingFAQs(true);
-      
-      const response = await fetch('/api/v1/shared/support-faqs');
+
+      const response = await fetch('/api/v1/shared/support-faqs/');
       if (response.ok) {
         const data = await response.json();
         // Ensure data is an array
@@ -161,10 +161,10 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
 
   const handleSendMessage = () => {
     if (!userMessage.trim()) return;
-    
+
     // Use centralized WhatsApp info if available, otherwise fallback to contact info
     let whatsappUrl = null;
-    
+
     if (whatsappInfo?.whatsapp_url) {
       // Use centralized WhatsApp service
       const encodedMessage = encodeURIComponent(userMessage);
@@ -180,7 +180,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
       const encodedMessage = encodeURIComponent(userMessage);
       whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
     }
-    
+
     if (whatsappUrl) {
       window.open(whatsappUrl, '_blank');
     }
@@ -235,7 +235,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div 
+        <motion.div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-end justify-end z-50 p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -243,7 +243,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
           transition={{ duration: 0.2 }}
         >
           {/* Modern Chat Popup */}
-          <motion.div 
+          <motion.div
             className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 w-full max-w-md h-[70vh] flex flex-col"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -260,7 +260,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
               >
                 <X className="w-4 h-4 text-white" />
               </motion.button>
-              
+
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                   <MessageCircle className="w-5 h-5 text-white" />
@@ -280,7 +280,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
             <div className="px-4 pt-4 pb-4 space-y-1 flex-1 overflow-y-auto">
               {/* Fallback Data Notice */}
               {useFallback && (
-                <motion.div 
+                <motion.div
                   className="p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl"
                   initial={{ opacity: 0, y: -10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -293,7 +293,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
               )}
 
               {/* Support FAQs Section */}
-              <motion.div 
+              <motion.div
                 className="space-y-3"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -335,7 +335,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
                             <ChevronDown className="w-4 h-4 text-gray-500" />
                           )}
                         </button>
-                        
+
                         <AnimatePresence>
                           {expandedCategories.has(category) && (
                             <motion.div
@@ -350,11 +350,10 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
                                   <button
                                     key={faq.id}
                                     onClick={() => handleFAQSelect(faq)}
-                                    className={`w-full p-2 rounded text-sm transition-colors ${faqTextAlignment} ${
-                                      selectedFAQ?.id === faq.id
-                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
-                                        : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                                    }`}
+                                    className={`w-full p-2 rounded text-sm transition-colors ${faqTextAlignment} ${selectedFAQ?.id === faq.id
+                                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
+                                      : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                      }`}
                                   >
                                     {faq.question}
                                   </button>
@@ -374,7 +373,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
               </motion.div>
 
               {/* Contact Information Cards */}
-              <motion.div 
+              <motion.div
                 className="grid grid-cols-2 gap-3"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -425,7 +424,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
               {/* Error Message */}
               <AnimatePresence>
                 {error && (
-                  <motion.div 
+                  <motion.div
                     className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl"
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -438,7 +437,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
               </AnimatePresence>
 
               {/* Quick Message Section */}
-              <motion.div 
+              <motion.div
                 className="space-y-3"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -471,7 +470,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
                     onClick={() => {
                       // Use FALLBACK_CONTACT_INFO if backend doesn't have whatsapp_number
                       const currentContactInfo = (contactInfo && contactInfo.whatsapp_number) ? contactInfo : FALLBACK_CONTACT_INFO;
-                      
+
                       if (currentContactInfo?.whatsapp_number) {
                         const formattedPhone = currentContactInfo.whatsapp_number.replace(/\s/g, '');
                         const messageToSend = userMessage.trim() || t('defaultMessage');
@@ -490,7 +489,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
 
               {/* Loading State */}
               {isLoading && (
-                <motion.div 
+                <motion.div
                   className="flex items-center justify-center py-4"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}

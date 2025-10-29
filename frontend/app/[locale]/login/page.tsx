@@ -352,7 +352,11 @@ export default function LoginPage() {
               >
                 <GoogleSignInButton
                   onError={(msg) => setError(msg)}
-                  onSuccessRedirect={(path) => router.push(`/${locale}${path}`)}
+                  onSuccessRedirect={(path) => {
+                    // Remove leading locale if path already contains it to avoid /en/en/
+                    const cleanPath = path.startsWith(`/${locale}`) ? path : `/${locale}${path}`;
+                    router.push(cleanPath);
+                  }}
                 />
               </motion.div>
 

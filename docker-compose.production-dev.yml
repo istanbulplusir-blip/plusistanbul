@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password_123}
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
     volumes:
-      - peykan_postgres_data:/var/lib/postgresql/data
+      - plusistanbul_postgres_data:/var/lib/postgresql/data
       - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
       - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
     ports:
@@ -206,8 +206,9 @@ services:
 
 volumes:
   # Peykan project volumes with consistent naming
-  peykan_postgres_data:
-    driver: local
+  # Using existing postgres_data volume to preserve data
+  plusistanbul_postgres_data:
+    external: true
   peykan_redis_data:
     driver: local
   peykan_redis_logs:

@@ -28,9 +28,10 @@ urlpatterns = [
         'status': 'ok'
     })),
     
-    # Health check endpoint
-    path('api/v1/health/', health_check, name='health_check'),
+    # Health check endpoint (with and without trailing slash for Docker)
+    path('health', health_check, name='health_check_no_slash'),
     path('health/', health_check, name='health_check_alt'),
+    path('api/v1/health/', health_check, name='health_check'),
     
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

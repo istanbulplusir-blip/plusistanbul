@@ -305,6 +305,10 @@ class OTPVerifyView(APIView):
             # Find user by phone
             try:
                 user = User.objects.get(profile__phone=target)
+                # Upgrade guest users to customer role
+                if user.role == 'guest':
+                    user.role = 'customer'
+                    user.save()
                 refresh = RefreshToken.for_user(user)
                 return Response({
                     'message': 'OTP verified successfully.',
@@ -333,6 +337,9 @@ class OTPVerifyView(APIView):
             if otp.user:
                 otp.user.is_email_verified = True
                 otp.user.is_active = True  # Activate user after email verification
+                # Upgrade guest users to customer role
+                if otp.user.role == 'guest':
+                    otp.user.role = 'customer'
                 otp.user.save()
                 
                 # Generate tokens for auto-login after verification
@@ -551,6 +558,7 @@ class GoogleLoginView(APIView):
                 email=email,
                 first_name=first_name,
                 last_name=last_name,
+                role='customer',  # Set role to customer for OAuth users
                 is_active=True,
             )
             user.set_unusable_password()
@@ -560,6 +568,10 @@ class GoogleLoginView(APIView):
             created = True
         else:
             updated = False
+            # Upgrade guest users to customer role
+            if user.role == 'guest':
+                user.role = 'customer'
+                updated = True
             if hasattr(user, 'is_email_verified') and not user.is_email_verified:
                 user.is_email_verified = True
                 updated = True

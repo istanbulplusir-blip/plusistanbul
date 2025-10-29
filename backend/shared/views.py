@@ -827,3 +827,100 @@ class WhatsAppInfoViewSet(viewsets.ViewSet):
             return Response({'message': 'No active FAQ settings found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class CatalogFileViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for CatalogFile model.
+    Read-only for public access with download and view tracking.
+    """
+
+    def get_queryset(self):
+        """Get CatalogFile queryset - only active catalogs."""
+        from .models import CatalogFile
+        return CatalogFile.objects.filter(is_active=True).order_by('-is_featured', 'display_order', '-created_at')
+
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['catalog_type', 'is_featured']
+    ordering_fields = ['display_order', 'created_at', 'download_count', 'view_count']
+    ordering = ['-is_featured', 'display_order', '-created_at']
+
+    def get_serializer_class(self):
+        """Return appropriate serializer."""
+        from .serializers import CatalogFileSerializer
+        return CatalogFileSerializer
+
+    @action(detail=False, methods=['get'])
+    def featured(self, request):
+        """Get the featured catalog."""
+        from .models import CatalogFile
+        try:
+            catalog = CatalogFile.objects.filter(is_active=True, is_featured=True).first()
+            if catalog:
+                serializer = self.get_serializer(catalog, context={'request': request})
+                return Response(serializer.data)
+            return Response(
+                {'message': 'No featured catalog found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['get'])
+    def download(self, request, pk=None):
+        """
+        Download the catalog file with proper headers and increment download counter.
+        """
+        from django.http import FileResponse
+        from .models import CatalogFile
+        
+        try:
+            catalog = self.get_object()
+            
+            # Increment download counter
+            catalog.increment_download_count()
+            
+            # Prepare file response
+            if catalog.file:
+                response = FileResponse(
+                    catalog.file.open('rb'),
+                    content_type='application/pdf'
+                )
+                # Set Content-Disposition header for download
+                filename = catalog.file.name.split('/')[-1]
+                response['Content-Disposition'] = f'attachment; filename="{filename}"'
+                response['Content-Length'] = catalog.file.size
+                
+                return response
+            else:
+                return Response(
+                    {'error': 'File not found'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['post'])
+    def track_view(self, request, pk=None):
+        """Track view on catalog."""
+        from .models import CatalogFile
+        try:
+            catalog = self.get_object()
+            catalog.increment_view_count()
+            return Response({
+                'success': True,
+                'view_count': catalog.view_count
+            })
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )

@@ -13,7 +13,7 @@ from .models import (
     CTASection, CTAButton, CTAFeature,
     Footer, FooterLink,
     TransferBookingSection,
-    FAQSettings, NavigationMenu
+    FAQSettings, NavigationMenu, CatalogFile
 )
 
 
@@ -1025,3 +1025,84 @@ class FAQSettingsAdmin(TranslatableAdmin):
             settings = FAQSettings.objects.first()
             return self.change_view(request, str(settings.pk), extra_context=extra_context)
         return super().changelist_view(request, extra_context=extra_context)
+
+
+@admin.register(CatalogFile)
+class CatalogFileAdmin(TranslatableAdmin):
+    """
+    Admin interface for CatalogFile model.
+    """
+
+    list_display = [
+        'title', 'catalog_type', 'version', 'file_size_mb', 'is_featured',
+        'download_count', 'view_count', 'is_active', 'created_at'
+    ]
+    list_filter = ['catalog_type', 'is_featured', 'is_active', 'created_at']
+    list_editable = ['is_featured', 'is_active']
+    search_fields = ['translations__title', 'version']
+    ordering = ['-is_featured', 'display_order', '-created_at']
+    readonly_fields = ['file_size', 'file_size_mb', 'download_count', 'view_count', 'created_at', 'updated_at']
+
+    fieldsets = (
+        (_('Basic Information'), {
+            'fields': ('catalog_type', 'version', 'is_active')
+        }),
+        (_('Content'), {
+            'fields': ('title', 'description'),
+        }),
+        (_('File'), {
+            'fields': ('file', 'file_size', 'file_size_mb'),
+            'description': _('Upload PDF file (max 50MB). File size is calculated automatically.')
+        }),
+        (_('Display Settings'), {
+            'fields': ('is_featured', 'display_order'),
+            'description': _('Featured catalog will be shown as default on the catalog page.')
+        }),
+        (_('SEO'), {
+            'fields': ('meta_description',),
+            'classes': ('collapse',)
+        }),
+        (_('Analytics'), {
+            'fields': ('download_count', 'view_count'),
+            'classes': ('collapse',)
+        }),
+        (_('Timestamps'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def file_size_mb(self, obj):
+        """Display file size in megabytes."""
+        return f"{obj.file_size_mb} MB"
+    file_size_mb.short_description = _('File Size (MB)')
+
+    def get_queryset(self, request):
+        """Optimize queryset for admin."""
+        return super().get_queryset(request).prefetch_related('translations')
+
+    actions = ['mark_as_featured', 'unmark_as_featured', 'activate', 'deactivate']
+
+    def mark_as_featured(self, request, queryset):
+        """Mark selected catalogs as featured."""
+        updated = queryset.update(is_featured=True)
+        self.message_user(request, f'{updated} catalogs marked as featured.')
+    mark_as_featured.short_description = _('Mark selected catalogs as featured')
+
+    def unmark_as_featured(self, request, queryset):
+        """Unmark selected catalogs as featured."""
+        updated = queryset.update(is_featured=False)
+        self.message_user(request, f'{updated} catalogs unmarked as featured.')
+    unmark_as_featured.short_description = _('Unmark selected catalogs as featured')
+
+    def activate(self, request, queryset):
+        """Activate selected catalogs."""
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f'{updated} catalogs activated.')
+    activate.short_description = _('Activate selected catalogs')
+
+    def deactivate(self, request, queryset):
+        """Deactivate selected catalogs."""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f'{updated} catalogs deactivated.')
+    deactivate.short_description = _('Deactivate selected catalogs')

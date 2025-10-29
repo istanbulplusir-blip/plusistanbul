@@ -555,10 +555,10 @@ class CartService:
                 try:
                     existing_cart = Cart.objects.filter(session_id=session_id).first()
                     if existing_cart:
-                        # Generate unique session_id
-                        unique_session_id = f"{session_id}_{uuid.uuid4().hex[:8]}"
+                        # Generate unique session_id (max 40 chars: 31 + 1 + 8 = 40)
+                        unique_session_id = f"{session_id[:31]}_{uuid.uuid4().hex[:8]}"
                     else:
-                        unique_session_id = session_id
+                        unique_session_id = session_id[:40]  # Ensure it fits in varchar(40)
                     
                     cart = Cart.objects.create(
                         session_id=unique_session_id,
@@ -572,6 +572,7 @@ class CartService:
                         time.sleep(0.1 * (attempt + 1))  # Exponential backoff
                         continue
                     else:
+                        print(f"❌ Failed to create/get user cart after {max_retries} attempts: {e}")
                         raise e
         
         else:
@@ -589,7 +590,7 @@ class CartService:
                 # If cart was found but has a user (shouldn't happen), create new one
                 if not created and cart.user:
                     cart = Cart.objects.create(
-                        session_id=f"{session_id}_{uuid.uuid4().hex[:8]}",
+                        session_id=f"{session_id[:31]}_{uuid.uuid4().hex[:8]}",
                         expires_at=timezone.now() + timedelta(hours=24),
                     )
             except Exception as e:
@@ -602,9 +603,9 @@ class CartService:
                     )
                     created = False
                 except Cart.DoesNotExist:
-                    # Create new cart with unique session_id
+                    # Create new cart with unique session_id (max 40 chars)
                     cart = Cart.objects.create(
-                        session_id=f"{session_id}_{uuid.uuid4().hex[:8]}",
+                        session_id=f"{session_id[:31]}_{uuid.uuid4().hex[:8]}",
                         expires_at=timezone.now() + timedelta(hours=24),
                     )
                     created = True

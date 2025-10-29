@@ -914,3 +914,50 @@ class FAQSettingsSerializer(serializers.ModelSerializer):
             'id', 'title', 'subtitle', 'items_per_page', 'show_categories',
             'show_search', 'is_active', 'created_at', 'updated_at'
         ]
+
+
+
+class CatalogFileSerializer(serializers.ModelSerializer, ImageFieldSerializerMixin):
+    """
+    Serializer for CatalogFile model.
+    """
+
+    title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+    
+    file_url = serializers.SerializerMethodField()
+    download_url = serializers.SerializerMethodField()
+    file_size_mb = serializers.SerializerMethodField()
+
+    class Meta:
+        from .models import CatalogFile
+        model = CatalogFile
+        fields = [
+            'id', 'title', 'description', 'file', 'catalog_type', 'version',
+            'file_size', 'file_size_mb', 'file_url', 'download_url',
+            'is_featured', 'display_order', 'download_count', 'view_count',
+            'meta_description', 'is_active', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'file_size', 'download_count', 'view_count', 'created_at', 'updated_at']
+
+    def get_title(self, obj):
+        """Get translated title."""
+        return obj.title
+
+    def get_description(self, obj):
+        """Get translated description."""
+        return obj.description
+
+    def get_file_url(self, obj):
+        """Get absolute URL for the PDF file."""
+        request = self.context.get('request')
+        return obj.get_file_url(request)
+
+    def get_download_url(self, obj):
+        """Get download URL for the PDF file."""
+        request = self.context.get('request')
+        return obj.get_download_url(request)
+
+    def get_file_size_mb(self, obj):
+        """Get file size in megabytes."""
+        return obj.file_size_mb

@@ -200,6 +200,7 @@ export default function Footer() {
                   { href: '/tours', label: 'Tours', icon: '✈️' },
                   { href: '/events', label: 'Events', icon: '🎭' },
                   { href: '/transfers/booking', label: 'Transfers', icon: '🚗' },
+                  { href: '/catalog', label: 'Catalog', icon: '📄' },
                   { href: '/faq', label: 'FAQ', icon: '❓' },
                   { href: '/about', label: 'About', icon: '🏢' },
                   { href: '/contact', label: 'Contact', icon: '📞' }
@@ -270,19 +271,19 @@ export default function Footer() {
                       {link.label}
                     </Link>
                   )) || (
-                    <Link href="/privacy" className="text-gray-400 hover:text-primary-400 transition-all duration-300 hover:scale-105 text-sm sm:text-base font-medium">
-                      {t('privacy') || 'Privacy Policy'}
-                    </Link>
-                  )}
+                      <Link href="/privacy" className="text-gray-400 hover:text-primary-400 transition-all duration-300 hover:scale-105 text-sm sm:text-base font-medium">
+                        {t('privacy') || 'Privacy Policy'}
+                      </Link>
+                    )}
                   {footerData?.navigation_links?.filter(link => link.label.toLowerCase().includes('terms')).map(link => (
                     <Link key={link.id} href={link.url} className="text-gray-400 hover:text-secondary-400 transition-all duration-300 hover:scale-105 text-sm sm:text-base font-medium">
                       {link.label}
                     </Link>
                   )) || (
-                    <Link href="/terms" className="text-gray-400 hover:text-secondary-400 transition-all duration-300 hover:scale-105 text-sm sm:text-base font-medium">
-                      {t('terms') || 'Terms of Service'}
-                    </Link>
-                  )}
+                      <Link href="/terms" className="text-gray-400 hover:text-secondary-400 transition-all duration-300 hover:scale-105 text-sm sm:text-base font-medium">
+                        {t('terms') || 'Terms of Service'}
+                      </Link>
+                    )}
                 </div>
               </div>
 

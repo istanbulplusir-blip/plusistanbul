@@ -3,13 +3,13 @@ URL patterns for Shared app.
 """
 
 from django.urls import path, include
-from rest_framework.routers import SimpleRouter
+from rest_framework.routers import DefaultRouter
 from . import views
 
 app_name = 'shared'
 
-# Create router for ViewSets - using SimpleRouter to avoid trailing slash issues
-router = SimpleRouter()
+# Create router for ViewSets - using DefaultRouter for consistency with other apps
+router = DefaultRouter()
 router.register(r'faqs', views.FAQViewSet, basename='faq')
 router.register(r'pages', views.StaticPageViewSet, basename='staticpage')
 router.register(r'contact-info', views.ContactInfoViewSet, basename='contactinfo')
@@ -33,6 +33,7 @@ router.register(r'transfer-booking-section', views.TransferBookingSectionViewSet
 router.register(r'faq-settings', views.FAQSettingsViewSet, basename='faqsettings')
 router.register(r'whatsapp-info', views.WhatsAppInfoViewSet, basename='whatsappinfo')
 router.register(r'navigation-menu', views.NavigationMenuViewSet, basename='navigationmenu')
+router.register(r'catalogs', views.CatalogFileViewSet, basename='catalog')
 
 urlpatterns = [
     # Include router URLs

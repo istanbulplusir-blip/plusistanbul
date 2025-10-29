@@ -23,6 +23,7 @@
     "events": "Etkinlikler",
     "transfers": "Transferler",
     "carRentals": "Araç Kiralama",
+    "catalog": "Katalog",
     "about": "Hakkımızda",
     "contact": "İletişim",
     "login": "Giriş",
@@ -635,7 +636,40 @@
     "saturday": "Cumartesi",
     "sunday": "Pazar",
     "closed": "Kapalı",
-    "buttonTooltip": "Yardıma mı ihtiyacınız var? Destek ekibimizle iletişime geçin"
+    "buttonTooltip": "Yardıma mı ihtiyacınız var? Destek ekibimizle iletişime geçin",
+    "quickQuestions": "Hızlı Sorular",
+    "quickQuestionsDesc": "Mesajınızı hazırlamak için yaygın soruları seçin",
+    "noFAQs": "Sık sorulan soru bulunamadı",
+    "call": "Ara",
+    "workingHours": "Çalışma Saatleri",
+    "quickMessage": "Hızlı Mesaj",
+    "messagePlaceholder": "Mesajınızı girin",
+    "openWhatsApp": "WhatsApp'ı Aç",
+    "loadingFAQs": "Sorular yükleniyor...",
+    "usingFallbackData": "Yedek veri kullanılıyor",
+    "errorLoadingContactInfo": "İletişim bilgileri yüklenirken hata",
+    "customizeMessage": "Mesajı Özelleştir",
+    "defaultMessage": "Merhaba, yardıma ihtiyacım var",
+    "categories": {
+      "booking": "Rezervasyon",
+      "cancellation": "İptal",
+      "transfer": "Transfer",
+      "general": "Genel"
+    }
+  },
+  "catalog": {
+    "title": "Tur Kataloğu",
+    "description": "Tam tur kataloğumuzu görüntüleyin ve indirin",
+    "meta": {
+      "title": "Tur Kataloğu - Peykan Turizm",
+      "description": "Peykan Turizm turları ve hizmetlerinin tam kataloğunu görüntüleyin ve indirin"
+    },
+    "loading": "Katalog yükleniyor...",
+    "error": "Katalog yüklenirken hata oluştu. Lütfen tekrar deneyin.",
+    "download": "Kataloğu İndir",
+    "preview": "Katalog Önizlemesi",
+    "version": "Sürüm",
+    "fileSize": "Dosya Boyutu"
   },
   "CarRentals": {
     "title": "Car Rentals",
