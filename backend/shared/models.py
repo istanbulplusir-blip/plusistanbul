@@ -1237,7 +1237,11 @@ class FooterLink(BaseTranslatableModel):
         verbose_name=_('Footer')
     )
 
-    url = models.URLField(verbose_name=_('URL'))
+    url = models.CharField(
+        max_length=200, 
+        verbose_name=_('URL'),
+        help_text=_('Internal path (e.g., /events) or full URL (e.g., https://example.com)')
+    )
     link_type = models.CharField(
         max_length=20,
         choices=[

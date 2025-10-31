@@ -14,8 +14,8 @@ services:
       - plusistanbul_postgres_data:/var/lib/postgresql/data
       - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
       - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
-    ports:
-      - "5434:5432"  # Expose for development access (changed port to avoid conflict)
+    # Port exposure removed for security - PostgreSQL only accessible within peykan_internal network
+    # For local debugging, use: docker exec -it peykan_postgres psql -U peykan_user -d peykan
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U peykan_user -d peykan"]
       interval: 10s
@@ -40,8 +40,8 @@ services:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
       - peykan_redis_logs:/var/log/redis
     command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--requirepass", "${REDIS_PASSWORD:-dev_redis_123}"]
-    ports:
-      - "6380:6379"  # Expose for development access (changed port to avoid conflict)
+    # Port exposure removed for security - Redis only accessible within peykan_internal network
+    # For local debugging, use: docker exec -it peykan_redis redis-cli -a <password>
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-dev_redis_123}", "ping"]
       interval: 10s
@@ -68,7 +68,7 @@ services:
     environment:
       - DEBUG=False
       - DATABASE_URL=postgresql://peykan_user:${POSTGRES_PASSWORD:-dev_password_123}@postgres:5432/peykan
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-dev_redis_123}@redis:6379/1
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-dev_redis_123}@peykan_redis:6379/1
       - DJANGO_SETTINGS_MODULE=peykan.settings_production
       - ALLOWED_HOSTS=peykantravelistanbul.com,www.peykantravelistanbul.com,localhost,backend
       - CORS_ALLOWED_ORIGINS=https://peykantravelistanbul.com,https://www.peykantravelistanbul.com
@@ -78,7 +78,7 @@ services:
       - peykan_media:/app/media
       - ./backend/logs:/app/logs
     ports:
-      - "8000:8000"  # Expose for development access
+      - "127.0.0.1:8000:8000"  # Expose only to localhost for nginx
     depends_on:
       postgres:
         condition: service_healthy
@@ -114,7 +114,7 @@ services:
       - NEXT_PUBLIC_SITE_URL=https://peykantravelistanbul.com
       - NODE_ENV=production
     ports:
-      - "3000:3000"  # Expose for development access
+      - "127.0.0.1:3000:3000"  # Expose only to localhost for nginx
     depends_on:
       backend:
         condition: service_healthy
@@ -149,7 +149,7 @@ services:
     environment:
       - DEBUG=False
       - DATABASE_URL=postgresql://peykan_user:${POSTGRES_PASSWORD:-dev_password_123}@postgres:5432/peykan
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-dev_redis_123}@redis:6379/1
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-dev_redis_123}@peykan_redis:6379/1
       - DJANGO_SETTINGS_MODULE=peykan.settings_production
     volumes:
       - peykan_media:/app/media
@@ -226,7 +226,7 @@ networks:
   # Internal network for Peykan services
   peykan_internal:
     driver: bridge
-    internal: false  # Allow internet access for development
+    internal: false  # Allow internet access for development (set to true in production)
   
   # External network for nginx and inter-project communication
   peykan_external:

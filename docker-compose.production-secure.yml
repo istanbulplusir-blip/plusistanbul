@@ -169,6 +169,12 @@ volumes:
 networks:
   peykan_internal:
     driver: bridge
-    internal: true  # شبکه داخلی بدون دسترسی به اینترنت
+    internal: true  # شبکه داخلی بدون دسترسی به اینترنت - Production isolation
+    ipam:
+      config:
+        - subnet: 172.22.0.0/16
   peykan_external:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.23.0.0/16
