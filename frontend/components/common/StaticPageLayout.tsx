@@ -5,6 +5,7 @@ import { LucideIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '../ui/Button';
+import Footer from '../home/Footer';
 
 interface StaticPageLayoutProps {
   title: string;
@@ -16,6 +17,7 @@ interface StaticPageLayoutProps {
   ctaButtonText?: string;
   ctaButtonLink?: string;
   children?: ReactNode;
+  showFooter?: boolean;
 }
 
 export default function StaticPageLayout({
@@ -27,7 +29,8 @@ export default function StaticPageLayout({
   ctaDescription,
   ctaButtonText,
   ctaButtonLink,
-  children
+  children,
+  showFooter = true
 }: StaticPageLayoutProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -99,6 +102,9 @@ export default function StaticPageLayout({
           </div>
         </div>
       )}
+
+      {/* Footer Section */}
+      {showFooter && <Footer />}
     </div>
   );
 }

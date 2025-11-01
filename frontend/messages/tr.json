@@ -657,6 +657,27 @@
       "general": "Genel"
     }
   },
+  "faq": {
+    "title": "Sık Sorulan Sorular",
+    "description": "Müşterilerimizin hizmetlerimiz ve turlarımız hakkında sık sordukları soruların cevapları",
+    "search": {
+      "placeholder": "Soruları ara...",
+      "noResults": "Sonuç bulunamadı",
+      "noResultsDesc": "Maalesef aramanızla eşleşen soru bulunamadı. Lütfen farklı anahtar kelimeler deneyin.",
+      "clearSearch": "Aramayı Temizle"
+    },
+    "filter": {
+      "allCategories": "Tüm Kategoriler"
+    },
+    "tryAgain": "Tekrar Dene",
+    "noFAQs": "Soru mevcut değil",
+    "noFAQsDesc": "Şu anda sık sorulan soru mevcut değil. Lütfen daha sonra tekrar kontrol edin.",
+    "contact": {
+      "title": "Sorunuzu bulamadınız mı?",
+      "description": "Destek ekibimiz size yardımcı olmaya hazır",
+      "button": "Bize Ulaşın"
+    }
+  },
   "catalog": {
     "title": "Tur Kataloğu",
     "description": "Tam tur kataloğumuzu görüntüleyin ve indirin",
@@ -2502,5 +2523,73 @@
     "bookingTime": "Rezervasyon Zamanı",
     "grandTotal": "Genel Toplam",
     "errorGettingInvoice": "Fatura alınırken hata oluştu"
+  },
+  "privacy": {
+    "title": "Gizlilik Politikası",
+    "description": "Kişisel bilgilerinizi nasıl topladığımız, kullandığımız ve koruduğumuz",
+    "content": {
+      "intro": "Peykan Turizm'de gizliliğinizi korumaya kararlıyız. Bu Gizlilik Politikası, kişisel bilgilerinizi nasıl topladığımızı, kullandığımızı ve koruduğumuzu açıklar.",
+      "dataCollection": {
+        "title": "Bilgi Toplama",
+        "description": "Kayıt olduğunuzda, tur rezervasyonu yaptığınızda veya hizmetlerimizi kullandığınızda kişisel bilgilerinizi toplarız. Bu bilgiler adınızı, e-postanızı, telefon numaranızı ve ödeme bilgilerinizi içerir. Ayrıca çerezler ve benzer teknolojiler aracılığıyla web sitemizi kullanımınızla ilgili bilgileri de toplayabiliriz."
+      },
+      "dataUsage": {
+        "title": "Bilgilerin Kullanımı",
+        "description": "Bilgileriniz rezervasyonları işlemek, hizmet sağlamak, kullanıcı deneyimini iyileştirmek ve siparişlerinizle ilgili bilgileri göndermek için kullanılır. Ayrıca, siz vazgeçmediğiniz sürece, özel teklifler ve pazarlama iletişimleri göndermek için bilgilerinizi kullanabiliriz."
+      },
+      "dataSecurity": {
+        "title": "Bilgi Güvenliği",
+        "description": "Kişisel bilgilerinizi korumak için gelişmiş güvenlik önlemleri kullanıyoruz. Tüm hassas bilgiler SSL şifrelemesi kullanılarak korunur. Verilerinizin güvenliğini sağlamak için sistemlerimizi düzenli olarak gözden geçirir ve güncelleriz."
+      },
+      "userRights": {
+        "title": "Kullanıcı Hakları",
+        "description": "Kişisel bilgilerinize erişme, bunları düzeltme veya silinmesini talep etme hakkına sahipsiniz. Ayrıca pazarlama e-postalarını almaktan vazgeçebilirsiniz. Bu hakları kullanmak için lütfen bizimle iletişime geçin."
+      },
+      "contact": {
+        "title": "Bize Ulaşın",
+        "description": "Gizlilik Politikamız hakkında herhangi bir sorunuz varsa veya haklarınızı kullanmak istiyorsanız, lütfen iletişim sayfamız aracılığıyla bizimle iletişime geçin."
+      }
+    },
+    "cta": {
+      "title": "Sorularınız mı Var?",
+      "description": "Gizlilik Politikamız hakkında herhangi bir sorunuz varsa, size yardımcı olmaktan mutluluk duyarız",
+      "button": "Bize Ulaşın"
+    }
+  },
+  "terms": {
+    "title": "Şartlar ve Koşullar",
+    "description": "Peykan Turizm hizmetlerini kullanma kuralları ve düzenlemeleri",
+    "content": {
+      "intro": "Peykan Turizm hizmetlerini kullanarak, aşağıdaki şartlar ve koşulları kabul etmiş olursunuz. Lütfen bu şartları dikkatlice okuyun.",
+      "acceptance": {
+        "title": "Şartların Kabulü",
+        "description": "Web sitemize ve hizmetlerimize erişerek ve bunları kullanarak, bu şartlar ve koşulları okuduğunuzu, anladığınızı ve bunlara bağlı kalmayı kabul ettiğinizi onaylarsınız. Bu şartları kabul etmiyorsanız, lütfen hizmetlerimizi kullanmayın."
+      },
+      "services": {
+        "title": "Hizmet Açıklaması",
+        "description": "Peykan Turizm tur, etkinlik, transfer ve araç kiralama rezervasyon hizmetleri sunar. Doğru ve güncel bilgi sağlamaya çalışıyoruz, ancak tüm bilgilerin tam doğruluğunu garanti edemeyiz. Fiyatlar ve müsaitlik önceden haber verilmeksizin değiştirilebilir."
+      },
+      "bookingPolicy": {
+        "title": "Rezervasyon Politikası",
+        "description": "Tüm rezervasyonlar müsaitlik ve onaya tabidir. Bir rezervasyonu tamamladıktan sonra bir onay e-postası alacaksınız. Lütfen rezervasyon bilgilerinizi dikkatlice inceleyin. Herhangi bir hata varsa, derhal bizimle iletişime geçin. Gösterilen fiyatlar vergileri ve ek ücretleri içermeyebilir."
+      },
+      "cancellationPolicy": {
+        "title": "İptal Politikası",
+        "description": "İptal politikaları hizmet türüne ve sağlayıcıya göre değişir. Lütfen satın alma işleminizi tamamlamadan önce her rezervasyon için iptal politikasını dikkatlice okuyun. Bazı rezervasyonlar iade edilemez olabilir. İptal talepleri platformumuz üzerinden gönderilmeli ve iptal şartlarına ve ücretlerine tabi olacaktır."
+      },
+      "liability": {
+        "title": "Sorumluluk Sınırlaması",
+        "description": "Peykan Turizm, sizinle hizmet sağlayıcılar arasında bir aracı olarak hareket eder. Üçüncü taraf hizmet sağlayıcıların eylemleri veya ihmalleri için sorumlu değiliz. Yasaların izin verdiği ölçüde, herhangi bir doğrudan, dolaylı, tesadüfi veya sonuç olarak ortaya çıkan zararlar için sorumluluğumuzu sınırlandırıyoruz."
+      },
+      "changes": {
+        "title": "Şartlarda Değişiklikler",
+        "description": "Bu şartlar ve koşulları herhangi bir zamanda değiştirme hakkını saklı tutarız. Değişiklikler web sitemizde yayınlandığında yürürlüğe girecektir. Bu tür değişikliklerden sonra hizmetlerimizi kullanmaya devam etmeniz, yeni şartları kabul ettiğiniz anlamına gelir. Bu sayfayı düzenli olarak kontrol etmenizi öneririz."
+      }
+    },
+    "cta": {
+      "title": "Sorularınız mı Var?",
+      "description": "Şartlar ve koşullarımız hakkında herhangi bir sorunuz varsa, size yardımcı olmaktan mutluluk duyarız",
+      "button": "Bize Ulaşın"
+    }
   }
 }
